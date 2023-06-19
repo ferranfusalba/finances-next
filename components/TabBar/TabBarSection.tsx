@@ -1,5 +1,10 @@
 "use client";
+
+// Next
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+// Carbon
 import {
   Home,
   TableBuilt,
@@ -7,7 +12,6 @@ import {
   ChartLineData,
   Settings,
 } from "@carbon/icons-react";
-import { usePathname } from "next/navigation";
 
 type TabBarSectionProps = {
   link: TabBarLinkData

@@ -1,6 +1,9 @@
-import Card from "../Card";
+// Next
 import Image from "next/image";
-import TabBarSection from "./TabBarSection";
+
+// Components
+import Card from "@/components/Card";
+import TabBarSection from "@/components/TabBar/TabBarSection";
 
 export type TabBarLinkData = {
   label: string,
@@ -9,7 +12,11 @@ export type TabBarLinkData = {
 }
 
 const links:TabBarLinkData[] = [
-  { label: "Home", icon: "Home", link: "/" },
+  {
+    label: "Home",
+    icon: "Home",
+    link: "/"
+  },
   {
     label: "Budget",
     icon: "TableBuilt",
