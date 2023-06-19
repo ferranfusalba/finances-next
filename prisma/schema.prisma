@@ -14,29 +14,25 @@ model User {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  email     String    @unique
+  email     String @unique
   firstName String
   lastName  String
   password  String
   projects  Project[]
-  Task      Task[]
+  tasks      Task[]
 }
 
 model Project {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   name    String
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
-
   description String?
   due         DateTime?
   deleted     Boolean   @default(false)
   tasks       Task[]
-
   @@unique([ownerId, name])
   @@index([ownerId, id])
 }
@@ -51,19 +47,14 @@ model Task {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   status TASK_STATUS @default(NOT_STARTED)
   name   String
-
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
-
+  ownerId   String
+  owner     User    @relation(fields: [ownerId], references: [id])
   projectId String
   project   Project @relation(fields: [projectId], references: [id])
-
   description String?
-  due         DateTime?
-  deleted     Boolean   @default(false)
-
+  due     DateTime?
+  deleted Boolean   @default(false)
   @@index([ownerId])
 }

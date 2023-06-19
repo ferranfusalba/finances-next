@@ -22,6 +22,53 @@
   background-color: #242424;
 }
 
+h1 {
+  font-size: 32px;
+}
+
+.layout-submenu {
+  padding: 2.5rem;
+}
+
+.layout-accounts {
+  
+}
+
+.account-menu {
+  display: flex;
+  width: 100%;
+}
+
+/* ButtonArea */
+.account-add {
+
+}
+
+.account-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: auto;
+  padding: 0;
+  text-align: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+.account-scroll > a {
+  text-decoration: none;
+  color: white;
+}
+
+.account-button {
+  border: 2px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0.8rem;
+  min-width: 10rem;
+  height: 2.75rem;
+  margin: 0 0.625rem;
+}
+
 .tab-bar {
   position: fixed;
   bottom: 0;
