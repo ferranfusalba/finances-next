@@ -6,7 +6,10 @@ export function GET() {
 }
 
 // with NextResponse
-export function POST() {
+export async function POST(request: any) {
+  const data = await request.json();
+  console.log(data); // Server console
+
   return NextResponse.json({
     message: "POST works!",
   });
