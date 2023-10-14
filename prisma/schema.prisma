@@ -13,10 +13,10 @@ datasource db {
 model Account {
   id             Int      @id @default(autoincrement())
   name           String
-  active         Boolean
-  type           Int
+  active         Boolean?
+  type           Int?
   description    String?
-  initialBalance Decimal
-  createdAt      DateTime
+  initialBalance Decimal?
+  createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
