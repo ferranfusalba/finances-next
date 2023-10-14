@@ -10,6 +10,9 @@ export default function TabBar() {
         <li>
           <Link href="/about">About</Link>
         </li>
+        <li>
+          <Link href="/accounts">Accounts</Link>
+        </li>
       </ul>
     </nav>
   );
