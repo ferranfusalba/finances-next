@@ -1,25 +1,31 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { prisma } from "@/libs/prisma";
 
 export const metadata: Metadata = {
   title: "Accounts | Finances Next",
 };
 
-export default function AccountsLayout({
+async function loadAccounts() {
+  return await prisma.account.findMany();
+}
+
+export default async function AccountsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const accounts = await loadAccounts();
+
   return (
     <>
       <nav className="nav-accounts">
         <ul>
-          <li>
-            <Link href="/accounts/1">Account 1</Link>
-          </li>
-          <li>
-            <Link href="/accounts/2">Account 2</Link>
-          </li>
+          {accounts.map((account) => (
+            <li key={account.id}>
+              <Link href={"/accounts/" + account.id}>Account {account.id}</Link>
+            </li>
+          ))}
         </ul>
       </nav>
       {children}
