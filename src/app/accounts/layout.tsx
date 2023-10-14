@@ -1,4 +1,9 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Accounts | Finances Next",
+};
 
 export default function AccountsLayout({
   children,
@@ -9,8 +14,12 @@ export default function AccountsLayout({
     <>
       <nav className="nav-accounts">
         <ul>
-          <Link href="/accounts/1">Account 1</Link>
-          <Link href="/accounts/2">Account 2</Link>
+          <li>
+            <Link href="/accounts/1">Account 1</Link>
+          </li>
+          <li>
+            <Link href="/accounts/2">Account 2</Link>
+          </li>
         </ul>
       </nav>
       {children}

@@ -1,9 +1,14 @@
 import TabBar from "@/components/TabBar/TabBar";
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, IBM_Plex_Sans } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
+const ibm = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  style: ["italic", "normal"],
+});
 
 export const metadata: Metadata = {
   title: "Finances Next",
@@ -17,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-800 text-slate-100`}>
+      <body className={`${ibm.className} bg-slate-800 text-slate-100`}>
         <main>{children}</main>
         <footer>
           <TabBar />
