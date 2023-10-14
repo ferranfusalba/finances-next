@@ -1,18 +1,30 @@
+import { prisma } from "@/libs/prisma";
 import { NextResponse } from "next/server";
 
-// with Response
-export function GET() {
-  return new Response("GET works!");
+export async function GET() {
+  const accounts = await prisma.account.findMany();
+  console.log(accounts);
+  return NextResponse.json(accounts);
 }
 
-// with NextResponse
 export async function POST(request: any) {
   const data = await request.json();
   console.log(data); // Server console
 
-  return NextResponse.json({
-    message: "POST works!",
+  const newAccount = await prisma.account.create({
+    data: {
+      id: data.id,
+      name: data.name,
+      active: data.active,
+      type: data.type,
+      description: data.description,
+      initialBalance: data.initialBalance,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    },
   });
+
+  return NextResponse.json(newAccount);
 }
 
 export function PUT() {
