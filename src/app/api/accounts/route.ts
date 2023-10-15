@@ -3,13 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const accounts = await prisma.account.findMany();
-  console.log(accounts);
   return NextResponse.json(accounts);
 }
 
 export async function POST(request: any) {
   const data = await request.json();
-  console.log(data); // Server console
 
   const newAccount = await prisma.account.create({
     data: {

@@ -19,7 +19,6 @@ export default function NewAccount() {
     });
 
     const data = await res.json();
-    console.log(data);
 
     router.push("/accounts/" + data.id);
     router.refresh();
