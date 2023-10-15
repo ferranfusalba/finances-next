@@ -7,16 +7,15 @@ export default function TopBar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="bg-slate-900 flex items-center py-3 justify-between px-24 text-white">
+    <nav className="bg-slate-900 flex items-center px-6 py-3 justify-between text-white">
       <Link href="/">
         <h1>Finances</h1>
       </Link>
       <div className="flex gap-x-2 items-center">
         {session?.user ? (
           <>
-            <Link href="/accounts">Accounts</Link>
             <p>
-              {session.user.name} {session.user.email}
+              {session.user.name} - {session.user.email}
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
