@@ -10,7 +10,9 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@carbon/icons-react": "^11.28.0",
     "@prisma/client": "5.4.2",
+    "@types/carbon__icons-react": "^11.26.1",
     "next": "13.5.4",
     "next-auth": "^4.23.2",
     "react": "^18",
