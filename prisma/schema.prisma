@@ -10,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// @default(uuid())
 model Account {
   id             Int      @id @default(autoincrement())
   name           String
