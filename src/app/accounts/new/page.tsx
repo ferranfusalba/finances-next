@@ -22,6 +22,7 @@ export default function NewAccount() {
     console.log(data);
 
     router.push("/accounts/" + data.id);
+    router.refresh();
   };
 
   return (
