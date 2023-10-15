@@ -10,9 +10,10 @@ export default function AccountMenuItem({ account }: { account: any }) {
       <Link href={"/accounts/" + account.id}>Account {account.id}</Link>{" "}
       <button
         onClick={async () => {
-          const res = await fetch(`/api/accounts/${account.id}`, {
+          await fetch(`/api/accounts/${account.id}`, {
             method: "DELETE",
           });
+          router.push("/accounts/");
           router.refresh();
         }}
       >
