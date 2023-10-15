@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { signIn, useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function TopBar() {
   const { data: session } = useSession();
-  console.log(session);
 
   return (
     <nav className="bg-slate-900 flex items-center py-3 justify-between px-24 text-white">
@@ -18,12 +18,19 @@ export default function TopBar() {
             <p>
               {session.user.name} {session.user.email}
             </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={session.user.image}
+              src={session.user.image!}
               alt="Profile picture"
               className="w-10 h-10 rounded-full cursor-pointer"
             />
-            <button onClick={() => signOut()}>Logout</button>
+            <button
+              onClick={async () => {
+                await signOut({ callbackUrl: "/" });
+              }}
+            >
+              Logout
+            </button>
           </>
         ) : (
           <button
