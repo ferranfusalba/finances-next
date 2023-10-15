@@ -21,6 +21,9 @@ export default async function AccountsLayout({
     <>
       <nav className="nav-accounts">
         <ul>
+          <Link href="/accounts/new">New Account</Link>
+        </ul>
+        <ul>
           {accounts.map((account) => (
             <li key={account.id}>
               <Link href={"/accounts/" + account.id}>Account {account.id}</Link>
