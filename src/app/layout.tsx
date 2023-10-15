@@ -2,6 +2,8 @@ import TabBar from "@/components/TabBar/TabBar";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Sans } from "next/font/google";
+import TopBar from "@/components/TopBar/TopBar";
+import { Providers } from "./Providers";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibm = IBM_Plex_Sans({
@@ -23,10 +25,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${ibm.className} bg-slate-800 text-slate-100`}>
-        <main>{children}</main>
-        <footer>
-          <TabBar />
-        </footer>
+        <Providers>
+          <header className="top-bar">
+            <TopBar />
+          </header>
+          <main>{children}</main>
+          <footer>
+            <TabBar />
+          </footer>
+        </Providers>
       </body>
     </html>
   );
