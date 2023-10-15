@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/libs/prisma";
+import AccountMenuItem from "@/components/AccountMenuItem/AccountMenuItem";
 
 export const metadata: Metadata = {
   title: "Accounts | Finances Next",
@@ -25,9 +26,7 @@ export default async function AccountsLayout({
         </ul>
         <ul>
           {accounts.map((account) => (
-            <li key={account.id}>
-              <Link href={"/accounts/" + account.id}>Account {account.id}</Link>
-            </li>
+            <AccountMenuItem key={account.id} account={account} />
           ))}
         </ul>
       </nav>
