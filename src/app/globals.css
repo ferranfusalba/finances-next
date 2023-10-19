@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-}
-
 .scroll-touch {
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
