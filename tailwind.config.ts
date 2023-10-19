@@ -16,6 +16,9 @@ const config: Config = {
       minWidth: {
         "10rem": "10rem",
       },
+      height: {
+        "full-main": "calc(100vh - 156px)", // 156 = 64 TopBar + 44 Accounts Top Menu + 48 TabBar
+      },
     },
   },
   plugins: [],
