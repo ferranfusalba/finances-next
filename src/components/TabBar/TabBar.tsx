@@ -29,7 +29,7 @@ const routes: Array<Section> = [
 function TabBarSection({ section }: { section: Section }) {
   return (
     <Link href={section.path}>
-      <li className="flex content-center gap-2 pr-6">
+      <li className="flex content-center gap-2 md:pr-6 flex-col md:flex-row">
         <div className="self-center">{section.icon}</div>
         {section.name}
       </li>
@@ -40,7 +40,7 @@ function TabBarSection({ section }: { section: Section }) {
 export default function TabBar() {
   return (
     <nav className="bg-slate-900 px-6 py-3 text-white">
-      <ul className="flex justify-start">
+      <ul className="flex justify-between md:justify-start">
         {routes.map((route) => {
           return <TabBarSection key={route.path} section={route} />;
         })}
