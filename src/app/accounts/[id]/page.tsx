@@ -1,3 +1,7 @@
+"use client";
+import { TrashCan } from "@carbon/icons-react";
+import { useRouter } from "next/navigation";
+
 type ParamsProps = {
   params: {
     id: string;
@@ -5,5 +9,22 @@ type ParamsProps = {
 };
 
 export default function AccountLayout({ params }: ParamsProps) {
-  return <>Account id: {params.id}</>;
+  const router = useRouter();
+
+  return (
+    <>
+      Account id: {params.id}
+      <button
+        onClick={async () => {
+          await fetch(`/api/accounts/${params.id}`, {
+            method: "DELETE",
+          });
+          router.push("/accounts/");
+          router.refresh();
+        }}
+      >
+        <TrashCan />
+      </button>
+    </>
+  );
 }
