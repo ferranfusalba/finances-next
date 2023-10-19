@@ -30,7 +30,7 @@ export default function RootLayout({
             <TopBar />
           </header>
           <main>{children}</main>
-          <footer>
+          <footer className="absolute bottom-0 w-full">
             <TabBar />
           </footer>
         </Providers>
