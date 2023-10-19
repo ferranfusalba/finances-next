@@ -21,7 +21,7 @@ const routes: Array<Section> = [
     name: "Accounts",
     icon: <Currency />,
   },
-  { path: "/budget", name: "Budget", icon: <TableBuilt /> },
+  { path: "/budgets", name: "Budgets", icon: <TableBuilt /> },
   { path: "/data", name: "Data", icon: <ChartLineData /> },
   { path: "/settings", name: "Settings", icon: <Settings /> },
 ];
