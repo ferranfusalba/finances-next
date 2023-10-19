@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AccountsTopMenu from "@/components/AccountsTopMenu/AccountsTopMenu";
+import AccountsTopMenu from "@/components/accounts/top-menu/AccountsTopMenu";
 
 export const metadata: Metadata = {
   title: "Accounts | Finances Next",
