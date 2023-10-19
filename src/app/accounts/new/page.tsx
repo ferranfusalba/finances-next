@@ -25,8 +25,8 @@ export default function NewAccount() {
   };
 
   return (
-    <div className="h-screen flex justify-center items-center">
-      <form className="bg-slate-800 p-10 w-1/4" onSubmit={handleSubmit}>
+    <div className="h-full flex justify-center items-center">
+      <form className="bg-slate-800" onSubmit={handleSubmit}>
         {/* Name */}
         <label htmlFor="name" className="font-bold text-sm">
           Account Name
