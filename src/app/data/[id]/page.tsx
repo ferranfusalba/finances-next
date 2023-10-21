@@ -5,6 +5,6 @@ type ParamsProps = {
   };
 };
 
-export default async function DataLayout({ params }: ParamsProps) {
+export default function DataLayout({ params }: ParamsProps) {
   return <>Data {params.id}</>;
 }
