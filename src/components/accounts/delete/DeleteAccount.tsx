@@ -1,14 +1,9 @@
 "use client";
+import { AccountParamsProps } from "@/types/Account";
 import { TrashCan } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
 
-type ParamsProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default function DeleteAccount({ params }: ParamsProps) {
+export default function DeleteAccount({ params }: AccountParamsProps) {
   const router = useRouter();
 
   return (
