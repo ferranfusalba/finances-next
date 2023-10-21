@@ -1,6 +1,5 @@
-"use client";
-import { TrashCan } from "@carbon/icons-react";
-import { useRouter } from "next/navigation";
+import { prisma } from "@/libs/prisma";
+import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 
 type ParamsProps = {
   params: {
@@ -8,23 +7,31 @@ type ParamsProps = {
   };
 };
 
-export default function AccountLayout({ params }: ParamsProps) {
-  const router = useRouter();
+async function loadAccount({ params }: ParamsProps) {
+  return await prisma.account.findUnique({
+    where: {
+      id: Number(params.id),
+    },
+  });
+}
+
+export default async function AccountLayout({ params }: ParamsProps) {
+  const account = await loadAccount({ params });
 
   return (
     <>
-      Account id: {params.id}
-      <button
-        onClick={async () => {
-          await fetch(`/api/accounts/${params.id}`, {
-            method: "DELETE",
-          });
-          router.push("/accounts/");
-          router.refresh();
-        }}
-      >
-        <TrashCan />
-      </button>
+      <ol>
+        <li>Account id (params): {params.id}</li>
+        <li>Account id (account): {account?.id}</li>
+        <li>Account name: {account?.name}</li>
+        <li>Account active: {account?.active?.toString()}</li>
+        <li>Account type: {account?.type?.toString()}</li>
+        <li>Account description: {account?.description}</li>
+        <li>Account initialBalance: {account?.initialBalance?.toString()}</li>
+        <li>Account createdAt: {account?.createdAt.toString()}</li>
+        <li>Account updatedAt: {account?.updatedAt.toString()}</li>
+      </ol>
+      <DeleteAccount params={params} />
     </>
   );
 }
