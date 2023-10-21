@@ -1,11 +1,11 @@
 export interface Account {
-  active: boolean;
+  active: boolean | null;
   createdAt: Date;
-  description: string;
+  description: string | null;
   id: number;
-  initialBalance: string;
+  initialBalance: string | null;
   name: string;
-  type: number;
+  type: number | null;
   updatedAt: Date;
 }
 
