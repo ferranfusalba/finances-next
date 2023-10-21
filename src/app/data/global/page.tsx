@@ -11,7 +11,7 @@ export default function DataGlobalLayout() {
       <br />
       <AreaClosed
         width={Number(windowDimensions.width)}
-        height={Number(windowDimensions.width)}
+        height={Number(windowDimensions.height)}
       />
     </>
   );
