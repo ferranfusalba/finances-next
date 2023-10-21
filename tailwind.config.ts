@@ -19,6 +19,9 @@ const config: Config = {
       height: {
         "full-main": "calc(100vh - 156px)", // 156 = 64 TopBar + 44 Accounts Top Menu + 48 TabBar
       },
+      minHeight: {
+        "top-bar": "2.75rem",
+      },
     },
   },
   plugins: [],
