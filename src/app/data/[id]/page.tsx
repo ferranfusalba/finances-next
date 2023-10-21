@@ -1,10 +1,5 @@
-type ParamsProps = {
-  params: {
-    id: string;
-    name: string;
-  };
-};
+import { DataParamsProps } from "@/types/Data";
 
-export default function DataLayout({ params }: ParamsProps) {
+export default function DataLayout({ params }: DataParamsProps) {
   return <>Data {params.id}</>;
 }

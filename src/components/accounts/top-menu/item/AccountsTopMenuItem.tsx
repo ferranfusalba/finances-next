@@ -1,7 +1,8 @@
 "use client";
+import { Account } from "@/types/Account";
 import Link from "next/link";
 
-export default function AccountMenuItem({ account }: { account: any }) {
+export default function AccountMenuItem({ account }: { account: Account }) {
   return (
     <li
       key={account.id}

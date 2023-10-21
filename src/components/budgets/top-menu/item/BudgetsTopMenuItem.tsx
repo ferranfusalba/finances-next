@@ -1,7 +1,8 @@
 "use client";
+import { Budget } from "@/types/Budget";
 import Link from "next/link";
 
-export default function BudgettMenuItem({ budget }: { budget: any }) {
+export default function BudgettMenuItem({ budget }: { budget: Budget }) {
   return (
     <li
       key={budget.id}

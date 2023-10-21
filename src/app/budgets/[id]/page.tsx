@@ -1,13 +1,8 @@
 import { prisma } from "@/libs/prisma";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
+import { BudgetParamsProps } from "@/types/Budget";
 
-type ParamsProps = {
-  params: {
-    id: string;
-  };
-};
-
-async function loadBudget({ params }: ParamsProps) {
+async function loadBudget({ params }: BudgetParamsProps) {
   return await prisma.budget.findUnique({
     where: {
       id: Number(params.id),
@@ -15,7 +10,7 @@ async function loadBudget({ params }: ParamsProps) {
   });
 }
 
-export default async function BudgetLayout({ params }: ParamsProps) {
+export default async function BudgetLayout({ params }: BudgetParamsProps) {
   const budget = await loadBudget({ params });
 
   return (

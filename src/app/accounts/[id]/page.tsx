@@ -1,13 +1,8 @@
 import { prisma } from "@/libs/prisma";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
+import { AccountParamsProps } from "@/types/Account";
 
-type ParamsProps = {
-  params: {
-    id: string;
-  };
-};
-
-async function loadAccount({ params }: ParamsProps) {
+async function loadAccount({ params }: AccountParamsProps) {
   return await prisma.account.findUnique({
     where: {
       id: Number(params.id),
@@ -15,7 +10,7 @@ async function loadAccount({ params }: ParamsProps) {
   });
 }
 
-export default async function AccountLayout({ params }: ParamsProps) {
+export default async function AccountLayout({ params }: AccountParamsProps) {
   const account = await loadAccount({ params });
 
   return (

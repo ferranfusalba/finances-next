@@ -1,7 +1,8 @@
 "use client";
+import { Data } from "@/types/Data";
 import Link from "next/link";
 
-export default function DataMenuItem({ data }: { data: any }) {
+export default function DataMenuItem({ data }: { data: Data }) {
   return (
     <li
       key={data.id}
