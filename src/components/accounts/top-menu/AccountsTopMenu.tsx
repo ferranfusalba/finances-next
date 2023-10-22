@@ -2,12 +2,16 @@ import Link from "next/link";
 import AccountMenuItem from "@/components/accounts/top-menu/item/AccountsTopMenuItem";
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
+import { authConfig } from "@/libs/auth";
+import { getServerSession } from "next-auth";
 
 async function loadAccounts() {
   return await prisma.account.findMany();
 }
 
 export default async function AccountsTopMenu() {
+  const session = await getServerSession(authConfig);
+  const userEmail = session?.user?.email;
   const accounts = await loadAccounts();
   return (
     <>
