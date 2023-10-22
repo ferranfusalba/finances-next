@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import { signIn, useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function TopBar() {
   const { data: session } = useSession();
@@ -32,12 +31,9 @@ export default function TopBar() {
             </button>
           </>
         ) : (
-          <button
-            onClick={() => signIn()}
-            className="bg-sky-400 px-3 py-2 rounded"
-          >
-            Sign In
-          </button>
+          <Link href="/signin">
+            <button className="bg-sky-400 px-3 py-2 rounded">Sign In</button>
+          </Link>
         )}
       </div>
     </nav>
