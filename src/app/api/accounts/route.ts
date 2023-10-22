@@ -11,14 +11,15 @@ export async function POST(request: any) {
 
   const newAccount = await prisma.account.create({
     data: {
-      id: data.id,
-      name: data.name,
       active: data.active,
-      type: data.type,
-      description: data.description,
-      initialBalance: data.initialBalance,
       createdAt: data.createdAt,
+      description: data.description,
+      id: data.id,
+      initialBalance: data.initialBalance,
+      name: data.name,
+      type: data.type,
       updatedAt: data.updatedAt,
+      userId: data.userId,
     },
   });
 
