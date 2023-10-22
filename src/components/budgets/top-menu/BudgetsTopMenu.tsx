@@ -2,13 +2,35 @@ import Link from "next/link";
 import BudgetsTopMenuItem from "@/components/budgets/top-menu/item/BudgetsTopMenuItem";
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
+import { authConfig } from "@/libs/auth";
+import { getServerSession } from "next-auth";
 
-async function loadBudgets() {
-  return await prisma.budget.findMany();
+// async function loadBudgets() {
+//   return await prisma.budget.findMany();
+// }
+
+async function getUserId(userEmail: any) {
+  return await prisma.user.findFirst({
+    where: {
+      email: userEmail,
+    },
+  });
+}
+
+async function loadUserBudgets(userId: any) {
+  return await prisma.budget.findMany({
+    where: {
+      userId: userId,
+    },
+  });
 }
 
 export default async function BudgetsTopMenu() {
-  const budgets = await loadBudgets();
+  const session = await getServerSession(authConfig);
+  const userEmail = session?.user?.email;
+  const userId = await getUserId(userEmail);
+  const userBudgets = await loadUserBudgets(userId?.id);
+  // const budgets = await loadBudgets();
   return (
     <>
       <nav className="flex bg-pink-900">
@@ -20,7 +42,7 @@ export default async function BudgetsTopMenu() {
           </Link>
         </ul>
         <ul className="flex overflow-auto flex-nowrap scroll-touch">
-          {budgets.map((budget) => (
+          {userBudgets.map((budget) => (
             <BudgetsTopMenuItem key={budget.id} budget={budget} />
           ))}
         </ul>
