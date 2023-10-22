@@ -4,20 +4,13 @@ import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
 import { authConfig } from "@/libs/auth";
 import { getServerSession } from "next-auth";
+import getUserId from "@/utils/getUserId";
 
 // async function loadAccounts() {
 //   return await prisma.account.findMany();
 // }
 
-async function getUserId(userEmail: any) {
-  return await prisma.user.findFirst({
-    where: {
-      email: userEmail,
-    },
-  });
-}
-
-async function loadUserAccounts(userId: any) {
+async function loadUserAccounts(userId: number) {
   return await prisma.account.findMany({
     where: {
       userId: userId,
@@ -27,9 +20,9 @@ async function loadUserAccounts(userId: any) {
 
 export default async function AccountsTopMenu() {
   const session = await getServerSession(authConfig);
-  const userEmail = session?.user?.email;
+  const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userAccounts = await loadUserAccounts(userId?.id);
+  const userAccounts = await loadUserAccounts(userId?.id as number);
   // const accounts = await loadAccounts();
   return (
     <>

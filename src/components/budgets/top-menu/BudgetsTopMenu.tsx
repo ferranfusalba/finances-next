@@ -4,20 +4,13 @@ import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
 import { authConfig } from "@/libs/auth";
 import { getServerSession } from "next-auth";
+import getUserId from "@/utils/getUserId";
 
 // async function loadBudgets() {
 //   return await prisma.budget.findMany();
 // }
 
-async function getUserId(userEmail: any) {
-  return await prisma.user.findFirst({
-    where: {
-      email: userEmail,
-    },
-  });
-}
-
-async function loadUserBudgets(userId: any) {
+async function loadUserBudgets(userId: number) {
   return await prisma.budget.findMany({
     where: {
       userId: userId,
@@ -27,9 +20,9 @@ async function loadUserBudgets(userId: any) {
 
 export default async function BudgetsTopMenu() {
   const session = await getServerSession(authConfig);
-  const userEmail = session?.user?.email;
+  const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userBudgets = await loadUserBudgets(userId?.id);
+  const userBudgets = await loadUserBudgets(userId?.id as number);
   // const budgets = await loadBudgets();
   return (
     <>

@@ -8,7 +8,7 @@ export default function AccountMenuItem({ account }: { account: Account }) {
       key={account.id}
       className="border-2 border-white flex justify-center items-center min-w-10rem mx-2.5"
     >
-      <Link href={"/accounts/" + account.id}>Account {account.id}</Link>{" "}
+      <Link href={"/accounts/" + account.id}>{account.name}</Link>{" "}
     </li>
   );
 }
