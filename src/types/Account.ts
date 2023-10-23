@@ -1,3 +1,5 @@
+import { Transaction } from "./Transaction";
+
 export interface Account {
   active: boolean | null;
   createdAt: Date;
@@ -7,6 +9,7 @@ export interface Account {
   name: string;
   type: number | null;
   updatedAt: Date;
+  // transactions: Array<Transaction> | null;
 }
 
 export interface AccountParamsProps {
