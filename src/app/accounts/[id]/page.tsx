@@ -1,6 +1,7 @@
 import { prisma } from "@/libs/prisma";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
+import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await prisma.account.findUnique({
@@ -10,8 +11,13 @@ async function loadAccount({ params }: AccountParamsProps) {
   });
 }
 
+async function loadTransactions() {
+  return await prisma.accountTransaction.findMany();
+}
+
 export default async function AccountLayout({ params }: AccountParamsProps) {
   const account = await loadAccount({ params });
+  const transactions = await loadTransactions();
 
   return (
     <>
@@ -27,6 +33,8 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <li>Account updatedAt: {account?.updatedAt.toString()}</li>
       </ol>
       <DeleteAccount params={params} />
+      <p>Table Transactions</p>
+      <TransactionTable account={account} />
     </>
   );
 }

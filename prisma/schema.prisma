@@ -23,7 +23,7 @@ model User {
   budgets   Budget[]
 }
 
-model Transaction {
+model AccountTransaction {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -34,35 +34,46 @@ model Transaction {
   notes     String
   Account   Account? @relation(fields: [accountId], references: [id])
   accountId Int?
+}
+
+model BudgetTransaction {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  concept   String
+  type      String
+  import    String
+  currency  String
+  notes     String
   Budget    Budget?  @relation(fields: [budgetId], references: [id])
   budgetId  Int?
 }
 
 // @default(uuid())
 model Account {
-  id             Int           @id @default(autoincrement())
+  id             Int                  @id @default(autoincrement())
   name           String
   active         Boolean?
   type           Int?
   description    String?
   initialBalance String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  User           User?         @relation(fields: [userId], references: [id])
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  User           User?                @relation(fields: [userId], references: [id])
   userId         Int?
-  transactions   Transaction[]
+  transactions   AccountTransaction[]
 }
 
 model Budget {
-  id             Int           @id @default(autoincrement())
+  id             Int                 @id @default(autoincrement())
   name           String
   active         Boolean?
   type           Int?
   description    String?
   initialBalance String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  User           User?         @relation(fields: [userId], references: [id])
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  User           User?               @relation(fields: [userId], references: [id])
   userId         Int?
-  transactions   Transaction[]
+  transactions   BudgetTransaction[]
 }
