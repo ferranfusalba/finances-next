@@ -1,4 +1,4 @@
-import { Transaction } from "./Transaction";
+import { AccountTransaction } from "./Transaction";
 
 export interface Account {
   active: boolean | null;
@@ -9,7 +9,7 @@ export interface Account {
   name: string;
   type: number | null;
   updatedAt: Date;
-  // transactions: Array<Transaction> | null;
+  transactions?: Array<AccountTransaction>;
 }
 
 export interface AccountParamsProps {

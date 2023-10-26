@@ -8,11 +8,12 @@ import {
 } from "@tanstack/react-table";
 import "./index.css";
 import { Account } from "@/types/Account";
-import { Transaction } from "@/types/Transaction";
+import { AccountTransaction } from "@/types/Transaction";
 
-const defaultData: Array<Transaction> = [
+const defaultData: Array<AccountTransaction> = [
   {
-    id: "tanner",
+    id: 1,
+    accountId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     concept: "100",
@@ -22,7 +23,8 @@ const defaultData: Array<Transaction> = [
     notes: "",
   },
   {
-    id: "tandy",
+    id: 2,
+    accountId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     concept: "40",
@@ -32,7 +34,8 @@ const defaultData: Array<Transaction> = [
     notes: "",
   },
   {
-    id: "joe",
+    id: 3,
+    accountId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     concept: "20",
@@ -43,24 +46,24 @@ const defaultData: Array<Transaction> = [
   },
 ];
 
-const columnHelper = createColumnHelper<Transaction>();
+const columnHelper = createColumnHelper<AccountTransaction>();
 
 const columns = [
   columnHelper.accessor("id", {
     cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor((row) => row.createdAt, {
-    id: "createdAt",
-    cell: (info) => <i>{info.getValue().toString()}</i>,
-    header: () => <span>Created at</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("updatedAt", {
-    header: () => "Updated At",
-    cell: (info) => info.renderValue()?.toString(),
-    footer: (info) => info.column.id,
-  }),
+  // columnHelper.accessor((row) => row.createdAt, {
+  //   id: "createdAt",
+  //   cell: (info) => <i>{info.getValue().toString()}</i>,
+  //   header: () => <span>Created at</span>,
+  //   footer: (info) => info.column.id,
+  // }),
+  // columnHelper.accessor("updatedAt", {
+  //   header: () => "Updated At",
+  //   cell: (info) => info.renderValue()?.toString(),
+  //   footer: (info) => info.column.id,
+  // }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
@@ -85,10 +88,12 @@ const columns = [
 
 export default function TransactionTable({
   account,
+  accountTransactions,
 }: {
   account: Account | null;
+  accountTransactions: Array<AccountTransaction>;
 }) {
-  console.log("account", account);
+  console.log("accountTransactions CLIENT", accountTransactions);
   const [data, setData] = useState(() => [...defaultData]);
   const rerender = useReducer(() => ({}), {})[1];
 

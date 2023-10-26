@@ -11,13 +11,17 @@ async function loadAccount({ params }: AccountParamsProps) {
   });
 }
 
-async function loadTransactions() {
-  return await prisma.accountTransaction.findMany();
+async function loadAccountTransactions(userId: number) {
+  return await prisma.accountTransaction.findMany({
+    where: {
+      accountId: userId,
+    },
+  });
 }
 
 export default async function AccountLayout({ params }: AccountParamsProps) {
   const account = await loadAccount({ params });
-  const transactions = await loadTransactions();
+  const accountTransactions = await loadAccountTransactions(account!.id);
 
   return (
     <>
@@ -34,7 +38,10 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
       </ol>
       <DeleteAccount params={params} />
       <p>Table Transactions</p>
-      <TransactionTable account={account} />
+      <TransactionTable
+        account={account}
+        accountTransactions={accountTransactions}
+      />
     </>
   );
 }
