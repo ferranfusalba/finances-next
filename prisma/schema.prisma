@@ -33,7 +33,7 @@ model AccountTransaction {
   currency  String
   notes     String
   Account   Account? @relation(fields: [accountId], references: [id])
-  accountId Int?
+  accountId Int
 }
 
 model BudgetTransaction {
@@ -46,7 +46,7 @@ model BudgetTransaction {
   currency  String
   notes     String
   Budget    Budget?  @relation(fields: [budgetId], references: [id])
-  budgetId  Int?
+  budgetId  Int
 }
 
 // @default(uuid())

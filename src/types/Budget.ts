@@ -1,4 +1,4 @@
-import { Transaction } from "./Transaction";
+import { BudgetTransaction } from "./Transaction";
 
 export interface Budget {
   active: boolean | null;
@@ -9,7 +9,7 @@ export interface Budget {
   name: string;
   type: number | null;
   updatedAt: Date;
-  // transactions: Array<Transaction> | null;
+  transactions?: Array<BudgetTransaction>;
 }
 
 export interface BudgetParamsProps {
