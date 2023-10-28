@@ -1,5 +1,5 @@
 "use client";
-import { useState, useReducer } from "react";
+import { useReducer } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -10,42 +10,6 @@ import "./index.css";
 import { Account } from "@/types/Account";
 import { AccountTransaction } from "@/types/Transaction";
 
-const defaultData: Array<AccountTransaction> = [
-  {
-    id: 1,
-    accountId: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    concept: "100",
-    type: "In Relationship",
-    import: "50",
-    currency: "EUR",
-    notes: "",
-  },
-  {
-    id: 2,
-    accountId: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    concept: "40",
-    type: "Single",
-    import: "80",
-    currency: "EUR",
-    notes: "",
-  },
-  {
-    id: 3,
-    accountId: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    concept: "20",
-    type: "Complicated",
-    import: "10",
-    currency: "EUR",
-    notes: "",
-  },
-];
-
 const columnHelper = createColumnHelper<AccountTransaction>();
 
 const columns = [
@@ -53,17 +17,17 @@ const columns = [
     cell: (info) => info.getValue(),
     footer: (info) => info.column.id,
   }),
-  // columnHelper.accessor((row) => row.createdAt, {
-  //   id: "createdAt",
-  //   cell: (info) => <i>{info.getValue().toString()}</i>,
-  //   header: () => <span>Created at</span>,
-  //   footer: (info) => info.column.id,
-  // }),
-  // columnHelper.accessor("updatedAt", {
-  //   header: () => "Updated At",
-  //   cell: (info) => info.renderValue()?.toString(),
-  //   footer: (info) => info.column.id,
-  // }),
+  columnHelper.accessor((row) => row.createdAt, {
+    id: "createdAt",
+    cell: (info) => <i>{info.getValue().toString()}</i>,
+    header: () => <span>Created at</span>,
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("updatedAt", {
+    header: () => "Updated At",
+    cell: (info) => info.renderValue()?.toString(),
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
@@ -86,15 +50,14 @@ const columns = [
   }),
 ];
 
+const prepareColumns = () => {};
+
 export default function TransactionTable({
-  account,
   accountTransactions,
 }: {
-  account: Account | null;
   accountTransactions: Array<AccountTransaction>;
 }) {
-  console.log("accountTransactions CLIENT", accountTransactions);
-  const [data, setData] = useState(() => [...defaultData]);
+  const data = accountTransactions;
   const rerender = useReducer(() => ({}), {})[1];
 
   const table = useReactTable({
