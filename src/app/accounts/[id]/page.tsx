@@ -38,10 +38,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
       </ol>
       <DeleteAccount params={params} />
       <p>Table Transactions</p>
-      <TransactionTable
-        account={account}
-        accountTransactions={accountTransactions}
-      />
+      <TransactionTable accountTransactions={accountTransactions} />
     </>
   );
 }
