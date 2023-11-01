@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import "./index.css";
-import { Account } from "@/types/Account";
+import { useCounterStore } from "@/store/counterStore";
 import { AccountTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
@@ -50,8 +50,6 @@ const columns = [
   }),
 ];
 
-const prepareColumns = () => {};
-
 export default function TransactionTable({
   accountTransactions,
 }: {
@@ -59,6 +57,9 @@ export default function TransactionTable({
 }) {
   const data = accountTransactions;
   const rerender = useReducer(() => ({}), {})[1];
+
+  const count = useCounterStore((state) => state.count);
+  const { increment } = useCounterStore();
 
   const table = useReactTable({
     data,
@@ -68,6 +69,9 @@ export default function TransactionTable({
 
   return (
     <div className="p-2">
+      Zustand:
+      {count}
+      <hr />
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

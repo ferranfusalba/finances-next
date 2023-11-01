@@ -1,8 +1,8 @@
 export interface User {
-  createdAt: Date;
+  createdAt: Date | null;
   email: string;
   id: number;
   name: string;
   password: string;
-  updatedAt: Date;
+  updatedAt: Date | null;
 }
