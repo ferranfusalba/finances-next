@@ -37,7 +37,6 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <li>Account updatedAt: {account?.updatedAt.toString()}</li>
       </ol>
       <DeleteAccount params={params} />
-      <p>Table Transactions</p>
       <TransactionTable accountTransactions={accountTransactions} />
     </>
   );

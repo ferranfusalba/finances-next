@@ -69,9 +69,9 @@ export default function TransactionTable({
 
   return (
     <div className="p-2">
-      Zustand:
-      {count}
+      Level: {count}
       <hr />
+      <br />
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

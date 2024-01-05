@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import {
   Home,
   TableBuilt,
@@ -7,6 +6,7 @@ import {
   ChartLineData,
   Settings,
 } from "@carbon/icons-react";
+import LevelClient from "./LevelClient";
 
 type Section = {
   path: string;
@@ -39,12 +39,13 @@ function TabBarSection({ section }: { section: Section }) {
 
 export default function TabBar() {
   return (
-    <nav className="bg-slate-900 px-6 py-3 text-white">
+    <nav className="md:flex md:justify-between bg-slate-900 px-6 py-3 text-white">
       <ul className="flex justify-between md:justify-start">
         {routes.map((route) => {
           return <TabBarSection key={route.path} section={route} />;
         })}
       </ul>
+      <LevelClient />
     </nav>
   );
 }
