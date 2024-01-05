@@ -1,5 +1,4 @@
 import ClientSession from "@/components/home/ClientSession";
-import InitClient from "@/components/home/InitClient";
 import { authConfig } from "@/libs/auth";
 import getUserId from "@/utils/getUserId";
 import { getServerSession } from "next-auth";
@@ -31,9 +30,6 @@ export default async function Home() {
         <p>user.password: {user?.password}</p>
         <p>user.createdAt: {user?.createdAt?.toString()}</p>
         <p>user.updatedAt: {user?.updatedAt?.toString()}</p>
-        <hr />
-        <p>Zustand tests</p>
-        <InitClient />
       </>
     );
   }
