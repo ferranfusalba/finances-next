@@ -15,7 +15,7 @@
     "@tanstack/react-table": "^8.10.7",
     "@types/carbon__icons-react": "^11.26.1",
     "@visx/visx": "^3.4.0",
-    "next": "13.5.4",
+    "next": "^14.0.4",
     "next-auth": "^4.23.2",
     "react": "^18",
     "react-dom": "^18",
