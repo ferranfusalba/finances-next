@@ -6,14 +6,15 @@ import { useEffect } from "react";
 export default function InitClient() {
   const storeCount = useCounterStore((state) => ({
     count: state.count,
-    posts: state.posts,
+    // posts: state.posts,
   }));
-  const { increment, getPosts, clearStore, multiply } = useCounterStore();
+  // getPosts
+  const { increment, clearStore, multiply } = useCounterStore();
 
-  useEffect(() => {
-    getPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   getPosts();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <>
