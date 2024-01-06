@@ -5,9 +5,10 @@ export interface Account {
   createdAt: Date;
   description: string | null;
   id: number;
-  initialBalance: string | null;
+  initialBalance: number | null;
   name: string;
-  type: number | null;
+  code: string;
+  type: string | null;
   updatedAt: Date;
   transactions?: Array<AccountTransaction>;
 }
@@ -15,5 +16,6 @@ export interface Account {
 export interface AccountParamsProps {
   params: {
     id: string;
+    code: string;
   };
 }

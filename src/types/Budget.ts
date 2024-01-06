@@ -5,9 +5,10 @@ export interface Budget {
   createdAt: Date;
   description: string | null;
   id: number;
-  initialBalance: string | null;
+  initialBalance: number | null;
   name: string;
-  type: number | null;
+  code: string;
+  type: string | null;
   updatedAt: Date;
   transactions?: Array<BudgetTransaction>;
 }
