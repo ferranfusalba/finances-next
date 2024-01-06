@@ -6,7 +6,7 @@ import TransactionTable from "@/components/accounts/tables/transactions/Transact
 async function loadAccount({ params }: AccountParamsProps) {
   return await prisma.account.findUnique({
     where: {
-      id: Number(params.id),
+      code: params.code,
     },
   });
 }

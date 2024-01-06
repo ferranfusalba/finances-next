@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: any, { params }: AccountParamsProps) {
   const account = await prisma.account.findUnique({
     where: {
-      id: Number(params.id),
+      code: params.code,
     },
   });
 

@@ -10,7 +10,7 @@ export default function AccountMenuItem({ account }: { account: Account }) {
     >
       <Link
         className="w-max min-w-10rem text-center"
-        href={"/accounts/" + account.id}
+        href={"/accounts/" + account.code}
       >
         {account.name}
       </Link>{" "}
