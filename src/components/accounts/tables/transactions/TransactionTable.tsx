@@ -19,24 +19,41 @@ const columns = [
   }),
   columnHelper.accessor((row) => row.createdAt, {
     id: "createdAt",
-    cell: (info) => <i>{info.getValue().toString()}</i>,
+    cell: (info) => {
+      return <i>{info.getValue().toLocaleString("ca")}</i>;
+    },
     header: () => <span>Created at</span>,
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("updatedAt", {
-    header: () => "Updated At",
-    cell: (info) => info.renderValue()?.toString(),
-    footer: (info) => info.column.id,
-  }),
+  // columnHelper.accessor("updatedAt", {
+  //   header: () => "Updated At",
+  //   cell: (info) => {
+  //     return <i>{info.getValue().toLocaleString("ca")}</i>;
+  //   },
+  //   footer: (info) => info.column.id,
+  // }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("type", {
+    cell: (info) => {
+      return info.getValue();
+    },
     header: "Type",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("import", {
+    cell: (info) => {
+      const number = info.getValue();
+
+      const intlNumber = new Intl.NumberFormat("de-DE", {
+        // style: "currency",
+        // currency: "EUR",
+      }).format(parseInt(number));
+
+      return <>{intlNumber}</>;
+    },
     header: "Import",
     footer: (info) => info.column.id,
   }),
