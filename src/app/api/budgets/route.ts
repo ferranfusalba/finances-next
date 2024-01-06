@@ -12,6 +12,7 @@ export async function POST(request: any) {
   const newBudget = await prisma.budget.create({
     data: {
       active: data.active,
+      code: data.code,
       createdAt: data.createdAt,
       description: data.description,
       id: data.id,
