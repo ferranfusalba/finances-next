@@ -26,8 +26,10 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   return (
     <>
       <ol>
-        <li>Account id (params): {params.id}</li>
+        <li>Account code (params): {params.code}</li>
+        <li>Account code (account): {account?.code}</li>
         <li>Account id (account): {account?.id}</li>
+        <li>Account order (account): {account?.order}</li>
         <li>Account name: {account?.name}</li>
         <li>Account active: {account?.active?.toString()}</li>
         <li>Account type: {account?.type?.toString()}</li>

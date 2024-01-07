@@ -9,6 +9,7 @@ export interface Account {
   name: string;
   code: string;
   type: string | null;
+  order: number;
   updatedAt: Date;
   transactions?: Array<AccountTransaction>;
 }

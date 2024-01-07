@@ -1,10 +1,10 @@
 import Link from "next/link";
-import AccountMenuItem from "@/components/accounts/top-menu/item/AccountsTopMenuItem";
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
 import { authConfig } from "@/libs/auth";
 import { getServerSession } from "next-auth";
 import getUserId from "@/utils/getUserId";
+import AccountsTopMenuList from "./list/AccountsTopMenuList";
 
 // async function loadAccounts() {
 //   return await prisma.account.findMany();
@@ -24,6 +24,7 @@ export default async function AccountsTopMenu() {
   const userId = await getUserId(userEmail);
   const userAccounts = await loadUserAccounts(userId?.id as number);
   // const accounts = await loadAccounts();
+
   return (
     <>
       <nav className="flex bg-sky-900">
@@ -34,11 +35,7 @@ export default async function AccountsTopMenu() {
             </li>
           </Link>
         </ul>
-        <ul className="flex overflow-auto flex-nowrap scroll-touch">
-          {userAccounts.map((account) => (
-            <AccountMenuItem key={account?.id} account={account} />
-          ))}
-        </ul>
+        <AccountsTopMenuList accountList={userAccounts} />
       </nav>
     </>
   );
