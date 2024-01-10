@@ -2,10 +2,10 @@ import NewAccountForm from "@/components/accounts/new/Form";
 import { authConfig } from "@/libs/auth";
 import { User } from "@/types/User";
 import getUserId from "@/utils/getUserId";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 
 export default async function NewAccount() {
-  const session = await getServerSession(authConfig);
+  const session = await auth(authConfig);
   const userEmail = session?.user?.email as string;
 
   const userId = await getUserId(userEmail);

@@ -1,10 +1,10 @@
 import ClientSession from "@/components/home/ClientSession";
 import { authConfig } from "@/libs/auth";
 import getUserId from "@/utils/getUserId";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 
 export default async function Home() {
-  const serverSession = await getServerSession(authConfig);
+  const serverSession = await auth(authConfig);
 
   const user = await getUserId(serverSession?.user?.email as string);
 
