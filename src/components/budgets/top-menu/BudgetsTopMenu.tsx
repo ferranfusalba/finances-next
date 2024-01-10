@@ -3,7 +3,7 @@ import BudgetsTopMenuItem from "@/components/budgets/top-menu/item/BudgetsTopMen
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
 import { authConfig } from "@/libs/auth";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 
 // async function loadBudgets() {
@@ -19,7 +19,7 @@ async function loadUserBudgets(userId: number) {
 }
 
 export default async function BudgetsTopMenu() {
-  const session = await getServerSession(authConfig);
+  const session = await auth(authConfig);
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
   const userBudgets = await loadUserBudgets(userId?.id as number);

@@ -1,11 +1,11 @@
 import { CredentialsForm } from "@/components/auth/CredentialsForm";
 import { GoogleSignInButton } from "@/components/auth/AuthButtons";
 import { authConfig } from "@/libs/auth";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export default async function SignInPage() {
-  const session = await getServerSession(authConfig);
+  const session = await auth(authConfig);
 
   if (session) return redirect("/");
 
