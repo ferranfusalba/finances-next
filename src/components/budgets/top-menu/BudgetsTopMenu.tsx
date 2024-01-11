@@ -2,7 +2,6 @@ import Link from "next/link";
 import BudgetsTopMenuItem from "@/components/budgets/top-menu/item/BudgetsTopMenuItem";
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
-import { authConfig } from "@/libs/auth";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 
@@ -10,19 +9,19 @@ import getUserId from "@/utils/getUserId";
 //   return await prisma.budget.findMany();
 // }
 
-async function loadUserBudgets(userId: number) {
-  return await prisma.budget.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
+// async function loadUserBudgets(userId: number) {
+//   return await prisma.budget.findMany({
+//     where: {
+//       userId: userId,
+//     },
+//   });
+// }
 
 export default async function BudgetsTopMenu() {
-  const session = await auth(authConfig);
+  const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userBudgets = await loadUserBudgets(userId?.id as number);
+  // const userBudgets = await loadUserBudgets(userId?.id as number);
   // const budgets = await loadBudgets();
   return (
     <>
@@ -34,11 +33,11 @@ export default async function BudgetsTopMenu() {
             </li>
           </Link>
         </ul>
-        <ul className="flex overflow-auto flex-nowrap scroll-touch">
+        {/* <ul className="flex overflow-auto flex-nowrap scroll-touch">
           {userBudgets.map((budget) => (
             <BudgetsTopMenuItem key={budget.id} budget={budget} />
           ))}
-        </ul>
+        </ul> */}
       </nav>
     </>
   );

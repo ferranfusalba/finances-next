@@ -3,13 +3,13 @@ import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
 
-async function loadAccount({ params }: AccountParamsProps) {
-  return await prisma.account.findUnique({
-    where: {
-      code: params.code,
-    },
-  });
-}
+// async function loadAccount({ params }: AccountParamsProps) {
+//   return await prisma.account.findUnique({
+//     where: {
+//       code: params.code,
+//     },
+//   });
+// }
 
 async function loadAccountTransactions(userId: number) {
   return await prisma.accountTransaction.findMany({
@@ -20,12 +20,12 @@ async function loadAccountTransactions(userId: number) {
 }
 
 export default async function AccountLayout({ params }: AccountParamsProps) {
-  const account = await loadAccount({ params });
-  const accountTransactions = await loadAccountTransactions(account!.id);
+  // const account = await loadAccount({ params });
+  // const accountTransactions = await loadAccountTransactions(account!.id);
 
   return (
     <>
-      <ol>
+      {/* <ol>
         <li>Account code (params): {params.code}</li>
         <li>Account code (account): {account?.code}</li>
         <li>Account id (account): {account?.id}</li>
@@ -39,7 +39,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <li>Account updatedAt: {account?.updatedAt.toString()}</li>
       </ol>
       <DeleteAccount params={params} />
-      <TransactionTable accountTransactions={accountTransactions} />
+      <TransactionTable accountTransactions={accountTransactions} /> */}
     </>
   );
 }
