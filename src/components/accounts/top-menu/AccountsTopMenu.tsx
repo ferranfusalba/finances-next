@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/libs/prisma";
 import { AddAlt } from "@carbon/icons-react";
-import { authConfig } from "@/libs/auth";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 import AccountsTopMenuList from "./list/AccountsTopMenuList";
@@ -10,19 +9,19 @@ import AccountsTopMenuList from "./list/AccountsTopMenuList";
 //   return await prisma.account.findMany();
 // }
 
-async function loadUserAccounts(userId: number) {
-  return await prisma.account.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
+// async function loadUserAccounts(userId: string) {
+//   return await prisma.account.findMany({
+//     where: {
+//       id: userId,
+//     },
+//   });
+// }
 
 export default async function AccountsTopMenu() {
-  const session = await auth(authConfig);
+  const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userAccounts = await loadUserAccounts(userId?.id as number);
+  // const userAccounts = await loadUserAccounts(userId?.id as string);
   // const accounts = await loadAccounts();
 
   return (
@@ -35,7 +34,7 @@ export default async function AccountsTopMenu() {
             </li>
           </Link>
         </ul>
-        <AccountsTopMenuList accountList={userAccounts} />
+        {/* <AccountsTopMenuList accountList={userAccounts} /> */}
       </nav>
     </>
   );
