@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import { AddAlt } from "@carbon/icons-react";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 import AccountsTopMenuList from "./list/AccountsTopMenuList";
 
 // async function loadAccounts() {
-//   return await prisma.account.findMany();
+//   return await db.account.findMany();
 // }
 
 // async function loadUserAccounts(userId: string) {
-//   return await prisma.account.findMany({
+//   return await db.account.findMany({
 //     where: {
 //       id: userId,
 //     },

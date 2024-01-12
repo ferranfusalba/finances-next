@@ -1,16 +1,16 @@
 import Link from "next/link";
 import BudgetsTopMenuItem from "@/components/budgets/top-menu/item/BudgetsTopMenuItem";
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import { AddAlt } from "@carbon/icons-react";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 
 // async function loadBudgets() {
-//   return await prisma.budget.findMany();
+//   return await db.budget.findMany();
 // }
 
 // async function loadUserBudgets(userId: number) {
-//   return await prisma.budget.findMany({
+//   return await db.budget.findMany({
 //     where: {
 //       userId: userId,
 //     },
