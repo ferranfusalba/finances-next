@@ -1,5 +1,5 @@
 import { getVerificationTokenByEmail } from "@/data/verification-token";
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 
 export const generateVerificationToken = async (email: string) => {
@@ -9,14 +9,14 @@ export const generateVerificationToken = async (email: string) => {
   const existingToken = await getVerificationTokenByEmail(email);
 
   if (existingToken) {
-    await prisma.verificationToken.delete({
+    await db.verificationToken.delete({
       where: {
         id: existingToken.id,
       },
     });
   }
 
-  const verificationToken = await prisma.verificationToken.create({
+  const verificationToken = await db.verificationToken.create({
     data: {
       email,
       token,

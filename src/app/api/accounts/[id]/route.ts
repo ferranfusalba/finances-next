@@ -1,9 +1,9 @@
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import { AccountParamsProps } from "@/types/Account";
 import { NextResponse } from "next/server";
 
 export async function GET(request: any, { params }: AccountParamsProps) {
-  const account = await prisma.account.findUnique({
+  const account = await db.account.findUnique({
     where: {
       code: params.code,
     },
@@ -14,7 +14,7 @@ export async function GET(request: any, { params }: AccountParamsProps) {
 
 export async function PUT(request: any, { params }: AccountParamsProps) {
   const data = await request.json();
-  await prisma.account.update({
+  await db.account.update({
     where: {
       id: Number(params.id),
     },
@@ -26,7 +26,7 @@ export async function PUT(request: any, { params }: AccountParamsProps) {
 
 export async function DELETE(request: any, { params }: AccountParamsProps) {
   try {
-    const accountDeleted = await prisma.account.delete({
+    const accountDeleted = await db.account.delete({
       where: {
         id: Number(params.id),
       },

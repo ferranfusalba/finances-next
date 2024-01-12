@@ -1,7 +1,7 @@
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 
 export default async function getUserId(userEmail: string) {
-  return await prisma.user.findFirst({
+  return await db.user.findFirst({
     where: {
       email: userEmail,
     },

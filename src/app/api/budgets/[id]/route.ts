@@ -1,9 +1,9 @@
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import { BudgetParamsProps } from "@/types/Budget";
 import { NextResponse } from "next/server";
 
 export async function GET(request: any, { params }: BudgetParamsProps) {
-  const budget = await prisma.budget.findUnique({
+  const budget = await db.budget.findUnique({
     where: {
       id: Number(params.id),
     },
@@ -14,7 +14,7 @@ export async function GET(request: any, { params }: BudgetParamsProps) {
 
 export async function PUT(request: any, { params }: BudgetParamsProps) {
   const data = await request.json();
-  await prisma.budget.update({
+  await db.budget.update({
     where: {
       id: Number(params.id),
     },
@@ -26,7 +26,7 @@ export async function PUT(request: any, { params }: BudgetParamsProps) {
 
 export async function DELETE(request: any, { params }: BudgetParamsProps) {
   try {
-    const budgetDeleted = await prisma.budget.delete({
+    const budgetDeleted = await db.budget.delete({
       where: {
         id: Number(params.id),
       },

@@ -1,10 +1,10 @@
-import { prisma } from "@/libs/prisma";
+import { db } from "@/lib/db";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
 
 // async function loadAccount({ params }: AccountParamsProps) {
-//   return await prisma.account.findUnique({
+//   return await db.account.findUnique({
 //     where: {
 //       code: params.code,
 //     },
@@ -12,7 +12,7 @@ import TransactionTable from "@/components/accounts/tables/transactions/Transact
 // }
 
 async function loadAccountTransactions(userId: number) {
-  return await prisma.accountTransaction.findMany({
+  return await db.accountTransaction.findMany({
     where: {
       accountId: userId,
     },
