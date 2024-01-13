@@ -1,27 +1,23 @@
-import { auth, signOut } from "@/auth";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Settings | Finances Next",
-};
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { signOut } from "next-auth/react";
+import { Navbar } from "./_components/navbar";
 
-const SettingsPage = async () => {
-  const session = await auth();
+const SettingsPage = () => {
+  const user = useCurrentUser();
+
+  const onClick = () => {
+    signOut();
+  };
 
   return (
-    <>
-      <h1>Settings</h1>
-      {JSON.stringify(session)}
-      <form
-        action={async () => {
-          "use server";
-
-          await signOut();
-        }}
-      >
-        <button type="submit">Sign Out</button>
-      </form>
-    </>
+    <div className="bg-white text-black p-10 rounded-xl">
+      <Navbar></Navbar>
+      <button type="submit" onClick={onClick}>
+        Sign Out
+      </button>
+    </div>
   );
 };
 
