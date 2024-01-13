@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { Navbar } from "@/components/_navbar/navbar";
 
 const TopBar = async () => {
   const session = await auth();
@@ -9,6 +10,7 @@ const TopBar = async () => {
       <Link href="/">
         <h1>Finances</h1>
       </Link>
+      <Navbar></Navbar>
       <div className="flex gap-x-2 items-center">
         {session?.user ? (
           <>
