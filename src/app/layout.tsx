@@ -5,6 +5,7 @@ import { Inter, IBM_Plex_Sans } from "next/font/google";
 import TopBar from "@/components/TopBar/TopBar";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibm = IBM_Plex_Sans({
@@ -31,7 +32,10 @@ export default async function RootLayout({
           <header className="top-bar">
             <TopBar />
           </header>
-          <main>{children}</main>
+          <main>
+            <Toaster />
+            {children}
+          </main>
           <footer className="absolute bottom-0 w-full">
             <TabBar />
           </footer>
