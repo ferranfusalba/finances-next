@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { auth } from "@/auth";
-import { Navbar } from "@/components/_navbar/navbar";
 import LogoutButtonClient from "./LogoutButtonClient";
 import { currentUser } from "@/lib/auth";
 
@@ -12,7 +10,6 @@ const TopBar = async () => {
       <Link href="/">
         <h1>Finances</h1>
       </Link>
-      <Navbar></Navbar>
       <div className="flex gap-x-2 items-center">
         {user ? (
           <>
