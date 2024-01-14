@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Navbar } from "@/components/_navbar/navbar";
+import LogoutButtonClient from "./LogoutButtonClient";
 
 const TopBar = async () => {
   const session = await auth();
@@ -23,7 +24,7 @@ const TopBar = async () => {
               alt="Profile picture"
               className="w-10 h-10 rounded-full cursor-pointer"
             />
-            <form
+            {/* <form
               action={async () => {
                 "use server";
 
@@ -31,7 +32,8 @@ const TopBar = async () => {
               }}
             >
               <button type="submit">Sign Out</button>
-            </form>
+            </form> */}
+            <LogoutButtonClient />
           </>
         ) : (
           <Link href="/signin">
