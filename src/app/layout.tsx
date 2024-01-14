@@ -31,10 +31,7 @@ export default async function RootLayout({
           <header className="top-bar">
             <TopBar />
           </header>
-          {/* <main>{children}</main> */}
-          <div className="h-full w-full flex flex-col gap-y-10 items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400 to-blue-800">
-            {children}
-          </div>
+          <main>{children}</main>
           <footer className="absolute bottom-0 w-full">
             <TabBar />
           </footer>
