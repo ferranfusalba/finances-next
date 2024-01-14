@@ -20,12 +20,13 @@ export const useUserState = create<UserState>((set) => ({
   updatedAt: null,
   initUserStore: (user: User) =>
     set(() => ({
-      id: user.id,
-      name: user.name,
-      password: user.password,
-      email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      // TODO: Update this to new user schema
+      // id: user.id,
+      // name: user.name,
+      // password: user.password,
+      // email: user.email,
+      // createdAt: user.createdAt,
+      // updatedAt: user.updatedAt,
     })),
   clearStore: () => {
     set({}, true);
