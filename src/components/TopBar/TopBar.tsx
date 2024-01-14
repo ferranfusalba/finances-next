@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import { Navbar } from "@/components/_navbar/navbar";
 import LogoutButtonClient from "./LogoutButtonClient";
+import { currentUser } from "@/lib/auth";
 
 const TopBar = async () => {
-  const session = await auth();
+  const user = await currentUser();
 
   return (
     <nav className="bg-slate-900 flex items-center px-6 py-3 justify-between text-white">
@@ -13,26 +14,17 @@ const TopBar = async () => {
       </Link>
       <Navbar></Navbar>
       <div className="flex gap-x-2 items-center">
-        {session?.user ? (
+        {user ? (
           <>
             <p>
-              {session.user.name} - {session.user.email}
+              {user?.name} - {user?.email}
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={session.user.image!}
+              src={user.image!}
               alt="Profile picture"
               className="w-10 h-10 rounded-full cursor-pointer"
             />
-            {/* <form
-              action={async () => {
-                "use server";
-
-                await signOut();
-              }}
-            >
-              <button type="submit">Sign Out</button>
-            </form> */}
             <LogoutButtonClient />
           </>
         ) : (
