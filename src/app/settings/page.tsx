@@ -30,7 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserRole } from "@prisma/client";
-import { Switch } from "@/components/ui/switch";
 
 const SettingsPage = () => {
   const user = useCurrentUser();
@@ -181,30 +180,6 @@ const SettingsPage = () => {
                   </FormItem>
                 )}
               ></FormField>
-              {/* TODO: Enable this in 2FA branch */}
-              {/* {user?.isOAuth === false && (
-                <FormField
-                  control={form.control}
-                  name="isTwoFactorEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Two Factor Authentication (2FA)</FormLabel>
-                        <FormDescription>
-                          Enable 2FA for your account
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          disabled={isPending}
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        ></Switch>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                ></FormField>
-              )} */}
             </div>
             <FormError message={error}></FormError>
             <FormSuccess message={success}></FormSuccess>

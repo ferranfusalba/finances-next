@@ -27,7 +27,6 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     values.email = undefined;
     values.password = undefined;
     values.newPassword = undefined;
-    // values.isTwoFactorEnabled = undefined; // TODO: Enable this in 2FA branch
   }
 
   if (values.email && values.email !== user.email) {
