@@ -1,14 +1,19 @@
 import Link from "next/link";
 import LogoutButtonClient from "./LogoutButtonClient";
+import { Badge } from "@/components/ui/badge";
 import { currentUser } from "@/lib/auth";
 
 const TopBar = async () => {
   const user = await currentUser();
+  const env = process.env.NODE_ENV;
 
   return (
     <nav className="bg-slate-900 flex items-center px-6 py-3 justify-between text-white">
       <Link href="/">
-        <h1>Finances</h1>
+        <div className="flex gap-4">
+          <h1>Finances</h1>
+          {env !== "production" && <Badge variant="destructive">{env}</Badge>}
+        </div>
       </Link>
       <div className="flex gap-x-2 items-center">
         {user ? (
