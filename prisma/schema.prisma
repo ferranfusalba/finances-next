@@ -5,7 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// prisma/schema.prisma
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -18,19 +17,18 @@ enum UserRole {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String             @id @default(cuid())
   name          String?
-  email         String?       @unique
+  email         String?            @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          UserRole      @default(USER)
+  role          UserRole           @default(USER)
   accounts      UserAccount[]
-  // 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  // accounts  Account[]
-  // budgets   Budget[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  finAccounts   FinancialAccount[]
+  budgets       Budget[]
 }
 
 model UserAccount {
@@ -70,18 +68,16 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
-/// OLD PRISMA:::
-
 model AccountTransaction {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int               @id @default(autoincrement())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   concept   String
   type      String
   import    String
   currency  String
   notes     String
-  Account   Account? @relation(fields: [accountId], references: [id])
+  Account   FinancialAccount? @relation(fields: [accountId], references: [id])
   accountId Int
 }
 
@@ -98,8 +94,7 @@ model BudgetTransaction {
   budgetId  Int
 }
 
-// @default(uuid())
-model Account {
+model FinancialAccount {
   id             Int                  @id @default(autoincrement())
   order          Int                  @default(autoincrement())
   name           String
@@ -110,8 +105,8 @@ model Account {
   initialBalance Float
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
-  // User           User?                @relation(fields: [userId], references: [id])
-  userId         Int?
+  User           User?                @relation(fields: [userId], references: [id])
+  userId         String?
   transactions   AccountTransaction[]
 }
 
@@ -126,7 +121,7 @@ model Budget {
   initialBalance Float
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
-  // User           User?               @relation(fields: [userId], references: [id])
-  userId         Int?
+  User           User?               @relation(fields: [userId], references: [id])
+  userId         String?
   transactions   BudgetTransaction[]
 }
