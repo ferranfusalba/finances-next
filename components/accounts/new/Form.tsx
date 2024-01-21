@@ -38,7 +38,7 @@ export default function NewAccountForm(props: Props) {
 
     const data = await res.json();
 
-    router.push("/accounts/" + data.id);
+    router.push("/accounts/" + data.code);
     router.refresh();
   };
 

@@ -5,24 +5,19 @@ import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 import AccountsTopMenuList from "./list/AccountsTopMenuList";
 
-// async function loadAccounts() {
-//   return await db.account.findMany();
-// }
-
-// async function loadUserAccounts(userId: string) {
-//   return await db.account.findMany({
-//     where: {
-//       id: userId,
-//     },
-//   });
-// }
+async function loadUserAccounts(userId: string) {
+  return await db.financialAccount.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 
 export default async function AccountsTopMenu() {
   const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  // const userAccounts = await loadUserAccounts(userId?.id as string);
-  // const accounts = await loadAccounts();
+  const userAccounts = await loadUserAccounts(userId?.id as string);
 
   return (
     <>
@@ -34,7 +29,7 @@ export default async function AccountsTopMenu() {
             </li>
           </Link>
         </ul>
-        {/* <AccountsTopMenuList accountList={userAccounts} /> */}
+        <AccountsTopMenuList accountList={userAccounts} />
       </nav>
     </>
   );
