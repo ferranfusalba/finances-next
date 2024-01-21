@@ -5,24 +5,20 @@ import { AddAlt } from "@carbon/icons-react";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 
-// async function loadBudgets() {
-//   return await db.budget.findMany();
-// }
-
-// async function loadUserBudgets(userId: number) {
-//   return await db.budget.findMany({
-//     where: {
-//       userId: userId,
-//     },
-//   });
-// }
+async function loadUserBudgets(userId: string) {
+  return await db.budget.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 
 export default async function BudgetsTopMenu() {
   const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  // const userBudgets = await loadUserBudgets(userId?.id as number);
-  // const budgets = await loadBudgets();
+  const userBudgets = await loadUserBudgets(userId?.id as string);
+
   return (
     <>
       <nav className="flex bg-pink-900">
@@ -33,11 +29,11 @@ export default async function BudgetsTopMenu() {
             </li>
           </Link>
         </ul>
-        {/* <ul className="flex overflow-auto flex-nowrap scroll-touch">
+        <ul className="flex overflow-auto flex-nowrap scroll-touch">
           {userBudgets.map((budget) => (
             <BudgetsTopMenuItem key={budget.id} budget={budget} />
           ))}
-        </ul> */}
+        </ul>
       </nav>
     </>
   );

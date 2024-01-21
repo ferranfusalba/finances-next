@@ -21,7 +21,7 @@ async function loadAccountTransactions(id: number) {
 
 export default async function AccountLayout({ params }: AccountParamsProps) {
   const account = await loadAccount({ params });
-  const accountTransactions = await loadAccountTransactions(account?.id);
+  const accountTransactions = await loadAccountTransactions(account!.id);
 
   return (
     <>
