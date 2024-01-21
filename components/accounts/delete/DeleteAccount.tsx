@@ -10,7 +10,7 @@ export default function DeleteAccount({ params }: AccountParamsProps) {
     <>
       <button
         onClick={async () => {
-          await fetch(`/api/accounts/${params.id}`, {
+          await fetch(`/api/accounts/${params.code}`, {
             method: "DELETE",
           });
           router.push("/accounts/");

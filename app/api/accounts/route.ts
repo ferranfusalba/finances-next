@@ -2,14 +2,14 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const accounts = await db.account.findMany();
+  const accounts = await db.financialAccount.findMany();
   return NextResponse.json(accounts);
 }
 
 export async function POST(request: any) {
   const data = await request.json();
 
-  const newAccount = await db.account.create({
+  const newAccount = await db.financialAccount.create({
     data: {
       active: data.active,
       code: data.code,
