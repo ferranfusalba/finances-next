@@ -50,7 +50,7 @@ const columns = [
       const intlNumber = new Intl.NumberFormat("de-DE", {
         // style: "currency",
         // currency: "EUR",
-      }).format(parseInt(number));
+      }).format(number);
 
       return <>{intlNumber}</>;
     },
