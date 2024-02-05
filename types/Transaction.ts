@@ -3,7 +3,7 @@ interface Transaction {
   createdAt: Date;
   currency: string;
   id: number;
-  import: string;
+  import: number;
   notes: string;
   type: string;
   updatedAt: Date;

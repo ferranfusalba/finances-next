@@ -12,7 +12,7 @@ async function loadAccount({ params }: AccountParamsProps) {
 }
 
 async function loadAccountTransactions(id: number) {
-  return await db.accountTransaction.findMany({
+  return await db.financialAccountTransaction.findMany({
     where: {
       accountId: id,
     },

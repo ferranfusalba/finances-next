@@ -68,13 +68,13 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
-model AccountTransaction {
+model FinancialAccountTransaction {
   id        Int               @id @default(autoincrement())
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   concept   String
   type      String
-  import    String
+  import    Float
   currency  String
   notes     String
   Account   FinancialAccount? @relation(fields: [accountId], references: [id])
@@ -95,19 +95,19 @@ model BudgetTransaction {
 }
 
 model FinancialAccount {
-  id             Int                  @id @default(autoincrement())
-  order          Int                  @default(autoincrement())
+  id             Int                           @id @default(autoincrement())
+  order          Int                           @default(autoincrement())
   name           String
-  code           String               @unique
+  code           String                        @unique
   active         Boolean
   type           String
   description    String?
   initialBalance Float
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  User           User?                @relation(fields: [userId], references: [id])
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+  User           User?                         @relation(fields: [userId], references: [id])
   userId         String?
-  transactions   AccountTransaction[]
+  transactions   FinancialAccountTransaction[]
 }
 
 model Budget {
