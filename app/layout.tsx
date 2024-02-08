@@ -6,6 +6,7 @@ import TopBar from "@/components/TopBar/TopBar";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 const ibm = IBM_Plex_Sans({
@@ -34,7 +35,14 @@ export default async function RootLayout({
           </header>
           <main>
             <Toaster />
-            {children}
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
           </main>
           <footer className="absolute bottom-0 w-full">
             <TabBar />
