@@ -9,6 +9,7 @@ import {
 import "./index.css";
 import { useCounterStore } from "@/store/counterStore";
 import { AccountTransaction } from "@/types/Transaction";
+import { AddTransaction } from "./AddTransaction";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
@@ -86,7 +87,10 @@ export default function TransactionTable({
 
   return (
     <div className="p-2">
+      <hr />
       Level: {count}
+      <hr />
+      <AddTransaction />
       <hr />
       <br />
       <table>
