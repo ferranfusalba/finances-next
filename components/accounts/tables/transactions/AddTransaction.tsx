@@ -24,7 +24,7 @@ export const AddTransaction = (props: Props) => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      amount: 0,
+      amountForm: "",
       concept: "",
       type: "",
       currency: "EUR",
@@ -32,8 +32,14 @@ export const AddTransaction = (props: Props) => {
     },
   });
 
-  const onSubmit = async (data: AccountTransaction) => {
-    const amount = parseFloat(data.amount);
+  const onSubmit = async (data: {
+    amountForm: string;
+    concept: string;
+    type: string;
+    currency: string;
+    notes: string;
+  }) => {
+    const amountForm = parseFloat(data.amountForm);
     const concept = data.concept;
     const type = data.type;
     const currency = data.currency;
@@ -43,7 +49,7 @@ export const AddTransaction = (props: Props) => {
     await fetch("/api/accounts/transactions/", {
       method: "POST",
       body: JSON.stringify({
-        amount,
+        amount: amountForm,
         concept,
         type,
         currency,
@@ -74,18 +80,20 @@ export const AddTransaction = (props: Props) => {
           <div className="grid gap-4 py-4">
             {/* Amount */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">
+              <Label htmlFor="amountForm" className="text-right">
                 Import
               </Label>
               <Input
-                id="amount"
-                type="text"
+                id="amountForm"
+                type="number"
+                min="0"
+                step="0.01"
                 className="col-span-3"
-                {...register("amount", {
+                {...register("amountForm", {
                   required: true,
                 })}
               />
-              {errors.amount && <p>This field is required</p>}
+              {errors.amountForm && <p>This field is required</p>}
             </div>
             {/* Concept */}
             <div className="grid grid-cols-4 items-center gap-4">
