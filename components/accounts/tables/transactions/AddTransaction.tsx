@@ -11,16 +11,16 @@ import {
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AccountTransaction } from "@/types/Transaction";
 
-export const AddTransaction = () => {
+export const AddTransaction = ({ accountId }: { accountId: number }) => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      import: null,
+      import: 0,
       concept: "",
       type: "",
       currency: "EUR",
@@ -28,7 +28,31 @@ export const AddTransaction = () => {
     },
   });
 
-  // console.log(watch("example"));
+  const onSubmit = async (e: React.BaseSyntheticEvent) => {
+    const importValue = parseFloat(e.target.import.value);
+    const concept = e.target.concept.value;
+    const type = e.target.type.value;
+    const currency = e.target.currency.value;
+    const notes = e.target.notes.value;
+    const accountId = 10;
+
+    await fetch("/api/accounts/transactions/", {
+      method: "POST",
+      body: JSON.stringify({
+        import: importValue,
+        concept,
+        type,
+        currency,
+        notes,
+        accountId,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Close Modal & rerender table
+  };
 
   return (
     <Dialog>
@@ -42,11 +66,7 @@ export const AddTransaction = () => {
             Add a transaction to this account:
           </DialogDescription>
         </DialogHeader>
-        <form
-          onSubmit={handleSubmit((data) => {
-            alert(JSON.stringify(data));
-          })}
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
             {/* Import */}
             <div className="grid grid-cols-4 items-center gap-4">
@@ -55,6 +75,7 @@ export const AddTransaction = () => {
               </Label>
               <Input
                 id="import"
+                type="number"
                 className="col-span-3"
                 {...register("import", {
                   required: true,
@@ -69,6 +90,7 @@ export const AddTransaction = () => {
               </Label>
               <Input
                 id="concept"
+                type="text"
                 className="col-span-3"
                 {...register("concept", {
                   required: true,
@@ -83,6 +105,7 @@ export const AddTransaction = () => {
               </Label>
               <Input
                 id="type"
+                type="text"
                 className="col-span-3"
                 {...register("type", {
                   required: true,
@@ -97,6 +120,7 @@ export const AddTransaction = () => {
               </Label>
               <Input
                 id="currency"
+                type="text"
                 className="col-span-3"
                 defaultValue="EUR"
                 {...register("currency", {
@@ -110,7 +134,12 @@ export const AddTransaction = () => {
               <Label htmlFor="notes" className="text-right">
                 Notes
               </Label>
-              <Input id="notes" className="col-span-3" {...register("notes")} />
+              <Input
+                id="notes"
+                type="text"
+                className="col-span-3"
+                {...register("notes")}
+              />
             </div>
           </div>
           <DialogFooter>

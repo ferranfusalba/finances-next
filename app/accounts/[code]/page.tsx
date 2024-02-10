@@ -21,7 +21,8 @@ async function loadAccountTransactions(id: number) {
 
 export default async function AccountLayout({ params }: AccountParamsProps) {
   const account = await loadAccount({ params });
-  const accountTransactions = await loadAccountTransactions(account!.id);
+  const accountId = account.id;
+  const accountTransactions = await loadAccountTransactions(accountId);
 
   return (
     <>
@@ -39,7 +40,10 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <li>Account updatedAt: {account?.updatedAt.toString()}</li>
       </ol>
       <DeleteAccount params={params} />
-      <TransactionTable accountTransactions={accountTransactions} />
+      <TransactionTable
+        accountId={accountId}
+        accountTransactions={accountTransactions}
+      />
     </>
   );
 }
