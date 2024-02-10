@@ -16,7 +16,7 @@ export async function POST(request: any) {
       updatedAt: data.updatedAt,
       concept: data.concept,
       type: data.type,
-      import: data.import,
+      import: data.amount,
       currency: data.currency,
       notes: data.notes,
       accountId: data.accountId,

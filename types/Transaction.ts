@@ -4,6 +4,7 @@ interface Transaction {
   currency: string;
   id: number;
   import: number;
+  amount: string;
   notes: string;
   type: string;
   updatedAt: Date;

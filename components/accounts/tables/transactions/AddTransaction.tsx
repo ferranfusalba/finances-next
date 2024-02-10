@@ -13,14 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AccountTransaction } from "@/types/Transaction";
 
-export const AddTransaction = ({ accountId }: { accountId: number }) => {
+interface Props {
+  accountId: number;
+}
+
+export const AddTransaction = (props: Props) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      import: 0,
+      amount: 0,
       concept: "",
       type: "",
       currency: "EUR",
@@ -28,18 +32,18 @@ export const AddTransaction = ({ accountId }: { accountId: number }) => {
     },
   });
 
-  const onSubmit = async (e: React.BaseSyntheticEvent) => {
-    const importValue = parseFloat(e.target.import.value);
-    const concept = e.target.concept.value;
-    const type = e.target.type.value;
-    const currency = e.target.currency.value;
-    const notes = e.target.notes.value;
-    const accountId = 10;
+  const onSubmit = async (data: AccountTransaction) => {
+    const amount = parseFloat(data.amount);
+    const concept = data.concept;
+    const type = data.type;
+    const currency = data.currency;
+    const notes = data.notes;
+    const accountId = props.accountId;
 
     await fetch("/api/accounts/transactions/", {
       method: "POST",
       body: JSON.stringify({
-        import: importValue,
+        amount,
         concept,
         type,
         currency,
@@ -68,20 +72,20 @@ export const AddTransaction = ({ accountId }: { accountId: number }) => {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
-            {/* Import */}
+            {/* Amount */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="import" className="text-right">
+              <Label htmlFor="amount" className="text-right">
                 Import
               </Label>
               <Input
-                id="import"
-                type="number"
+                id="amount"
+                type="text"
                 className="col-span-3"
-                {...register("import", {
+                {...register("amount", {
                   required: true,
                 })}
               />
-              {errors.import && <p>This field is required</p>}
+              {errors.amount && <p>This field is required</p>}
             </div>
             {/* Concept */}
             <div className="grid grid-cols-4 items-center gap-4">
