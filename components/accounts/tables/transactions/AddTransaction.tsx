@@ -45,6 +45,7 @@ export const AddTransaction = (props: Props) => {
     const currency = data.currency;
     const notes = data.notes;
     const accountId = props.accountId;
+    const balance = 0;
 
     await fetch("/api/accounts/transactions/", {
       method: "POST",
@@ -55,6 +56,7 @@ export const AddTransaction = (props: Props) => {
         currency,
         notes,
         accountId,
+        balance,
       }),
       headers: {
         "Content-Type": "application/json",
