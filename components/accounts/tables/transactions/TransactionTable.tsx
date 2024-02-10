@@ -69,8 +69,10 @@ const columns = [
 ];
 
 export default function TransactionTable({
+  accountId,
   accountTransactions,
 }: {
+  accountId: number;
   accountTransactions: Array<AccountTransaction>;
 }) {
   const data = accountTransactions;
@@ -90,7 +92,7 @@ export default function TransactionTable({
       <hr />
       Level: {count}
       <hr />
-      <AddTransaction />
+      <AddTransaction accountId={accountId} />
       <hr />
       <br />
       <table>
