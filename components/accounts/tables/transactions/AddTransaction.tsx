@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,13 +12,14 @@ import {
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AccountTransaction } from "@/types/Transaction";
 
 interface Props {
   accountId: number;
 }
 
 export const AddTransaction = (props: Props) => {
+  const [open, setOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -61,13 +63,13 @@ export const AddTransaction = (props: Props) => {
       headers: {
         "Content-Type": "application/json",
       },
-    });
+    }).then(() => setOpen(false));
 
-    // Close Modal & rerender table
+    // TODO: Rerender table
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
