@@ -44,7 +44,7 @@ const columns = [
     header: "Type",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("import", {
+  columnHelper.accessor("amount", {
     cell: (info) => {
       const number = info.getValue();
 
@@ -55,7 +55,7 @@ const columns = [
 
       return <>{intlNumber}</>;
     },
-    header: "Import",
+    header: "Amount",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("currency", {

@@ -3,8 +3,8 @@ interface Transaction {
   createdAt: Date;
   currency: string;
   id: number;
-  import: number;
-  amount?: number;
+  amount: number;
+  balance: number;
   notes: string;
   type: string;
   updatedAt: Date;
