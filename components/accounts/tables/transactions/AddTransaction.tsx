@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,17 @@ import {
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface Props {
   accountId: number;
@@ -20,11 +31,24 @@ interface Props {
 export const AddTransaction = (props: Props) => {
   const [open, setOpen] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const formSchema = z.object({
+    amountForm: z.string().min(1, {
+      message: "Amount Type is required.",
+    }),
+    concept: z.string().min(1, {
+      message: "Concept Type is required.",
+    }),
+    type: z.string().min(1, {
+      message: "Transaction Type is required.",
+    }),
+    currency: z.string().min(3, {
+      message: "Currency code must be at least 3 characters.",
+    }),
+    notes: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       amountForm: "",
       concept: "",
@@ -34,18 +58,12 @@ export const AddTransaction = (props: Props) => {
     },
   });
 
-  const onSubmit = async (data: {
-    amountForm: string;
-    concept: string;
-    type: string;
-    currency: string;
-    notes: string;
-  }) => {
-    const amountForm = parseFloat(data.amountForm);
-    const concept = data.concept;
-    const type = data.type;
-    const currency = data.currency;
-    const notes = data.notes;
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const amountForm = parseFloat(values.amountForm);
+    const concept = values.concept;
+    const type = values.type;
+    const currency = values.currency;
+    const notes = values.notes;
     const accountId = props.accountId;
     const balance = 0;
 
@@ -64,8 +82,6 @@ export const AddTransaction = (props: Props) => {
         "Content-Type": "application/json",
       },
     }).then(() => setOpen(false));
-
-    // TODO: Rerender table
   };
 
   return (
@@ -80,88 +96,111 @@ export const AddTransaction = (props: Props) => {
             Add a transaction to this account:
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-4 py-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Amount */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amountForm" className="text-right">
-                Import
-              </Label>
-              <Input
-                id="amountForm"
-                type="number"
-                min="0"
-                step="0.01"
-                className="col-span-3"
-                {...register("amountForm", {
-                  required: true,
-                })}
-              />
-              {errors.amountForm && <p>This field is required</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="amountForm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="amountForm"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="399,99"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Concept */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="concept" className="text-right">
-                Concept
-              </Label>
-              <Input
-                id="concept"
-                type="text"
-                className="col-span-3"
-                {...register("concept", {
-                  required: true,
-                })}
-              />
-              {errors.concept && <p>This field is required</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="concept"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Concept</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="concept"
+                      type="text"
+                      placeholder="Groceries"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Type */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
-              </Label>
-              <Input
-                id="type"
-                type="text"
-                className="col-span-3"
-                {...register("type", {
-                  required: true,
-                })}
-              />
-              {errors.type && <p>This field is required</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="type"
+                      type="text"
+                      placeholder="EXPENSES"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Currency */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="currency" className="text-right">
-                Currency
-              </Label>
-              <Input
-                id="currency"
-                type="text"
-                className="col-span-3"
-                defaultValue="EUR"
-                {...register("currency", {
-                  required: true,
-                })}
-              />
-              {errors.currency && <p>This field is required</p>}
-            </div>
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="currency"
+                      type="text"
+                      placeholder="EUR"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Notes */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-right">
-                Notes
-              </Label>
-              <Input
-                id="notes"
-                type="text"
-                className="col-span-3"
-                {...register("notes")}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit">Save</Button>
-          </DialogFooter>
-        </form>
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="notes"
+                      type="text"
+                      placeholder="Mercadona"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>Optional field</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
