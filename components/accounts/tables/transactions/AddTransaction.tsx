@@ -10,6 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -42,7 +49,7 @@ export const AddTransaction = (props: Props) => {
       message: "Transaction Type is required.",
     }),
     currency: z.string().min(3, {
-      message: "Currency code must be at least 3 characters.",
+      message: "Currency code is required.",
     }),
     notes: z.string(),
   });
@@ -53,7 +60,7 @@ export const AddTransaction = (props: Props) => {
       amountForm: "",
       concept: "",
       type: "",
-      currency: "EUR",
+      currency: "",
       notes: "",
     },
   });
@@ -145,14 +152,21 @@ export const AddTransaction = (props: Props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Type</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="type"
-                      type="text"
-                      placeholder="EXPENSES"
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="INCOME">INCOME</SelectItem>
+                      <SelectItem value="EXPENSE">EXPENSE</SelectItem>
+                      <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -164,19 +178,26 @@ export const AddTransaction = (props: Props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Currency</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="currency"
-                      type="text"
-                      placeholder="EUR"
-                      {...field}
-                    />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a currency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                      <SelectItem value="CHF">CHF</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {/* Notes */}
             <FormField
               control={form.control}
               name="notes"
