@@ -62,6 +62,42 @@ const columns = [
     header: "Currency",
     footer: (info) => info.column.id,
   }),
+  columnHelper.accessor("balance", {
+    cell: (info) => {
+      const number = info.getValue();
+
+      const intlNumber = new Intl.NumberFormat("de-DE", {
+        // style: "currency",
+        // currency: "EUR",
+      }).format(number);
+
+      return <>{intlNumber}</>;
+    },
+    header: "Balance",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("currency", {
+    header: "Currency",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("amount", {
+    cell: (info) => {
+      const number = info.getValue();
+
+      const intlNumber = new Intl.NumberFormat("de-DE", {
+        // style: "currency",
+        // currency: "EUR",
+      }).format(number);
+
+      return <>{intlNumber}</>;
+    },
+    header: "Original Amount",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("currency", {
+    header: "Currency",
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("notes", {
     header: "Notes",
     footer: (info) => info.column.id,
