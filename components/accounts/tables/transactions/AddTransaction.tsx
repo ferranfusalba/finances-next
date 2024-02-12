@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -88,7 +89,12 @@ export const AddTransaction = (props: Props) => {
       headers: {
         "Content-Type": "application/json",
       },
-    }).then(() => setOpen(false));
+    }).then(() => {
+      setOpen(false);
+      toast(`Transaction for ${concept} has been added`, {
+        description: `${amountForm + " " + currency}`,
+      });
+    });
   };
 
   return (
@@ -137,7 +143,7 @@ export const AddTransaction = (props: Props) => {
                     <Input
                       id="concept"
                       type="text"
-                      placeholder="Groceries"
+                      placeholder="Frankfurt Airport Duty Free"
                       {...field}
                     />
                   </FormControl>
@@ -208,7 +214,7 @@ export const AddTransaction = (props: Props) => {
                     <Input
                       id="notes"
                       type="text"
-                      placeholder="Mercadona"
+                      placeholder="1x Water Bottle, 1x Niederegger Box"
                       {...field}
                     />
                   </FormControl>
