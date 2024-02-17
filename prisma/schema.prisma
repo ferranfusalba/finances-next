@@ -75,14 +75,14 @@ model FinancialAccountTransaction {
   payee     String            @default("")
   concept   String
   type      String
+  currency  String
   amount    Float
   balance   Float
-  currency  String
-  notes     String
-  location  String?
+  category  String?
   dateTime  DateTime          @default(now())
   timezone  String?
-  category  String?
+  location  String?
+  notes     String
   Account   FinancialAccount? @relation(fields: [accountId], references: [id])
   accountId Int
 }

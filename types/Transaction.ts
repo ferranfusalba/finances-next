@@ -1,13 +1,18 @@
 interface Transaction {
-  concept: string;
-  createdAt: Date;
-  currency: string;
   id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  payee: string;
+  concept: string;
+  type: string;
+  currency: string;
   amount: number;
   balance: number;
+  category: string;
+  dateTime: Date;
+  timezone: string;
+  location: string;
   notes: string;
-  type: string;
-  updatedAt: Date;
 }
 
 export interface AccountTransaction extends Transaction {
