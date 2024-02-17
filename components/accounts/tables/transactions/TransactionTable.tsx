@@ -117,14 +117,14 @@ const columns = [
     header: () => <span>Date & Time</span>,
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("timezone", {
-    header: "Timezone",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("location", {
-    header: "Location",
-    footer: (info) => info.column.id,
-  }),
+  // columnHelper.accessor("timezone", {
+  //   header: "Timezone",
+  //   footer: (info) => info.column.id,
+  // }),
+  // columnHelper.accessor("location", {
+  //   header: "Location",
+  //   footer: (info) => info.column.id,
+  // }),
   columnHelper.accessor("notes", {
     header: "Notes",
     footer: (info) => info.column.id,

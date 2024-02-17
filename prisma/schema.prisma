@@ -78,7 +78,7 @@ model FinancialAccountTransaction {
   currency  String
   amount    Float
   balance   Float
-  category  String?
+  category  String            @default("")
   dateTime  DateTime          @default(now())
   timezone  String?
   location  String?
