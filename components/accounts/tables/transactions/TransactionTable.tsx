@@ -33,6 +33,10 @@ const columns = [
   //   },
   //   footer: (info) => info.column.id,
   // }),
+  columnHelper.accessor("payee", {
+    header: () => <span>Payee</span>,
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
@@ -42,6 +46,11 @@ const columns = [
       return info.getValue();
     },
     header: "Type",
+    footer: (info) => info.column.id,
+  }),
+  // Default Currency Amount + Balance
+  columnHelper.accessor("currency", {
+    header: "Currency",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("amount", {
@@ -58,10 +67,6 @@ const columns = [
     header: "Amount",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("currency", {
-    header: "Currency",
-    footer: (info) => info.column.id,
-  }),
   columnHelper.accessor("balance", {
     cell: (info) => {
       const number = info.getValue();
@@ -76,26 +81,43 @@ const columns = [
     header: "Balance",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("currency", {
-    header: "Currency",
+  // IF Foreign Currency
+  // TODO: Change it for foreignCurrency
+  // columnHelper.accessor("currency", {
+  //   header: "Currency",
+  //   footer: (info) => info.column.id,
+  // }),
+  // TODO: Change it for foreignCurrencyAmount
+  // columnHelper.accessor("amount", {
+  //   cell: (info) => {
+  //     const number = info.getValue();
+
+  //     const intlNumber = new Intl.NumberFormat("de-DE", {
+  //       // style: "currency",
+  //       // currency: "EUR",
+  //     }).format(number);
+
+  //     return <>{intlNumber}</>;
+  //   },
+  //   header: "Original Amount",
+  //   footer: (info) => info.column.id,
+  // }),
+  // TODO: Add exchange rate?
+  // IF Foreign Currency ENDS
+  columnHelper.accessor("category", {
+    header: "Category",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("amount", {
-    cell: (info) => {
-      const number = info.getValue();
-
-      const intlNumber = new Intl.NumberFormat("de-DE", {
-        // style: "currency",
-        // currency: "EUR",
-      }).format(number);
-
-      return <>{intlNumber}</>;
-    },
-    header: "Original Amount",
+  columnHelper.accessor("dateTime", {
+    header: "Date & Time",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("currency", {
-    header: "Currency",
+  columnHelper.accessor("timezone", {
+    header: "Timezone",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("location", {
+    header: "Location",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("notes", {
