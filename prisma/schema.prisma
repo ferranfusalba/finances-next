@@ -72,12 +72,17 @@ model FinancialAccountTransaction {
   id        Int               @id @default(autoincrement())
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  payee     String            @default("")
   concept   String
   type      String
   amount    Float
   balance   Float
   currency  String
   notes     String
+  location  String?
+  dateTime  DateTime          @default(now())
+  timezone  String?
+  category  String?
   Account   FinancialAccount? @relation(fields: [accountId], references: [id])
   accountId Int
 }
