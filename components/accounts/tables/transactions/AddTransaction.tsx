@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +25,12 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Form,
   FormControl,
@@ -40,8 +49,8 @@ export const AddTransaction = (props: Props) => {
   const [open, setOpen] = useState(false);
 
   const formSchema = z.object({
-    amountForm: z.string().min(1, {
-      message: "Amount Type is required.",
+    payee: z.string().min(1, {
+      message: "A Payee is required.",
     }),
     concept: z.string().min(1, {
       message: "Concept Type is required.",
@@ -52,25 +61,44 @@ export const AddTransaction = (props: Props) => {
     currency: z.string().min(3, {
       message: "Currency code is required.",
     }),
+    amountForm: z.string().min(1, {
+      message: "Amount Type is required.",
+    }),
+    category: z.string(),
+    dateTime: z.date({
+      required_error: "Transaction Date is required.",
+    }),
+    timezone: z.string(),
+    location: z.string(),
     notes: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amountForm: "",
+      payee: "",
       concept: "",
       type: "",
       currency: "",
+      amountForm: "",
+      category: "",
+      dateTime: undefined,
+      timezone: "",
+      location: "",
       notes: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const amountForm = parseFloat(values.amountForm);
+    const payee = values.payee;
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
+    const amountForm = parseFloat(values.amountForm);
+    const category = values.category;
+    const dateTime = values.dateTime;
+    const timezone = values.timezone;
+    const location = values.location;
     const notes = values.notes;
     const accountId = props.accountId;
     const balance = 0;
@@ -78,10 +106,15 @@ export const AddTransaction = (props: Props) => {
     await fetch("/api/accounts/transactions/", {
       method: "POST",
       body: JSON.stringify({
-        amount: amountForm,
+        payee,
         concept,
         type,
         currency,
+        amount: amountForm,
+        category,
+        dateTime,
+        timezone,
+        location,
         notes,
         accountId,
         balance,
@@ -102,7 +135,7 @@ export const AddTransaction = (props: Props) => {
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[800px] h-max">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
@@ -111,118 +144,246 @@ export const AddTransaction = (props: Props) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Amount */}
-            <FormField
-              control={form.control}
-              name="amountForm"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="amountForm"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="399,99"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Concept */}
-            <FormField
-              control={form.control}
-              name="concept"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Concept</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="concept"
-                      type="text"
-                      placeholder="Frankfurt Airport Duty Free"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Type */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="INCOME">INCOME</SelectItem>
-                      <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                      <SelectItem value="TRANSFER">TRANSFER</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Currency */}
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Currency</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a currency" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
-                      <SelectItem value="CHF">CHF</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="notes"
-                      type="text"
-                      placeholder="1x Water Bottle, 1x Niederegger Box"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>Optional field</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-flow-col space-x-8">
+              <div className="space-y-4">
+                {/* Payee */}
+                <FormField
+                  control={form.control}
+                  name="payee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payee</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="payee"
+                          type="text"
+                          placeholder="PAYEE"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Concept */}
+                <FormField
+                  control={form.control}
+                  name="concept"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Concept</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="concept"
+                          type="text"
+                          placeholder="Frankfurt Airport Duty Free"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Type */}
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="INCOME">INCOME</SelectItem>
+                          <SelectItem value="EXPENSE">EXPENSE</SelectItem>
+                          <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Currency */}
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Currency</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="CAD">CAD</SelectItem>
+                          <SelectItem value="CHF">CHF</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Amount */}
+                <FormField
+                  control={form.control}
+                  name="amountForm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="amountForm"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="399,99"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Date & Time */}
+                <FormField
+                  control={form.control}
+                  name="dateTime"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date: Date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-4">
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="category"
+                          type="text"
+                          placeholder="CATEGORY"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Timezone */}
+                <FormField
+                  control={form.control}
+                  name="timezone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Timezone</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="timezone"
+                          type="text"
+                          placeholder="TIMEZONE"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Location */}
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="location"
+                          type="text"
+                          placeholder="LOCATION"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Notes */}
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="notes"
+                          type="text"
+                          placeholder="1x Water Bottle, 1x Niederegger Box"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <DialogFooter>
               <Button type="submit">Save</Button>
             </DialogFooter>
