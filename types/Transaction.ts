@@ -9,8 +9,8 @@ interface Transaction {
   amount: number;
   balance: number;
   dateTime: Date;
-  // timezone: string;
-  // location: string;
+  timezone?: string | null;
+  location?: string | null;
   notes: string;
   category: string;
 }

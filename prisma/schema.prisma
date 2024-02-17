@@ -80,8 +80,8 @@ model FinancialAccountTransaction {
   balance   Float
   category  String            @default("")
   dateTime  DateTime          @default(now())
-  timezone  String?
-  location  String?
+  timezone  String?           @default("")
+  location  String?           @default("")
   notes     String
   Account   FinancialAccount? @relation(fields: [accountId], references: [id])
   accountId Int
