@@ -44,7 +44,7 @@ export default async function RootLayout({
               {children}
             </ThemeProvider>
           </main>
-          <footer className="absolute bottom-0 w-full">
+          <footer className="fixed bottom-0 w-full">
             <TabBar />
           </footer>
         </SessionProvider>
