@@ -2,17 +2,17 @@ interface Transaction {
   id: number;
   createdAt: Date;
   updatedAt: Date;
-  payee?: string;
+  payee: string;
   concept: string;
   type: string;
   currency: string;
   amount: number;
   balance: number;
-  category?: string;
-  dateTime?: Date;
-  timezone?: string;
-  location?: string;
+  dateTime: Date;
+  // timezone: string;
+  // location: string;
   notes: string;
+  category: string;
 }
 // TODO: Review optional fields & implications (page AccountLayout)
 

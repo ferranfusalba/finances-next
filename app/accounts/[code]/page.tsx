@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
+import { AccountTransaction } from "@/types/Transaction";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
