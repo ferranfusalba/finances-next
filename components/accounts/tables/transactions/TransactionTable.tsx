@@ -1,10 +1,11 @@
 "use client";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import "./index.css";
 import { useCounterStore } from "@/store/counterStore";
@@ -108,8 +109,12 @@ const columns = [
     header: "Category",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor("dateTime", {
-    header: "Date & Time",
+  columnHelper.accessor((row) => row.dateTime, {
+    id: "dateTime",
+    cell: (info) => {
+      return <i>{info.getValue().toLocaleString("ca")}</i>;
+    },
+    header: () => <span>Date & Time</span>,
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("timezone", {
@@ -134,6 +139,18 @@ export default function TransactionTable({
   accountTransactions: Array<AccountTransaction>;
 }) {
   const data = accountTransactions;
+
+  type ColumnSort = {
+    id: string;
+    desc: boolean;
+  };
+
+  type SortingState = ColumnSort[];
+
+  // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "createdAt", desc: false },
+  ]);
   const rerender = useReducer(() => ({}), {})[1];
 
   const count = useCounterStore((state) => state.count);
@@ -142,6 +159,11 @@ export default function TransactionTable({
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
   });
 
