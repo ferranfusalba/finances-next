@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
-import { AccountTransaction } from "@/types/Transaction";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
@@ -34,6 +33,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <li>Account id (account): {account?.id}</li>
         <li>Account order (account): {account?.order}</li>
         <li>Account name: {account?.name}</li>
+        <li>Account bankName: {account?.bankName}</li>
         <li>Account active: {account?.active?.toString()}</li>
         <li>Account type: {account?.type?.toString()}</li>
         <li>Account description: {account?.description}</li>
