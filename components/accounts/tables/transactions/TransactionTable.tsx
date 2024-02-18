@@ -8,10 +8,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import "./index.css";
-import { useCounterStore } from "@/store/counterStore";
 import { AccountTransaction } from "@/types/Transaction";
-import { AddTransaction } from "./AddTransaction";
-import { Account } from "@/types/Account";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
@@ -133,14 +130,8 @@ const columns = [
 ];
 
 export default function TransactionTable({
-  account,
-  accountId,
-  accountCode,
   accountTransactions,
 }: {
-  account: Account | null;
-  accountId: number;
-  accountCode: string;
   accountTransactions: Array<AccountTransaction>;
 }) {
   const data = accountTransactions;
@@ -158,9 +149,6 @@ export default function TransactionTable({
   ]);
   const rerender = useReducer(() => ({}), {})[1];
 
-  const count = useCounterStore((state) => state.count);
-  const { increment } = useCounterStore();
-
   const table = useReactTable({
     data,
     columns,
@@ -174,16 +162,6 @@ export default function TransactionTable({
 
   return (
     <div className="p-2">
-      <hr />
-      Level: {count}
-      <hr />
-      <AddTransaction
-        account={account}
-        accountId={accountId}
-        accountCode={accountCode}
-      />
-      <hr />
-      <br />
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
