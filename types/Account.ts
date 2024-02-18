@@ -6,6 +6,7 @@ export interface Account {
   description: string | null;
   id: number;
   initialBalance: number | null;
+  currentBalance: number | null;
   name: string;
   code: string;
   type: string | null;
