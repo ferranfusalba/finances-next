@@ -2,6 +2,9 @@ import { db } from "@/lib/db";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
+import { AddTransaction } from "@/components/accounts/tables/transactions/AddTransaction";
+import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
@@ -27,29 +30,41 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
 
   return (
     <>
-      <ol>
-        <li>Account code (params): {params.code}</li>
-        <li>Account code (account): {account?.code}</li>
-        <li>Account id (account): {account?.id}</li>
-        <li>Account order (account): {account?.order}</li>
-        <li>Account name: {account?.name}</li>
-        <li>Account bankName: {account?.bankName}</li>
-        <li>Account active: {account?.active?.toString()}</li>
-        <li>Account type: {account?.type?.toString()}</li>
-        <li>Account description: {account?.description}</li>
-        <li>Account defaultCurrency: {account?.defaultCurrency}</li>
-        <li>Account initialBalance: {account?.initialBalance?.toString()}</li>
-        <li>Account currentBalance: {account?.currentBalance?.toString()}</li>
-        <li>Account createdAt: {account?.createdAt.toString()}</li>
-        <li>Account updatedAt: {account?.updatedAt.toString()}</li>
-      </ol>
-      <DeleteAccount params={params} />
-      <TransactionTable
-        account={account}
-        accountId={accountId}
-        accountCode={accountCode}
-        accountTransactions={accountTransactions}
-      />
+      <div className="grid grid-cols-12">
+        <div className="col-span-1">
+          <Avatar>
+            {/* // TODO: Build image & bankCode matchers */}
+            {/* <AvatarImage src="https://images.unsplash.com/photo-1708022792768-edfab8b2be7a?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" /> */}
+            <AvatarFallback>{account?.bankName[0]}</AvatarFallback>
+          </Avatar>
+        </div>
+        <div className="col-span-10">
+          <span>{account?.bankName}</span>
+          <div>
+            <span>{account?.name}</span>
+            <span>{account?.code}</span>
+          </div>
+          <div>
+            <span>{account?.type}</span>
+            <span>{account?.defaultCurrency}</span>
+            <span>{account?.currentBalance}</span>
+          </div>
+        </div>
+        <div className="col-span-1">
+          <DeleteAccount params={params} />
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <ZustandClient></ZustandClient>
+        <AddTransaction
+          account={account}
+          accountId={accountId}
+          accountCode={accountCode}
+        />
+      </div>
+      <div>
+        <TransactionTable accountTransactions={accountTransactions} />
+      </div>
     </>
   );
 }
