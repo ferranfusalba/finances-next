@@ -2,6 +2,7 @@ import { AccountTransaction } from "./Transaction";
 
 export interface Account {
   active: boolean | null;
+  bankName: string;
   createdAt: Date;
   description: string | null;
   id: number;
