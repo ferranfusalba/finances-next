@@ -40,12 +40,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 
 interface Props {
   accountId: number;
 }
 
 export const AddTransaction = (props: Props) => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   const formSchema = z.object({
@@ -90,6 +92,8 @@ export const AddTransaction = (props: Props) => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const balanceForm = 100;
+
     const payee = values.payee;
     const concept = values.concept;
     const type = values.type;
@@ -101,7 +105,7 @@ export const AddTransaction = (props: Props) => {
     const location = values.location;
     const notes = values.notes;
     const accountId = props.accountId;
-    const balance = 0;
+    const balance = amountForm + balanceForm;
 
     await fetch("/api/accounts/transactions/", {
       method: "POST",
@@ -127,6 +131,7 @@ export const AddTransaction = (props: Props) => {
       toast(`Transaction for ${concept} has been added`, {
         description: `${amountForm + " " + currency}`,
       });
+      router.refresh();
     });
   };
 
