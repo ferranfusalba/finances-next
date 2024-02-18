@@ -18,6 +18,8 @@ export default function NewAccountForm(props: Props) {
     const type = e.target.type.value;
     const description = e.target.description.value;
     const initialBalance = parseFloat(e.target.initialBalance.value);
+    const currentBalance = initialBalance; // TODO: Add this field to the form & update this field handling
+    const defaultCurrency = "EUR"; // TODO: Add this field to the form
     const userId = props.userId.id;
 
     const res = await fetch("/api/accounts/", {
@@ -29,6 +31,8 @@ export default function NewAccountForm(props: Props) {
         type,
         description,
         initialBalance,
+        currentBalance,
+        defaultCurrency,
         userId,
       }),
       headers: {
