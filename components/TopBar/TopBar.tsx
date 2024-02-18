@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LogoutButtonClient from "./LogoutButtonClient";
 import { currentUser } from "@/lib/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const TopBar = async () => {
   const user = await currentUser();
@@ -18,12 +19,10 @@ const TopBar = async () => {
             <p>
               {user?.name} - {user?.email}
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={user.image!}
-              alt="Profile picture"
-              className="w-10 h-10 rounded-full cursor-pointer"
-            />
+            <Avatar>
+              <AvatarImage src={user.image!} />
+              <AvatarFallback>{user.name![0]}</AvatarFallback>
+            </Avatar>
             <LogoutButtonClient />
           </>
         ) : (
