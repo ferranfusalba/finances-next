@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -52,6 +52,7 @@ interface Props {
 export const AddTransaction = (props: Props) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -110,41 +111,43 @@ export const AddTransaction = (props: Props) => {
     const accountId = props.accountId;
     const balance = balanceOnAccount + amountForm;
 
-    await fetch(`/api/accounts/${accountId}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        currentBalance: balance,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    await fetch("/api/accounts/transactions/", {
-      method: "POST",
-      body: JSON.stringify({
-        payee,
-        concept,
-        type,
-        currency,
-        amount: amountForm,
-        category,
-        dateTime,
-        timezone,
-        location,
-        notes,
-        accountId,
-        balance,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then(() => {
-      setOpen(false);
-      toast(`Transaction for ${concept} has been added`, {
-        description: `${amountForm + " " + currency}`,
+    startTransition(async () => {
+      await fetch(`/api/accounts/${accountId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          currentBalance: balance,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      router.refresh();
+
+      await fetch("/api/accounts/transactions/", {
+        method: "POST",
+        body: JSON.stringify({
+          payee,
+          concept,
+          type,
+          currency,
+          amount: amountForm,
+          category,
+          dateTime,
+          timezone,
+          location,
+          notes,
+          accountId,
+          balance,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(() => {
+        setOpen(false);
+        toast(`Transaction for ${concept} has been added`, {
+          description: `${amountForm + " " + currency}`,
+        });
+        router.refresh();
+      });
     });
   };
 
@@ -402,7 +405,9 @@ export const AddTransaction = (props: Props) => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Save</Button>
+              <Button type="submit" disabled={isPending}>
+                Save
+              </Button>
             </DialogFooter>
           </form>
         </Form>
