@@ -106,6 +106,7 @@ model FinancialAccount {
   order           Int                           @default(autoincrement())
   name            String
   code            String                        @unique
+  bankName        String                        @default("")
   active          Boolean
   type            String
   description     String?
