@@ -41,9 +41,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
+import { Account } from "@/types/Account";
 
 interface Props {
   accountId: number;
+  accountCode: string;
+  account: Account | null;
 }
 
 export const AddTransaction = (props: Props) => {
@@ -92,7 +95,7 @@ export const AddTransaction = (props: Props) => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const balanceForm = 100;
+    const balanceOnAccount = props.account!.currentBalance;
 
     const payee = values.payee;
     const concept = values.concept;
@@ -105,7 +108,17 @@ export const AddTransaction = (props: Props) => {
     const location = values.location;
     const notes = values.notes;
     const accountId = props.accountId;
-    const balance = amountForm + balanceForm;
+    const balance = balanceOnAccount + amountForm;
+
+    await fetch(`/api/accounts/${accountId}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        currentBalance: balance,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     await fetch("/api/accounts/transactions/", {
       method: "POST",
@@ -253,7 +266,6 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="amountForm"
                           type="number"
-                          min="0"
                           step="0.01"
                           placeholder="399,99"
                           {...field}
