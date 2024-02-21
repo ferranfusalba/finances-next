@@ -161,7 +161,7 @@ export default function TransactionTable({
   });
 
   return (
-    <div className="p-2">
+    <>
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -211,6 +211,6 @@ export default function TransactionTable({
       <button onClick={() => rerender()} className="border p-2">
         Rerender
       </button>
-    </div>
+    </>
   );
 }
