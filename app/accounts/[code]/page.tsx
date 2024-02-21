@@ -28,33 +28,47 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
 
+  let euro = new Intl.NumberFormat("ca-AD", {
+    style: "currency",
+    currency: "EUR",
+  });
+
   return (
     <>
-      <div className="grid grid-cols-12">
-        <div className="col-span-1">
+      <div className="grid grid-cols-12 py-6">
+        <div className="col-span-1 grid justify-center content-center">
           <Avatar>
             {/* // TODO: Build image & bankCode matchers */}
             {/* <AvatarImage src="https://images.unsplash.com/photo-1708022792768-edfab8b2be7a?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" /> */}
             <AvatarFallback>{account?.bankName[0]}</AvatarFallback>
           </Avatar>
         </div>
-        <div className="col-span-10">
-          <span>{account?.bankName}</span>
+        <div className="col-span-10 grid gap-2">
+          <span className="text-2xl">{account?.bankName}</span>
           <div>
+            <span className="font-mono p-1 bg-slate-100 v rounded-md text-stone-900">
+              {account?.code}
+            </span>
+            <span> </span>
             <span>{account?.name}</span>
-            <span>{account?.code}</span>
           </div>
           <div>
+            <span className="font-mono p-1 bg-blue-800 v rounded-md text-amber-300">
+              {account?.defaultCurrency}
+            </span>
+            <span> </span>
             <span>{account?.type}</span>
-            <span>{account?.defaultCurrency}</span>
-            <span>{account?.currentBalance}</span>
+            <span> </span>
+            <span className="font-mono">
+              {euro.format(account?.currentBalance as number)}
+            </span>
           </div>
         </div>
-        <div className="col-span-1">
+        <div className="col-span-1 grid justify-center content-center bg-red-900 rounded-lg border">
           <DeleteAccount params={params} />
         </div>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between py-2">
         <ZustandClient></ZustandClient>
         <AddTransaction
           account={account}
@@ -62,7 +76,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
           accountCode={accountCode}
         />
       </div>
-      <div>
+      <div className="py-2">
         <TransactionTable accountTransactions={accountTransactions} />
       </div>
     </>
