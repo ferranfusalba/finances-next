@@ -64,7 +64,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
             </span>
           </div>
         </div>
-        <div className="col-span-1 grid justify-center content-center bg-red-900 rounded-lg border">
+        <div className="col-span-1 grid justify-center content-center">
           <DeleteAccount params={params} />
         </div>
       </div>
