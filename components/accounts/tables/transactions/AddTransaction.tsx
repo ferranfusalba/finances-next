@@ -178,7 +178,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="payee"
                           type="text"
-                          placeholder="PAYEE"
+                          placeholder="ZRH Duty Free"
                           {...field}
                         />
                       </FormControl>
@@ -197,7 +197,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="concept"
                           type="text"
-                          placeholder="Frankfurt Airport Duty Free"
+                          placeholder="1x Basler Läckerli Huus, 1x Sprüngli Box"
                           {...field}
                         />
                       </FormControl>
@@ -270,7 +270,7 @@ export const AddTransaction = (props: Props) => {
                           id="amountForm"
                           type="number"
                           step="0.01"
-                          placeholder="399,99"
+                          placeholder="34,50"
                           {...field}
                         />
                       </FormControl>
@@ -333,7 +333,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="category"
                           type="text"
-                          placeholder="CATEGORY"
+                          placeholder="Gifts"
                           {...field}
                         />
                       </FormControl>
@@ -353,7 +353,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="timezone"
                           type="text"
-                          placeholder="TIMEZONE"
+                          placeholder="UTC+01:00"
                           {...field}
                         />
                       </FormControl>
@@ -373,7 +373,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="location"
                           type="text"
-                          placeholder="LOCATION"
+                          placeholder="Zürich Airport, Kloten, CH"
                           {...field}
                         />
                       </FormControl>
@@ -393,7 +393,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="notes"
                           type="text"
-                          placeholder="1x Water Bottle, 1x Niederegger Box"
+                          placeholder="Invoice Ref.: #123456"
                           {...field}
                         />
                       </FormControl>
