@@ -34,11 +34,11 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   });
 
   return (
-    <>
+    <div className="m-auto w-full xl:w-9/12">
       <div className="grid grid-cols-12 py-6">
         <div className="col-span-1 grid justify-center content-center">
           <Avatar>
-            {/* // TODO: Build image & bankCode matchers */}
+            {/* TODO: Build image & bankCode matchers */}
             {/* <AvatarImage src="https://images.unsplash.com/photo-1708022792768-edfab8b2be7a?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" /> */}
             <AvatarFallback>{account?.bankName[0]}</AvatarFallback>
           </Avatar>
@@ -79,6 +79,6 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
       <div className="py-2">
         <TransactionTable accountTransactions={accountTransactions} />
       </div>
-    </>
+    </div>
   );
 }
