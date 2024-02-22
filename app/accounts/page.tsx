@@ -1,3 +1,7 @@
 export default function AccountsPage() {
-  return <h1>Select an account</h1>;
+  return (
+    <div className="w-full h-full grid justify-center content-center">
+      Select an account
+    </div>
+  );
 }
