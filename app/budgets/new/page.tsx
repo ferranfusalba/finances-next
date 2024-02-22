@@ -11,7 +11,7 @@ export default async function NewBudget() {
 
   return (
     <>
-      New Budget
+      <h2 className="text-center py-6">New Budget</h2>
       <NewBudgetForm userId={userId as User} />
     </>
   );

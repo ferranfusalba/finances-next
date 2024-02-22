@@ -11,7 +11,7 @@ export default async function NewAccount() {
 
   return (
     <>
-      New Account
+      <h2 className="text-center py-6">New Account</h2>
       <NewAccountForm userId={userId as User} />
     </>
   );
