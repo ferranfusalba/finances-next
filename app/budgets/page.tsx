@@ -1,3 +1,7 @@
 export default function BudgetsPage() {
-  return <h1>Select a budget</h1>;
+  return (
+    <div className="w-full h-full grid justify-center content-center">
+      Select a budget
+    </div>
+  );
 }

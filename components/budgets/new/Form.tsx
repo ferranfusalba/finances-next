@@ -1,6 +1,22 @@
 "use client";
+import { useTransition } from "react";
 import { User } from "@/types/User";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   userId: User;
@@ -8,101 +24,176 @@ type Props = {
 
 export default function NewBudgetForm(props: Props) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = async (e: React.BaseSyntheticEvent) => {
-    e.preventDefault();
+  const formSchema = z.object({
+    name: z.string().min(1, {
+      message: "Budget Name is required.",
+    }),
+    code: z.string().min(1, {
+      message: "Budget Code is required.",
+    }),
+    type: z.string().min(1, {
+      message: "Budget Type is required.",
+    }),
+    description: z.string(),
+    initialBalance: z.string().min(1, {
+      message: "Initial Balance is required.",
+    }),
+  });
 
-    const name = e.target.name.value;
-    const code = e.target.code.value;
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      code: "",
+      type: "",
+      description: "",
+      initialBalance: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const name = values.name;
+    const code = values.code;
     const active = true;
-    const type = e.target.type.value;
-    const description = e.target.description.value;
-    const initialBalance = parseFloat(e.target.initialBalance.value);
+    const type = values.type;
+    const description = values.description;
+    const initialBalance = parseFloat(values.initialBalance);
     const userId = props.userId.id;
 
-    const res = await fetch("/api/budgets/", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        code,
-        active,
-        type,
-        description,
-        initialBalance,
-        userId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+    startTransition(async () => {
+      const res = await fetch("/api/budgets/", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          code,
+          active,
+          type,
+          description,
+          initialBalance,
+          userId,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      router.push("/budgets/" + data.id);
+      router.refresh();
     });
-
-    const data = await res.json();
-
-    router.push("/budgets/" + data.id);
-    router.refresh();
   };
 
   return (
     <div className="h-full flex justify-center items-center">
-      <form className="bg-slate-800" onSubmit={handleSubmit}>
-        {/* Name */}
-        <label htmlFor="name" className="font-bold text-sm">
-          Budget Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          className="border border-gray-400 p-2 mb-4 w-full text-black"
-          placeholder="Budget Name"
-        />
-        {/* Code */}
-        <label htmlFor="code" className="font-bold text-sm">
-          Code
-        </label>
-        <input
-          type="text"
-          id="code"
-          className="border border-gray-400 p-2 mb-4 w-full text-black"
-          placeholder="Code"
-        />
-        {/* Type */}
-        <label htmlFor="type" className="font-bold text-sm">
-          Type
-        </label>
-        <input
-          type="text"
-          id="type"
-          className="border border-gray-400 p-2 mb-4 w-full text-black"
-          placeholder="Type"
-        />
-        {/* Description */}
-        <label htmlFor="description" className="font-bold text-sm">
-          Description (optional)
-        </label>
-        <textarea
-          rows={3}
-          name=""
-          id="description"
-          className="border border-gray-400 p-2 mb-4 w-full text-black"
-          placeholder="Description"
-        ></textarea>
-        {/* Initial Balance */}
-        <label htmlFor="initialBalance" className="font-bold text-sm">
-          Initial Balance
-        </label>
-        <input
-          type="number"
-          id="initialBalance"
-          min="0"
-          step="0.01"
-          className="border border-gray-400 p-2 mb-4 w-full text-black"
-          placeholder="Initial Balance"
-        />
-        {/* Send Button */}
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Add
-        </button>
-      </form>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 min-w-96"
+        >
+          {/* Budget Name */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Budget Name</FormLabel>
+                <FormControl>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Budget Name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Code */}
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Budget Code</FormLabel>
+                <FormControl>
+                  <Input
+                    id="code"
+                    type="text"
+                    placeholder="Budget Code"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Type */}
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Budget Type</FormLabel>
+                <FormControl>
+                  <Input
+                    id="type"
+                    type="text"
+                    placeholder="Budget Type"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Description */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Description"
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>Optional field</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Initial Balance */}
+          <FormField
+            control={form.control}
+            name="initialBalance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Initial Balance</FormLabel>
+                <FormControl>
+                  <Input
+                    id="initialBalance"
+                    type="number"
+                    step="0.01"
+                    placeholder="Initial Balance"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isPending}>
+            Add
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
