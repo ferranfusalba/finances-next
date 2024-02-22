@@ -27,6 +27,9 @@ export default function NewAccountForm(props: Props) {
   const [isPending, startTransition] = useTransition();
 
   const formSchema = z.object({
+    bankName: z.string().min(1, {
+      message: "Bank Name is required.",
+    }),
     name: z.string().min(1, {
       message: "Account Name is required.",
     }),
@@ -45,6 +48,7 @@ export default function NewAccountForm(props: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      bankName: "",
       name: "",
       code: "",
       type: "",
@@ -54,6 +58,7 @@ export default function NewAccountForm(props: Props) {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const bankName = values.bankName;
     const name = values.name;
     const code = values.code;
     const active = true;
@@ -68,6 +73,7 @@ export default function NewAccountForm(props: Props) {
       const res = await fetch("/api/accounts/", {
         method: "POST",
         body: JSON.stringify({
+          bankName,
           name,
           code,
           active,
@@ -97,7 +103,26 @@ export default function NewAccountForm(props: Props) {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 min-w-96"
         >
-          {/* Name */}
+          {/* Bank Name */}
+          <FormField
+            control={form.control}
+            name="bankName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bank Name</FormLabel>
+                <FormControl>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Bank Name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Account Name */}
           <FormField
             control={form.control}
             name="name"

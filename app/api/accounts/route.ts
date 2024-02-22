@@ -12,6 +12,7 @@ export async function POST(request: any) {
   const newAccount = await db.financialAccount.create({
     data: {
       active: data.active,
+      bankName: data.bankName,
       code: data.code,
       createdAt: data.createdAt,
       description: data.description,
