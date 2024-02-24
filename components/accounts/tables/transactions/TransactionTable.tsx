@@ -164,7 +164,7 @@ export default function TransactionTable({
   });
 
   return (
-    <>
+    <div className="flex flex-col overflow-auto flex-nowrap scroll-touch">
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -214,6 +214,6 @@ export default function TransactionTable({
       <button onClick={() => rerender()} className="border p-2">
         Rerender
       </button>
-    </>
+    </div>
   );
 }
