@@ -137,6 +137,8 @@ export const AddTransaction = (props: Props) => {
           currency,
           amount: amountForm,
           category,
+          subcategory,
+          tags,
           dateTime,
           timezone,
           location,
