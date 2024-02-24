@@ -24,6 +24,7 @@
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
+    "@react-spring/web": "^9.7.3",
     "@tanstack/react-table": "^8.10.7",
     "@visx/visx": "^3.4.0",
     "bcryptjs": "^2.4.3",

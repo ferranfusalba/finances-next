@@ -1,15 +1,15 @@
 "use client";
-import AreaClosed from "@/components/data/graphics/AreaClosed/AreaClosed";
+import Pie from "@/components/data/graphics/Pie";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 
-export default function DataGlobalLayout() {
+export default function DataAssetAllocationLayout() {
   const windowDimensions = useWindowDimensions();
 
   return (
     <>
       Data Asset Allocation from own page
       <br />
-      <AreaClosed
+      <Pie
         width={Number(windowDimensions.width)}
         height={Number(windowDimensions.height)}
       />

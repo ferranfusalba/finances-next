@@ -27,8 +27,12 @@ export default async function DataTopMenu() {
       name: "Income & Expenses Inception",
     },
     {
-      id: "net-worth-evolution",
-      name: "Net Worth Evolution",
+      id: "net-worth-year",
+      name: "Net Worth 2024",
+    },
+    {
+      id: "net-worth",
+      name: "Net Worth Inception",
     },
   ];
   return (

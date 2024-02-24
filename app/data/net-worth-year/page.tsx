@@ -1,15 +1,15 @@
 "use client";
-import BarGroup from "@/components/data/graphics/BarGroup";
+import AreaClosed from "@/components/data/graphics/AreaClosed";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 
-export default function DataIncomeExpensesInceptionLayout() {
+export default function DataNetWorthYearLayout() {
   const windowDimensions = useWindowDimensions();
 
   return (
     <>
-      Data Income v. Expenses (Inception) from own page
+      Data Net Worth (year) from own page
       <br />
-      <BarGroup
+      <AreaClosed
         width={Number(windowDimensions.width)}
         height={Number(windowDimensions.height)}
       />
