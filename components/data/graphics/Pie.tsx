@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { useState } from "react";
 import Pie, { ProvidedProps, PieArcDatum } from "@visx/shape/lib/shapes/Pie";
 import { scaleOrdinal } from "@visx/scale";
