@@ -69,22 +69,24 @@ model PasswordResetToken {
 }
 
 model FinancialAccountTransaction {
-  id        Int               @id @default(autoincrement())
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  payee     String            @default("")
-  concept   String
-  type      String
-  currency  String
-  amount    Float
-  balance   Float
-  category  String            @default("")
-  dateTime  DateTime          @default(now())
-  timezone  String?           @default("")
-  location  String?           @default("")
-  notes     String
-  Account   FinancialAccount? @relation(fields: [accountId], references: [id])
-  accountId Int
+  id          Int               @id @default(autoincrement())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  payee       String            @default("")
+  concept     String
+  type        String
+  currency    String
+  amount      Float
+  balance     Float
+  category    String            @default("")
+  subcategory String?           @default("")
+  tags        String?           @default("")
+  dateTime    DateTime          @default(now())
+  timezone    String?           @default("")
+  location    String?           @default("")
+  notes       String
+  Account     FinancialAccount? @relation(fields: [accountId], references: [id])
+  accountId   Int
 }
 
 model BudgetTransaction {

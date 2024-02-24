@@ -71,6 +71,8 @@ export const AddTransaction = (props: Props) => {
       message: "Amount Type is required.",
     }),
     category: z.string(),
+    subcategory: z.string(),
+    tags: z.string(),
     dateTime: z.date({
       required_error: "Transaction Date is required.",
     }),
@@ -88,6 +90,8 @@ export const AddTransaction = (props: Props) => {
       currency: "",
       amountForm: "",
       category: "",
+      subcategory: "",
+      tags: "",
       dateTime: undefined,
       timezone: "",
       location: "",
@@ -104,6 +108,8 @@ export const AddTransaction = (props: Props) => {
     const currency = values.currency;
     const amountForm = parseFloat(values.amountForm);
     const category = values.category;
+    const subcategory = values.subcategory;
+    const tags = values.tags;
     const dateTime = values.dateTime;
     const timezone = values.timezone;
     const location = values.location;
@@ -333,7 +339,47 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="category"
                           type="text"
-                          placeholder="Gifts"
+                          placeholder="Digital Subscriptions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Subcategory */}
+                <FormField
+                  control={form.control}
+                  name="subcategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subcategory</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="subcategory"
+                          type="text"
+                          placeholder="HBO Max"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Optional field</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Tags */}
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="tags"
+                          type="text"
+                          placeholder="Digital Subscriptions, HBO Max"
                           {...field}
                         />
                       </FormControl>
