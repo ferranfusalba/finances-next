@@ -7,7 +7,7 @@ export default function DataGlobalLayout() {
 
   return (
     <>
-      Data Global from own page
+      Data Income v. Expenses (Inception) from own page
       <br />
       <AreaClosed
         width={Number(windowDimensions.width)}
