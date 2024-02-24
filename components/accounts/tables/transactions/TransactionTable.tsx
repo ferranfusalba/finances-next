@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import "./index.css";
 import { AccountTransaction } from "@/types/Transaction";
+import { currency } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
@@ -47,7 +48,6 @@ const columns = [
     header: "Type",
     footer: (info) => info.column.id,
   }),
-  // Default Currency Amount + Balance
   columnHelper.accessor("currency", {
     header: "Currency",
     footer: (info) => info.column.id,
@@ -56,12 +56,7 @@ const columns = [
     cell: (info) => {
       const number = info.getValue();
 
-      const intlNumber = new Intl.NumberFormat("de-DE", {
-        // style: "currency",
-        // currency: "EUR",
-      }).format(number);
-
-      return <>{intlNumber}</>;
+      return <>{currency("ca-AD", "EUR").format(number)}</>;
     },
     header: "Amount",
     footer: (info) => info.column.id,
@@ -70,41 +65,49 @@ const columns = [
     cell: (info) => {
       const number = info.getValue();
 
-      const intlNumber = new Intl.NumberFormat("de-DE", {
-        // style: "currency",
-        // currency: "EUR",
-      }).format(number);
-
-      return <>{intlNumber}</>;
+      return <>{currency("ca-AD", "EUR").format(number)}</>;
     },
     header: "Balance",
     footer: (info) => info.column.id,
   }),
-  // IF Foreign Currency
-  // TODO: Change it for foreignCurrency
-  // columnHelper.accessor("currency", {
-  //   header: "Currency",
-  //   footer: (info) => info.column.id,
-  // }),
-  // TODO: Change it for foreignCurrencyAmount
-  // columnHelper.accessor("amount", {
-  //   cell: (info) => {
-  //     const number = info.getValue();
+  columnHelper.accessor("foreignCurrency", {
+    header: "Foreign Currency",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("foreignCurrencyAmount", {
+    cell: (info) => {
+      const number = info.getValue();
+      const foreignCurrency = info.row.original?.foreignCurrency;
 
-  //     const intlNumber = new Intl.NumberFormat("de-DE", {
-  //       // style: "currency",
-  //       // currency: "EUR",
-  //     }).format(number);
+      if (foreignCurrency) {
+        return (
+          <>
+            {currency("ca-AD", foreignCurrency as string).format(
+              number as number
+            )}
+          </>
+        );
+      }
 
-  //     return <>{intlNumber}</>;
-  //   },
-  //   header: "Original Amount",
-  //   footer: (info) => info.column.id,
-  // }),
-  // TODO: Add exchange rate?
-  // IF Foreign Currency ENDS
+      return <></>;
+    },
+    header: "Foreign Currency Amount",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("foreignCurrencyExchangeRate", {
+    header: "Exchange Rate",
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("category", {
     header: "Category",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("subcategory", {
+    header: "Subcategory",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("tags", {
+    header: "Tags",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor((row) => row.dateTime, {

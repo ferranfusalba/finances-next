@@ -5,6 +5,7 @@ import TransactionTable from "@/components/accounts/tables/transactions/Transact
 import { AddTransaction } from "@/components/accounts/tables/transactions/AddTransaction";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { currency } from "@/lib/utils";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
@@ -27,11 +28,6 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   const accountId = account!.id;
   const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
-
-  let euro = new Intl.NumberFormat("ca-AD", {
-    style: "currency",
-    currency: "EUR",
-  });
 
   return (
     <div className="m-auto w-full xl:w-9/12">
@@ -60,7 +56,9 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
             <span>{account?.type}</span>
             <span> </span>
             <span className="font-mono">
-              {euro.format(account?.currentBalance as number)}
+              {currency("ca-AD", "EUR").format(
+                account?.currentBalance as number
+              )}
             </span>
           </div>
         </div>
