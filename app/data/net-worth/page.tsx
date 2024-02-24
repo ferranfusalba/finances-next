@@ -1,15 +1,15 @@
 "use client";
-import AreaClosed from "@/components/data/graphics/AreaClosed/AreaClosed";
+import Brush from "@/components/data/graphics/Brush";
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 
-export default function DataGlobalLayout() {
+export default function DataNetWorthInceptionLayout() {
   const windowDimensions = useWindowDimensions();
 
   return (
     <>
-      Data Net Worth Evolution from own page
+      Data Net Worth (Inception) from own page
       <br />
-      <AreaClosed
+      <Brush
         width={Number(windowDimensions.width)}
         height={Number(windowDimensions.height)}
       />
