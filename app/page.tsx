@@ -26,7 +26,7 @@ export default async function Home() {
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
         <p>user.email: {user?.email}</p>
-        <p>user.password: {user?.password}</p>
+        {/* <p>user.password: {user?.password}</p> */}
         <p>user.createdAt: {user?.createdAt?.toString()}</p>
         <p>user.updatedAt: {user?.updatedAt?.toString()}</p>
       </>
