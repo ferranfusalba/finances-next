@@ -79,8 +79,8 @@ model FinancialAccountTransaction {
   amount                      Float
   balance                     Float
   foreignCurrency             String?           @default("")
-  foreignCurrencyAmount       Float?            @default(0)
-  foreignCurrencyExchangeRate Float?            @default(0)
+  foreignCurrencyAmount       Float?            @default(0.00)
+  foreignCurrencyExchangeRate Float?            @default(0.00)
   category                    String            @default("")
   subcategory                 String?           @default("")
   tags                        String?           @default("")
