@@ -84,9 +84,6 @@ const config = {
         "full-main": "calc(100vh - 112px)", // 112 = 64 TopBar + 48 TabBar
         "full-main-mobile": "calc(100vh - 144px)", // 144 = 72 TopBar + 72 TabBar (mobile)
       },
-      minHeight: {
-        "top-bar": "2.75rem",
-      },
     },
   },
   plugins: [require("tailwindcss-animate")],
