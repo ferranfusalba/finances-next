@@ -21,7 +21,7 @@ export default async function AccountsTopMenu() {
 
   return (
     <>
-      <nav className="flex bg-sky-900">
+      <nav className="flex bg-sky-900 fixed top-16 w-full z-10">
         <ul>
           <Link href="/accounts/new">
             <li className="border-2 border-white flex justify-center items-center mr-2.5 w-11 h-11">

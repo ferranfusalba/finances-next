@@ -45,10 +45,10 @@ export default async function RootLayout({
       </head>
       <body className={`${ibm.className} bg-slate-800 text-slate-100`}>
         <SessionProvider session={session}>
-          <header className="top-bar">
+          <header className="top-bar fixed top-0 w-full">
             <TopBar />
           </header>
-          <main>
+          <main className="pt-16">
             <Toaster />
             <ThemeProvider
               attribute="class"

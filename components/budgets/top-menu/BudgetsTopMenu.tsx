@@ -21,7 +21,7 @@ export default async function BudgetsTopMenu() {
 
   return (
     <>
-      <nav className="flex bg-pink-900">
+      <nav className="flex bg-pink-900 fixed top-16 w-full">
         <ul>
           <Link href="/budgets/new">
             <li className="border-2 border-white flex justify-center items-center mr-2.5 w-11 h-11">

@@ -13,7 +13,9 @@ export default async function BudgetsLayout({
   return (
     <>
       <BudgetsTopMenu />
-      <main className="h-full-main">{children}</main>
+      <main className="h-full-main-mobile md:h-full-main pt-11">
+        {children}
+      </main>
     </>
   );
 }

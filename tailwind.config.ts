@@ -81,8 +81,8 @@ const config = {
         "10rem": "10rem",
       },
       height: {
-        "full-main": "calc(100vh - 156px)", // 156 = 64 TopBar + 44 Accounts Top Menu + 48 TabBar
-        "full-main-mobile": "calc(100vh - 180px)", // 180 = 64 TopBar + 44 Accounts Top Menu + 72 TabBar (mobile)
+        "full-main": "calc(100vh - 112px)", // 112 = 64 TopBar + 48 TabBar
+        "full-main-mobile": "calc(100vh - 144px)", // 144 = 72 TopBar + 72 TabBar (mobile)
       },
       minHeight: {
         "top-bar": "2.75rem",
