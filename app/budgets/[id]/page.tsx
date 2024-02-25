@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import { BudgetParamsProps } from "@/types/Budget";
+import LevelClient from "@/components/TabBar/LevelClient";
 
 async function loadBudget({ params }: BudgetParamsProps) {
   return await db.budget.findUnique({
@@ -27,6 +28,7 @@ export default async function BudgetLayout({ params }: BudgetParamsProps) {
         <li>Budget updatedAt: {budget?.updatedAt.toString()}</li>
       </ol>
       <DeleteBudget params={params} />
+      <LevelClient />
     </>
   );
 }

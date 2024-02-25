@@ -2,13 +2,15 @@
 import { BudgetParamsProps } from "@/types/Budget";
 import { TrashCan } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function DeleteBudget({ params }: BudgetParamsProps) {
   const router = useRouter();
 
   return (
     <>
-      <button
+      <Button
+        variant="destructive"
         onClick={async () => {
           await fetch(`/api/budgets/${params.id}`, {
             method: "DELETE",
@@ -18,7 +20,7 @@ export default function DeleteBudget({ params }: BudgetParamsProps) {
         }}
       >
         <TrashCan />
-      </button>
+      </Button>
     </>
   );
 }
