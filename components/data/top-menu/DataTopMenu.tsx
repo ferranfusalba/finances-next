@@ -37,8 +37,7 @@ export default async function DataTopMenu() {
   ];
   return (
     <>
-      {/* min-h-top-bar */}
-      <nav className="flex bg-lime-900">
+      <nav className="flex bg-lime-900 fixed top-16 w-full">
         <ul className="flex overflow-auto flex-nowrap scroll-touch">
           {data.map((item) => (
             <DataMenuItem key={item.id} data={item} />
