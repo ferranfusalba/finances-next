@@ -28,6 +28,21 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+          rel="icon"
+          href="/icon?<generated>"
+          type="image/<generated>"
+          sizes="<generated>"
+        />
+        <link
+          rel="apple-touch-icon"
+          href="/apple-icon?<generated>"
+          type="image/<generated>"
+          sizes="<generated>"
+        />
+      </head>
       <body className={`${ibm.className} bg-slate-800 text-slate-100`}>
         <SessionProvider session={session}>
           <header className="top-bar">
