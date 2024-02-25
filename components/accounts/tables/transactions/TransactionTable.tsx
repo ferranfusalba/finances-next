@@ -150,7 +150,6 @@ export default function TransactionTable({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: false },
   ]);
-  const rerender = useReducer(() => ({}), {})[1];
 
   const table = useReactTable({
     data,
@@ -210,10 +209,6 @@ export default function TransactionTable({
           ))}
         </tfoot>
       </table>
-      <div className="h-4" />
-      <button onClick={() => rerender()} className="border p-2">
-        Rerender
-      </button>
     </div>
   );
 }
