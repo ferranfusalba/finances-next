@@ -45,7 +45,7 @@ export default function TabBar() {
           return <TabBarSection key={route.path} section={route} />;
         })}
       </ul>
-      <LevelClient />
+      {/* <LevelClient /> */}
     </nav>
   );
 }

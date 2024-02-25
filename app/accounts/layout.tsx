@@ -13,7 +13,7 @@ export default async function AccountsLayout({
   return (
     <>
       <AccountsTopMenu />
-      <main className="h-full-main">{children}</main>
+      <main className="h-full-main-mobile md:h-full-main">{children}</main>
     </>
   );
 }

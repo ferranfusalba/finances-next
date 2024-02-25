@@ -82,6 +82,7 @@ const config = {
       },
       height: {
         "full-main": "calc(100vh - 156px)", // 156 = 64 TopBar + 44 Accounts Top Menu + 48 TabBar
+        "full-main-mobile": "calc(100vh - 180px)", // 180 = 64 TopBar + 44 Accounts Top Menu + 72 TabBar (mobile)
       },
       minHeight: {
         "top-bar": "2.75rem",

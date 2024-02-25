@@ -30,16 +30,16 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   const accountTransactions = await loadAccountTransactions(accountId);
 
   return (
-    <div className="m-auto w-full xl:w-9/12">
+    <div className="m-auto w-full xl:w-9/12 pb-20">
       <div className="grid grid-cols-12 py-6">
-        <div className="col-span-1 grid justify-center content-center">
+        <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <Avatar>
             {/* TODO: Build image & bankCode matchers */}
             {/* <AvatarImage src="https://images.unsplash.com/photo-1708022792768-edfab8b2be7a?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" /> */}
             <AvatarFallback>{account?.bankName[0]}</AvatarFallback>
           </Avatar>
         </div>
-        <div className="col-span-10 grid gap-2">
+        <div className="col-span-8 md:col-span-10 grid gap-2">
           <span className="text-2xl">{account?.bankName}</span>
           <div>
             <span className="font-mono p-1 bg-slate-100 v rounded-md text-stone-900">
@@ -62,7 +62,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
             </span>
           </div>
         </div>
-        <div className="col-span-1 grid justify-center content-center">
+        <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <DeleteAccount params={params} />
         </div>
       </div>
