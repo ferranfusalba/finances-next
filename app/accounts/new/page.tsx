@@ -10,9 +10,9 @@ export default async function NewAccount() {
   const userId = await getUserId(userEmail);
 
   return (
-    <>
+    <div className="pb-20">
       <h2 className="text-center py-6">New Account</h2>
       <NewAccountForm userId={userId as User} />
-    </>
+    </div>
   );
 }
