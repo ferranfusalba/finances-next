@@ -30,7 +30,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
   const accountTransactions = await loadAccountTransactions(accountId);
 
   return (
-    <div className="m-auto w-full xl:w-9/12 pb-20">
+    <div className="m-auto w-11/12 xl:w-9/12 pb-20">
       <div className="grid grid-cols-12 py-6">
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <Avatar>
