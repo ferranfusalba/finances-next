@@ -70,11 +70,23 @@ export const AddTransaction = (props: Props) => {
     amountForm: z.string().min(1, {
       message: "Amount Type is required.",
     }),
+    foreignCurrency: z.string(),
+    foreignCurrencyAmount: z.string(),
+    foreignCurrencyExchangeRate: z.string(),
     category: z.string(),
     subcategory: z.string(),
     tags: z.string(),
     dateTime: z.date({
       required_error: "Transaction Date is required.",
+    }),
+    timeHour: z.string().min(2, {
+      message: "Req.!",
+    }),
+    timeMinute: z.string().min(2, {
+      message: "Req.!",
+    }),
+    timePost: z.string().min(2, {
+      message: "Req.!",
     }),
     timezone: z.string(),
     location: z.string(),
@@ -89,10 +101,12 @@ export const AddTransaction = (props: Props) => {
       type: "",
       currency: "",
       amountForm: "",
+      // TODO: Add foreignCurrency fields
       category: "",
       subcategory: "",
       tags: "",
       dateTime: undefined,
+      // TODO: Add Time
       timezone: "",
       location: "",
       notes: "",
@@ -286,6 +300,74 @@ export const AddTransaction = (props: Props) => {
                     </FormItem>
                   )}
                 />
+                {/* TODO: Encapsulate Foreign Currency if option is given */}
+                {/* Foreign Currency */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Foreign Currency</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="CAD">CAD</SelectItem>
+                          <SelectItem value="CHF">CHF</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Foreign Currency Amount */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrencyAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>FC Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="foreignCurrencyAmount"
+                          type="number"
+                          step="0.01"
+                          placeholder="34,50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Foreign Currency Exchange Rate */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrencyExchangeRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>FC Exchange Rate</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="foreignCurrencyExchangeRate"
+                          type="number"
+                          step="0.01"
+                          placeholder="1.595"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {/* Date & Time */}
                 <FormField
                   control={form.control}
@@ -328,6 +410,85 @@ export const AddTransaction = (props: Props) => {
                     </FormItem>
                   )}
                 />
+                <div className="flex justify-between">
+                  <div>
+                    {/* TODO: Control this like iPhone Time Scroller */}
+                    <FormField
+                      control={form.control}
+                      name="timeHour"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hour</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeHour"
+                              type="number"
+                              min="00"
+                              max="23"
+                              placeholder="02"
+                              className="w-12"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeMinute"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Min.</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeMinute"
+                              type="number"
+                              min="00"
+                              max="59"
+                              placeholder="50"
+                              className="w-12"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    {/* TODO: Control this depending on user's locale */}
+                    <FormField
+                      control={form.control}
+                      name="timePost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meridiem</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-10">
+                                <SelectValue
+                                  className="w-12"
+                                  placeholder="AM"
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="AM">AM</SelectItem>
+                              <SelectItem value="PM">PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
               <div className="space-y-4">
                 {/* Category */}
