@@ -10,9 +10,9 @@ export default async function NewBudget() {
   const userId = await getUserId(userEmail);
 
   return (
-    <>
+    <div className="pb-20">
       <h2 className="text-center py-6">New Budget</h2>
       <NewBudgetForm userId={userId as User} />
-    </>
+    </div>
   );
 }
