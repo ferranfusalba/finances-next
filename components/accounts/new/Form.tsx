@@ -101,7 +101,7 @@ export default function NewAccountForm(props: Props) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 min-w-96"
+          className="space-y-8 m-auto w-11/12 md:w-5/12 min-w-80 md:min-w-96"
         >
           {/* Bank Name */}
           <FormField
