@@ -30,7 +30,7 @@ function TabBarSection({ section }: { section: Section }) {
     <Link href={section.path}>
       <li className="flex content-center gap-2 md:pr-6 flex-col md:flex-row">
         <div className="self-center">{section.icon}</div>
-        <span className="text-xs">{section.name}</span>
+        <span className="text-xs md:text-base">{section.name}</span>
       </li>
     </Link>
   );
