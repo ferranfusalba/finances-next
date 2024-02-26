@@ -6,7 +6,6 @@ import {
   ChartLineData,
   Settings,
 } from "@carbon/icons-react";
-import LevelClient from "./LevelClient";
 
 type Section = {
   path: string;
@@ -31,7 +30,7 @@ function TabBarSection({ section }: { section: Section }) {
     <Link href={section.path}>
       <li className="flex content-center gap-2 md:pr-6 flex-col md:flex-row">
         <div className="self-center">{section.icon}</div>
-        {section.name}
+        <span className="text-xs">{section.name}</span>
       </li>
     </Link>
   );
@@ -45,7 +44,6 @@ export default function TabBar() {
           return <TabBarSection key={route.path} section={route} />;
         })}
       </ul>
-      {/* <LevelClient /> */}
     </nav>
   );
 }
