@@ -19,7 +19,7 @@ export default function DeleteAccount({ params }: AccountParamsProps) {
 
   const handleOnClick = async () => {
     startTransition(async () => {
-      await fetch(`/api/accounts/${params.code}`, {
+      await fetch(`/api/accounts/${params.id}`, {
         method: "DELETE",
       });
       router.push("/accounts/");

@@ -5,7 +5,7 @@ export interface Account {
   bankName: string;
   createdAt: Date;
   description: string | null;
-  id: number;
+  id: string;
   initialBalance: number | null;
   currentBalance: number;
   name: string;

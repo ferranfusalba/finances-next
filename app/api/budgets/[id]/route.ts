@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: any, { params }: BudgetParamsProps) {
   const budget = await db.budget.findUnique({
     where: {
-      id: Number(params.id),
+      id: params.id,
     },
   });
 
@@ -16,7 +16,7 @@ export async function PUT(request: any, { params }: BudgetParamsProps) {
   const data = await request.json();
   await db.budget.update({
     where: {
-      id: Number(params.id),
+      id: params.id,
     },
     data: data,
   });
@@ -28,7 +28,7 @@ export async function DELETE(request: any, { params }: BudgetParamsProps) {
   try {
     const budgetDeleted = await db.budget.delete({
       where: {
-        id: Number(params.id),
+        id: params.id,
       },
     });
 

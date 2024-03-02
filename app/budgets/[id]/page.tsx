@@ -6,7 +6,7 @@ import LevelClient from "@/components/TabBar/LevelClient";
 async function loadBudget({ params }: BudgetParamsProps) {
   return await db.budget.findUnique({
     where: {
-      id: Number(params.id),
+      id: params.id,
     },
   });
 }

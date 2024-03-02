@@ -44,7 +44,7 @@ import { useRouter } from "next/navigation";
 import { Account } from "@/types/Account";
 
 interface Props {
-  accountId: number;
+  accountId: string;
   accountCode: string;
   account: Account | null;
 }
