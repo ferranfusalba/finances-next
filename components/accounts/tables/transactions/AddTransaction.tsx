@@ -79,15 +79,18 @@ export const AddTransaction = (props: Props) => {
     dateTime: z.date({
       required_error: "Transaction Date is required.",
     }),
-    timeHour: z.string().min(2, {
-      message: "Req.!",
-    }),
-    timeMinute: z.string().min(2, {
-      message: "Req.!",
-    }),
-    timePost: z.string().min(2, {
-      message: "Req.!",
-    }),
+    timeHour: z.string(),
+    timeMinute: z.string(),
+    timePost: z.string(),
+    // timeHour: z.string().min(2, {
+    //   message: "Req.!",
+    // }),
+    // timeMinute: z.string().min(2, {
+    //   message: "Req.!",
+    // }),
+    // timePost: z.string().min(2, {
+    //   message: "Req.!",
+    // }),
     timezone: z.string(),
     location: z.string(),
     notes: z.string(),
@@ -101,12 +104,16 @@ export const AddTransaction = (props: Props) => {
       type: "",
       currency: "",
       amountForm: "",
-      // TODO: Add foreignCurrency fields
+      foreignCurrency: "",
+      foreignCurrencyAmount: "",
+      foreignCurrencyExchangeRate: "",
       category: "",
       subcategory: "",
       tags: "",
       dateTime: undefined,
-      // TODO: Add Time
+      timeHour: "",
+      timeMinute: "",
+      timePost: "",
       timezone: "",
       location: "",
       notes: "",
@@ -116,11 +123,18 @@ export const AddTransaction = (props: Props) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
 
+    // TODO: Build dateTime with time, send it as dateTime from here
+
     const payee = values.payee;
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
     const amountForm = parseFloat(values.amountForm);
+    const foreignCurrency = values.foreignCurrency;
+    const foreignCurrencyAmount = parseFloat(values.foreignCurrencyAmount);
+    const foreignCurrencyExchangeRate = parseFloat(
+      values.foreignCurrencyExchangeRate
+    );
     const category = values.category;
     const subcategory = values.subcategory;
     const tags = values.tags;
@@ -150,6 +164,9 @@ export const AddTransaction = (props: Props) => {
           type,
           currency,
           amount: amountForm,
+          foreignCurrency,
+          foreignCurrencyAmount,
+          foreignCurrencyExchangeRate,
           category,
           subcategory,
           tags,
@@ -178,7 +195,7 @@ export const AddTransaction = (props: Props) => {
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max">
+      <DialogContent className="sm:max-w-[800px] overflow-y-auto h-5/6">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>

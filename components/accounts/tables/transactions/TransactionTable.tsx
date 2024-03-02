@@ -14,10 +14,10 @@ import { currency } from "@/lib/utils";
 const columnHelper = createColumnHelper<AccountTransaction>();
 
 const columns = [
-  columnHelper.accessor("id", {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
+  // columnHelper.accessor("id", {
+  //   cell: (info) => info.getValue(),
+  //   footer: (info) => info.column.id,
+  // }),
   columnHelper.accessor((row) => row.createdAt, {
     id: "createdAt",
     cell: (info) => {
