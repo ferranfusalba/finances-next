@@ -1,5 +1,5 @@
 interface Transaction {
-  id: number;
+  id: string;
   createdAt: Date;
   updatedAt: Date;
   payee: string;
@@ -22,9 +22,9 @@ interface Transaction {
 // TODO: Review optional fields & implications (page AccountLayout)
 
 export interface AccountTransaction extends Transaction {
-  accountId: number;
+  accountId: string;
 }
 
 export interface BudgetTransaction extends Transaction {
-  budgetId: number;
+  budgetId: string;
 }

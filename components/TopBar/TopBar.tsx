@@ -32,7 +32,7 @@ const TopBar = async () => {
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar>
+                <Avatar className="cursor-pointer">
                   <AvatarImage src={user.image!} />
                   <AvatarFallback>{user.name![0]}</AvatarFallback>
                 </Avatar>

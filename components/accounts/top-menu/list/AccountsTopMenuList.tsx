@@ -17,7 +17,7 @@ export default function AccountsTopMenuList({
           >
             <Link
               className="w-max min-w-10rem text-center"
-              href={"/accounts/" + account.code}
+              href={"/accounts/" + account.id}
             >
               {account.name}
             </Link>{" "}
