@@ -443,7 +443,7 @@ export const AddTransaction = (props: Props) => {
                               min="00"
                               max="23"
                               placeholder="02"
-                              className="w-12"
+                              // className="w-12"
                               {...field}
                             />
                           </FormControl>
@@ -466,7 +466,7 @@ export const AddTransaction = (props: Props) => {
                               min="00"
                               max="59"
                               placeholder="50"
-                              className="w-12"
+                              // className="w-12"
                               {...field}
                             />
                           </FormControl>
@@ -475,8 +475,8 @@ export const AddTransaction = (props: Props) => {
                       )}
                     />
                   </div>
-                  <div>
-                    {/* TODO: Control this depending on user's locale */}
+                  {/* TODO: Control this depending on user's locale */}
+                  {/* <div>
                     <FormField
                       control={form.control}
                       name="timePost"
@@ -504,7 +504,7 @@ export const AddTransaction = (props: Props) => {
                         </FormItem>
                       )}
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="space-y-4">
