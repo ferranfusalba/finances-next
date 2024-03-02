@@ -89,7 +89,7 @@ model FinancialAccountTransaction {
   location                    String?           @default("")
   notes                       String
   Account                     FinancialAccount? @relation(fields: [accountId], references: [id])
-  accountId                   Int
+  accountId                   String
 }
 
 model BudgetTransaction {
@@ -107,7 +107,7 @@ model BudgetTransaction {
 }
 
 model FinancialAccount {
-  id              Int                           @id @default(autoincrement())
+  id              String                        @id @default(uuid())
   order           Int                           @default(autoincrement())
   name            String
   code            String
