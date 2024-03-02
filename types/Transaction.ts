@@ -1,5 +1,5 @@
 interface Transaction {
-  id: number;
+  id: string;
   createdAt: Date;
   updatedAt: Date;
   payee: string;
@@ -26,5 +26,5 @@ export interface AccountTransaction extends Transaction {
 }
 
 export interface BudgetTransaction extends Transaction {
-  budgetId: number;
+  budgetId: string;
 }
