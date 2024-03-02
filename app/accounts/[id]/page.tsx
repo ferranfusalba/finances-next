@@ -10,7 +10,7 @@ import { currency } from "@/lib/utils";
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
     where: {
-      code: params.code,
+      id: Number(params.id),
     },
   });
 }
