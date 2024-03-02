@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: any, { params }: AccountParamsProps) {
   const account = await db.financialAccount.findUnique({
     where: {
-      code: params.code,
+      id: Number(params.id),
     },
   });
 
@@ -28,7 +28,7 @@ export async function DELETE(request: any, { params }: AccountParamsProps) {
   try {
     const accountDeleted = await db.financialAccount.delete({
       where: {
-        code: params.id,
+        id: Number(params.id),
       },
     });
 
