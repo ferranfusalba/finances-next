@@ -22,7 +22,7 @@ interface Transaction {
 // TODO: Review optional fields & implications (page AccountLayout)
 
 export interface AccountTransaction extends Transaction {
-  accountId: number;
+  accountId: string;
 }
 
 export interface BudgetTransaction extends Transaction {

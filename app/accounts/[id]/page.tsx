@@ -10,12 +10,12 @@ import { currency } from "@/lib/utils";
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.financialAccount.findUnique({
     where: {
-      id: Number(params.id),
+      id: params.id,
     },
   });
 }
 
-async function loadAccountTransactions(id: number) {
+async function loadAccountTransactions(id: string) {
   return await db.financialAccountTransaction.findMany({
     where: {
       accountId: id,
