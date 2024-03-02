@@ -103,7 +103,7 @@ model BudgetTransaction {
   currency  String
   notes     String
   Budget    Budget?  @relation(fields: [budgetId], references: [id])
-  budgetId  Int
+  budgetId  String
 }
 
 model FinancialAccount {
@@ -128,10 +128,10 @@ model FinancialAccount {
 }
 
 model Budget {
-  id             Int                 @id @default(autoincrement())
+  id             String              @id @default(uuid())
   order          Int                 @default(autoincrement())
   name           String
-  code           String              @unique
+  code           String
   active         Boolean
   type           String
   description    String?
@@ -141,4 +141,6 @@ model Budget {
   User           User?               @relation(fields: [userId], references: [id])
   userId         String?
   transactions   BudgetTransaction[]
+
+  @@unique([userId, code])
 }

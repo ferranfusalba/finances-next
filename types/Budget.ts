@@ -4,7 +4,7 @@ export interface Budget {
   active: boolean | null;
   createdAt: Date;
   description: string | null;
-  id: number;
+  id: string;
   initialBalance: number | null;
   name: string;
   code: string;
