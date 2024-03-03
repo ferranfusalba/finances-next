@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import { BudgetParamsProps } from "@/types/Budget";
-import LevelClient from "@/components/TabBar/LevelClient";
+import LevelClient from "@/components/budgets/LevelClient";
 
 async function loadBudget({ params }: BudgetParamsProps) {
   return await db.budget.findUnique({

@@ -13,6 +13,7 @@ export default async function BudgetsLayout({
   return (
     <>
       <BudgetsTopMenu />
+      {/* TODO: Solve this TS error */}
       <main className="h-full-main-mobile md:h-full-main pt-11">
         {children}
       </main>
