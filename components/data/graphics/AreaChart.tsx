@@ -56,44 +56,46 @@ export default function AreaChart({
 }) {
   if (width < 10) return null;
   return (
-    <Group left={left || margin.left} top={top || margin.top}>
-      <LinearGradient
-        id="gradient"
-        from={gradientColor}
-        fromOpacity={1}
-        to={gradientColor}
-        toOpacity={0.2}
-      />
-      <AreaClosed<AppleStock>
-        data={data}
-        x={(d) => xScale(getDate(d)) || 0}
-        y={(d) => yScale(getStockValue(d)) || 0}
-        yScale={yScale}
-        strokeWidth={1}
-        stroke="url(#gradient)"
-        fill="url(#gradient)"
-        curve={curveMonotoneX}
-      />
-      {!hideBottomAxis && (
-        <AxisBottom
-          top={yMax}
-          scale={xScale}
-          numTicks={width > 520 ? 10 : 5}
-          stroke={axisColor}
-          tickStroke={axisColor}
-          tickLabelProps={axisBottomTickLabelProps}
-        />
-      )}
-      {!hideLeftAxis && (
-        <AxisLeft
-          scale={yScale}
-          numTicks={5}
-          stroke={axisColor}
-          tickStroke={axisColor}
-          tickLabelProps={axisLeftTickLabelProps}
-        />
-      )}
-      {children}
-    </Group>
+    <></>
+    // TODO: Solve TS Error
+    // <Group left={left || margin.left} top={top || margin.top}>
+    //   <LinearGradient
+    //     id="gradient"
+    //     from={gradientColor}
+    //     fromOpacity={1}
+    //     to={gradientColor}
+    //     toOpacity={0.2}
+    //   />
+    //   <AreaClosed<AppleStock>
+    //     data={data}
+    //     x={(d) => xScale(getDate(d)) || 0}
+    //     y={(d) => yScale(getStockValue(d)) || 0}
+    //     yScale={yScale}
+    //     strokeWidth={1}
+    //     stroke="url(#gradient)"
+    //     fill="url(#gradient)"
+    //     curve={curveMonotoneX}
+    //   />
+    //   {!hideBottomAxis && (
+    //     <AxisBottom
+    //       top={yMax}
+    //       scale={xScale}
+    //       numTicks={width > 520 ? 10 : 5}
+    //       stroke={axisColor}
+    //       tickStroke={axisColor}
+    //       tickLabelProps={axisBottomTickLabelProps}
+    //     />
+    //   )}
+    //   {!hideLeftAxis && (
+    //     <AxisLeft
+    //       scale={yScale}
+    //       numTicks={5}
+    //       stroke={axisColor}
+    //       tickStroke={axisColor}
+    //       tickLabelProps={axisLeftTickLabelProps}
+    //     />
+    //   )}
+    //   {children}
+    // </Group>
   );
 }

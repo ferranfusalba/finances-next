@@ -6,7 +6,7 @@ export default function SectionNavMenuList({
   list,
   type,
 }: {
-  list: Array<Account> | Array<Budget>;
+  list: Array<{ id: string; name: string }>;
   type: string;
 }) {
   return (

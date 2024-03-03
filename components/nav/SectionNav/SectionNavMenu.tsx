@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 export default async function SectionNavMenu({
   type,
   list,
+  allowAdd,
 }: {
   type: string;
-  list: Array<Account> | Array<Budget>;
+  allowAdd: boolean;
+  list: Array<{ id: string; name: string }>;
 }) {
   return (
     <>
@@ -17,12 +19,15 @@ export default async function SectionNavMenu({
         className={cn(
           "flex fixed top-16 w-full z-10",
           { "bg-sky-900": type === "accounts" },
-          { "bg-pink-900": type === "budgets" }
+          { "bg-pink-900": type === "budgets" },
+          { "bg-lime-900": type === "data" }
         )}
       >
-        <ul>
-          <SectionNavMenuAdd type={type} />
-        </ul>
+        {allowAdd && (
+          <ul>
+            <SectionNavMenuAdd type={type} />
+          </ul>
+        )}
         <SectionNavMenuList list={list} type={type} />
       </nav>
     </>

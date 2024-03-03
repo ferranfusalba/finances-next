@@ -28,7 +28,7 @@ export default async function AccountsLayout({
 
   return (
     <>
-      <SectionNavMenu type="accounts" list={userAccounts} />
+      <SectionNavMenu type="accounts" list={userAccounts} allowAdd={true} />
       {/* TODO: Solve this TS error */}
       <main className="h-full-main-mobile md:h-full-main pt-11">
         {children}

@@ -10,22 +10,24 @@ export default function SectionNavMenuListItem({
   index,
   type,
 }: {
-  item: Account | Budget;
+  item: { id: string; name: string };
   index: number;
   type: string;
 }) {
   const pathname = usePathname();
   const accountSelected = "/accounts/" + item.id === pathname;
   const budgetSelected = "/budgets/" + item.id === pathname;
+  const dataSelected = "/data/" + item.id === pathname;
 
   return (
     <>
       <li
         key={index}
         className={cn(
-          "border-2 border-white flex justify-center items-center mx-2.5 px-4",
+          "border-2 border-white flex justify-center items-center mx-2.5 px-4 h-11",
           { "bg-neutral-50 text-sky-900": accountSelected },
-          { "bg-neutral-50 text-pink-900": budgetSelected }
+          { "bg-neutral-50 text-pink-900": budgetSelected },
+          { "bg-neutral-50 text-lime-900": dataSelected }
         )}
       >
         <Link
