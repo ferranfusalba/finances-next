@@ -13,6 +13,7 @@ export default function AccountsTopMenuList({
           <AccountsTopMenuListItem
             account={account}
             index={index}
+            key={account.id}
           ></AccountsTopMenuListItem>
         ))}
       </ol>
