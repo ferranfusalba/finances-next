@@ -9,10 +9,12 @@ export default function DataNetWorthInceptionLayout() {
     <div className="pb-20 md:pb-12">
       Data Net Worth (Inception) from own page
       <br />
-      <Brush
+      <i>(Brush graphic)</i>
+      {/* TODO: Solve TS errors on AreaChart */}
+      {/* <Brush
         width={Number(windowDimensions.width)}
         height={Number(windowDimensions.height)}
-      />
+      /> */}
     </div>
   );
 }
