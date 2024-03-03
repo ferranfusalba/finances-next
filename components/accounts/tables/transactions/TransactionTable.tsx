@@ -1,5 +1,5 @@
 "use client";
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -14,25 +14,18 @@ import { currency } from "@/lib/utils";
 const columnHelper = createColumnHelper<AccountTransaction>();
 
 const columns = [
-  // columnHelper.accessor("id", {
-  //   cell: (info) => info.getValue(),
-  //   footer: (info) => info.column.id,
-  // }),
-  columnHelper.accessor((row) => row.createdAt, {
-    id: "createdAt",
+  columnHelper.accessor((row) => row.dateTime, {
+    id: "dateTime",
     cell: (info) => {
       return <i>{info.getValue().toLocaleString("ca")}</i>;
     },
-    header: () => <span>Created at</span>,
+    header: () => <span>Date & Time</span>,
     footer: (info) => info.column.id,
   }),
-  // columnHelper.accessor("updatedAt", {
-  //   header: () => "Updated At",
-  //   cell: (info) => {
-  //     return <i>{info.getValue().toLocaleString("ca")}</i>;
-  //   },
-  //   footer: (info) => info.column.id,
-  // }),
+  columnHelper.accessor("timezone", {
+    header: "Timezone",
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("payee", {
     header: () => <span>Payee</span>,
     footer: (info) => info.column.id,
@@ -110,18 +103,6 @@ const columns = [
     header: "Tags",
     footer: (info) => info.column.id,
   }),
-  columnHelper.accessor((row) => row.dateTime, {
-    id: "dateTime",
-    cell: (info) => {
-      return <i>{info.getValue().toLocaleString("ca")}</i>;
-    },
-    header: () => <span>Date & Time</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("timezone", {
-    header: "Timezone",
-    footer: (info) => info.column.id,
-  }),
   columnHelper.accessor("location", {
     header: "Location",
     footer: (info) => info.column.id,
@@ -148,7 +129,7 @@ export default function TransactionTable({
 
   // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "createdAt", desc: false },
+    { id: "dateTime", desc: false },
   ]);
 
   const table = useReactTable({

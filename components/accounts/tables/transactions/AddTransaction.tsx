@@ -1,10 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +22,9 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -76,21 +66,24 @@ export const AddTransaction = (props: Props) => {
     category: z.string(),
     subcategory: z.string(),
     tags: z.string(),
-    dateTime: z.date({
-      required_error: "Transaction Date is required.",
+    dateDay: z.string().min(1, {
+      message: "Required",
     }),
-    timeHour: z.string(),
-    timeMinute: z.string(),
-    timePost: z.string(),
-    // timeHour: z.string().min(2, {
-    //   message: "Req.!",
-    // }),
-    // timeMinute: z.string().min(2, {
-    //   message: "Req.!",
-    // }),
-    // timePost: z.string().min(2, {
-    //   message: "Req.!",
-    // }),
+    dateMonth: z.string().min(1, {
+      message: "Required",
+    }),
+    dateYear: z.string().min(4, {
+      message: "Required",
+    }),
+    timeHour: z.string().min(1, {
+      message: "Required",
+    }),
+    timeMinute: z.string().min(1, {
+      message: "Required",
+    }),
+    timeSecond: z.string().min(1, {
+      message: "Required",
+    }),
     timezone: z.string(),
     location: z.string(),
     notes: z.string(),
@@ -110,10 +103,12 @@ export const AddTransaction = (props: Props) => {
       category: "",
       subcategory: "",
       tags: "",
-      dateTime: undefined,
+      dateDay: "",
+      dateMonth: "",
+      dateYear: "",
       timeHour: "",
       timeMinute: "",
-      timePost: "",
+      timeSecond: "",
       timezone: "",
       location: "",
       notes: "",
@@ -123,7 +118,15 @@ export const AddTransaction = (props: Props) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
 
-    // TODO: Build dateTime with time, send it as dateTime from here
+    const dateBuilt = new Date(
+      Number(values.dateYear),
+      Number(values.dateMonth) - 1,
+      Number(values.dateDay),
+      Number(values.timeHour),
+      Number(values.timeMinute),
+      Number(values.timeSecond),
+      0 // TODO: Integrate here timezone
+    );
 
     const payee = values.payee;
     const concept = values.concept;
@@ -138,7 +141,7 @@ export const AddTransaction = (props: Props) => {
     const category = values.category;
     const subcategory = values.subcategory;
     const tags = values.tags;
-    const dateTime = values.dateTime;
+    const dateTime = dateBuilt;
     const timezone = values.timezone;
     const location = values.location;
     const notes = values.notes;
@@ -317,7 +320,222 @@ export const AddTransaction = (props: Props) => {
                     </FormItem>
                   )}
                 />
-                {/* TODO: Encapsulate Foreign Currency if option is given */}
+                {/* Date & Time */}
+                <div className="flex justify-between">
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Day</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateDay"
+                              type="number"
+                              min="00"
+                              max="31"
+                              placeholder="08"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateMonth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Month</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateMonth"
+                              type="number"
+                              min="00"
+                              max="12"
+                              placeholder="02"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Year</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateYear"
+                              type="number"
+                              min="1970"
+                              max="2024" // TODO: Control this as current year, placeholder too
+                              placeholder="2024"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeHour"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hour</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeHour"
+                              type="number"
+                              min="00"
+                              max="23"
+                              placeholder="02"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeMinute"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Min.</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeMinute"
+                              type="number"
+                              min="00"
+                              max="59"
+                              placeholder="50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeSecond"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sec.</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeSecond"
+                              type="number"
+                              min="00"
+                              max="59"
+                              placeholder="59"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                {/* Timezone */}
+                <FormField
+                  control={form.control}
+                  name="timezone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Timezone</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="timezone"
+                          type="text"
+                          placeholder="UTC+01:00"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="category"
+                          type="text"
+                          placeholder="Digital Subscriptions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Subcategory */}
+                <FormField
+                  control={form.control}
+                  name="subcategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subcategory</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="subcategory"
+                          type="text"
+                          placeholder="HBO Max"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Tags */}
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="tags"
+                          type="text"
+                          placeholder="Digital Subscriptions, HBO Max"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {/* Foreign Currency */}
                 <FormField
                   control={form.control}
@@ -385,209 +603,6 @@ export const AddTransaction = (props: Props) => {
                     </FormItem>
                   )}
                 />
-                {/* Date & Time */}
-                <FormField
-                  control={form.control}
-                  name="dateTime"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date: Date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-between">
-                  <div>
-                    {/* TODO: Control this like iPhone Time Scroller */}
-                    <FormField
-                      control={form.control}
-                      name="timeHour"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Hour</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeHour"
-                              type="number"
-                              min="00"
-                              max="23"
-                              placeholder="02"
-                              // className="w-12"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeMinute"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min.</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeMinute"
-                              type="number"
-                              min="00"
-                              max="59"
-                              placeholder="50"
-                              // className="w-12"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  {/* TODO: Control this depending on user's locale */}
-                  {/* <div>
-                    <FormField
-                      control={form.control}
-                      name="timePost"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Meridiem</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-10">
-                                <SelectValue
-                                  className="w-12"
-                                  placeholder="AM"
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="AM">AM</SelectItem>
-                              <SelectItem value="PM">PM</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div> */}
-                </div>
-              </div>
-              <div className="space-y-4">
-                {/* Category */}
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="category"
-                          type="text"
-                          placeholder="Digital Subscriptions"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>Optional field</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Subcategory */}
-                <FormField
-                  control={form.control}
-                  name="subcategory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subcategory</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="subcategory"
-                          type="text"
-                          placeholder="HBO Max"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>Optional field</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Tags */}
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tags</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="tags"
-                          type="text"
-                          placeholder="Digital Subscriptions, HBO Max"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>Optional field</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Timezone */}
-                <FormField
-                  control={form.control}
-                  name="timezone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Timezone</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="timezone"
-                          type="text"
-                          placeholder="UTC+01:00"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>Optional field</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 {/* Location */}
                 <FormField
                   control={form.control}
@@ -603,7 +618,6 @@ export const AddTransaction = (props: Props) => {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>Optional field</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -623,7 +637,6 @@ export const AddTransaction = (props: Props) => {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>Optional field</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
