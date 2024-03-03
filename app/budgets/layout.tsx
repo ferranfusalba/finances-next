@@ -28,7 +28,7 @@ export default async function BudgetsLayout({
 
   return (
     <>
-      <SectionNavMenu type="budgets" list={userBudgets} />
+      <SectionNavMenu type="budgets" list={userBudgets} allowAdd={true} />
       {/* TODO: Solve this TS error */}
       <main className="h-full-main-mobile md:h-full-main pt-11">
         {children}
