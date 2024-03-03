@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export default function AccountsTopMenuListItem({
+export default function SectionNavMenuListItem({
   account,
   index,
 }: {

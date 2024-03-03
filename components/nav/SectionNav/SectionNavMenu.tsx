@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { AddAlt } from "@carbon/icons-react";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
-import AccountsTopMenuList from "./list/SectionNavMenuList";
+import SectionNavMenuList from "./list/SectionNavMenuList";
 
 async function loadUserAccounts(userId: string) {
   return await db.financialAccount.findMany({
@@ -13,7 +13,7 @@ async function loadUserAccounts(userId: string) {
   });
 }
 
-export default async function AccountsTopMenu() {
+export default async function SectionNavMenu() {
   const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
@@ -29,7 +29,7 @@ export default async function AccountsTopMenu() {
             </li>
           </Link>
         </ul>
-        <AccountsTopMenuList accountList={userAccounts} />
+        <SectionNavMenuList accountList={userAccounts} />
       </nav>
     </>
   );
