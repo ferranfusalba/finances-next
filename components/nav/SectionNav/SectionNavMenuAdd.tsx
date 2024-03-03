@@ -4,17 +4,19 @@ import { AddAlt } from "@carbon/icons-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export default function SectionNavMenuAdd() {
+export default function SectionNavMenuAdd({ type }: { type: string }) {
   const pathname = usePathname();
   const newAccountSelected = pathname === "/accounts/new";
+  const newBudgetSelected = pathname === "/budgets/new";
 
   return (
     <>
-      <Link href="/accounts/new">
+      <Link href={`/${type}/new`}>
         <li
           className={cn(
             "border-2 border-white flex justify-center items-center mr-2.5 w-11 h-11",
-            { "bg-neutral-50 text-sky-900": newAccountSelected }
+            { "bg-neutral-50 text-sky-900": newAccountSelected },
+            { "bg-neutral-50 text-pink-900": newBudgetSelected }
           )}
         >
           <AddAlt />

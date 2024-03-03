@@ -1,19 +1,23 @@
 import { Account } from "@/types/Account";
+import { Budget } from "@/types/Budget";
 import SectionNavMenuListItem from "./SectionNavMenuListItem";
 
 export default function SectionNavMenuList({
-  accountList,
+  list,
+  type,
 }: {
-  accountList: Array<Account>;
+  list: Array<Account> | Array<Budget>;
+  type: string;
 }) {
   return (
     <>
       <ol className="flex overflow-auto flex-nowrap scroll-touch">
-        {accountList.map((account, index) => (
+        {list.map((item, index) => (
           <SectionNavMenuListItem
-            account={account}
+            item={item}
             index={index}
-            key={account.id}
+            key={item.id}
+            type={type}
           ></SectionNavMenuListItem>
         ))}
       </ol>
