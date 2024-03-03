@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const TopBar = async () => {
+const TopNav = async () => {
   const user = await currentUser();
 
   return (
@@ -73,4 +73,4 @@ const TopBar = async () => {
   );
 };
 
-export default TopBar;
+export default TopNav;

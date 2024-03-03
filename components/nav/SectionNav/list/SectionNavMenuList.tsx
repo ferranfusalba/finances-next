@@ -1,5 +1,5 @@
 import { Account } from "@/types/Account";
-import AccountsTopMenuListItem from "./AccoutnsTopMenuListItem";
+import AccountsTopMenuListItem from "./SectionNavMenuListItem";
 
 export default function AccountsTopMenuList({
   accountList,
