@@ -1,8 +1,8 @@
-import TabBar from "@/components/TabBar/TabBar";
+import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Sans } from "next/font/google";
-import TopBar from "@/components/TopBar/TopBar";
+import TopNav from "@/components/nav/TopNav/TopNav";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
@@ -46,7 +46,7 @@ export default async function RootLayout({
       <body className={`${ibm.className} bg-slate-800 text-slate-100`}>
         <SessionProvider session={session}>
           <header className="fixed top-0 w-full">
-            <TopBar />
+            <TopNav />
           </header>
           <main className="pt-16">
             <Toaster />
@@ -60,7 +60,7 @@ export default async function RootLayout({
             </ThemeProvider>
           </main>
           <footer className="fixed bottom-0 w-full">
-            <TabBar />
+            <BottomNav />
           </footer>
         </SessionProvider>
       </body>

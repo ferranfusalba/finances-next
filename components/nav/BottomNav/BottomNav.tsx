@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Home,
   TableBuilt,
@@ -6,8 +5,9 @@ import {
   ChartLineData,
   Settings,
 } from "@carbon/icons-react";
+import BottomNavSection from "./BottomNavSection";
 
-type Section = {
+export type Section = {
   path: string;
   name: string;
   icon: React.ReactNode;
@@ -25,23 +25,12 @@ const routes: Array<Section> = [
   { path: "/settings", name: "Settings", icon: <Settings /> },
 ];
 
-function TabBarSection({ section }: { section: Section }) {
-  return (
-    <Link href={section.path}>
-      <li className="flex content-center gap-2 md:pr-6 flex-col md:flex-row">
-        <div className="self-center">{section.icon}</div>
-        <span className="text-xs md:text-base">{section.name}</span>
-      </li>
-    </Link>
-  );
-}
-
-export default function TabBar() {
+export default function BottomNav() {
   return (
     <nav className="md:flex md:justify-between bg-slate-900 px-6 py-3 text-white">
       <ul className="flex justify-between md:justify-start">
         {routes.map((route) => {
-          return <TabBarSection key={route.path} section={route} />;
+          return <BottomNavSection key={route.path} section={route} />;
         })}
       </ul>
     </nav>

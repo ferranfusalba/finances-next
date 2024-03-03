@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { AddAlt } from "@carbon/icons-react";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
-import AccountsTopMenuList from "./list/AccountsTopMenuList";
+import AccountsTopMenuList from "./list/SectionNavMenuList";
 
 async function loadUserAccounts(userId: string) {
   return await db.financialAccount.findMany({
