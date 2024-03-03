@@ -1,4 +1,4 @@
-import AccountsTopMenu from "@/components/nav/SectionNav/SectionNavMenu";
+import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +12,8 @@ export default async function AccountsLayout({
 }) {
   return (
     <>
-      <AccountsTopMenu />
+      <SectionNavMenu />
+      {/* TODO: Solve this TS error */}
       <main className="h-full-main-mobile md:h-full-main pt-11">
         {children}
       </main>

@@ -4,7 +4,7 @@ import { AddAlt } from "@carbon/icons-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export default async function SectionNavMenuAdd() {
+export default function SectionNavMenuAdd() {
   const pathname = usePathname();
   const newAccountSelected = pathname === "/accounts/new";
 

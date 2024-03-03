@@ -47,6 +47,7 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <header className="fixed top-0 w-full">
             <TopNav />
+            {/* TODO: Solve this TS error */}
           </header>
           <main className="pt-16">
             <Toaster />
