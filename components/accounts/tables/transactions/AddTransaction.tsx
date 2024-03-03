@@ -43,6 +43,7 @@ export const AddTransaction = (props: Props) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const currentYear = new Date().getFullYear();
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -378,8 +379,8 @@ export const AddTransaction = (props: Props) => {
                               id="dateYear"
                               type="number"
                               min="1970"
-                              max="2024" // TODO: Control this as current year, placeholder too
-                              placeholder="2024"
+                              max={currentYear}
+                              placeholder={currentYear.toString()}
                               {...field}
                             />
                           </FormControl>
