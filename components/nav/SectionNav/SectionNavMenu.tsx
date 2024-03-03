@@ -1,30 +1,29 @@
-import { db } from "@/lib/db";
-import { auth } from "@/auth";
-import getUserId from "@/utils/getUserId";
 import SectionNavMenuList from "./list/SectionNavMenuList";
 import SectionNavMenuAdd from "./SectionNavMenuAdd";
+import { Account } from "@/types/Account";
+import { Budget } from "@/types/Budget";
+import { cn } from "@/lib/utils";
 
-async function loadUserAccounts(userId: string) {
-  return await db.financialAccount.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
-
-export default async function SectionNavMenu() {
-  const session = await auth();
-  const userEmail = session?.user?.email as string;
-  const userId = await getUserId(userEmail);
-  const userAccounts = await loadUserAccounts(userId?.id as string);
-
+export default async function SectionNavMenu({
+  type,
+  list,
+}: {
+  type: string;
+  list: Array<Account> | Array<Budget>;
+}) {
   return (
     <>
-      <nav className="flex bg-sky-900 fixed top-16 w-full z-10">
+      <nav
+        className={cn(
+          "flex fixed top-16 w-full z-10",
+          { "bg-sky-900": type === "accounts" },
+          { "bg-pink-900": type === "budgets" }
+        )}
+      >
         <ul>
-          <SectionNavMenuAdd />
+          <SectionNavMenuAdd type={type} />
         </ul>
-        <SectionNavMenuList accountList={userAccounts} />
+        <SectionNavMenuList list={list} type={type} />
       </nav>
     </>
   );
