@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { Account } from "@/types/Account";
-import "./AddTransaction.css";
 
 interface Props {
   accountId: string;
@@ -200,7 +199,7 @@ export const AddTransaction = (props: Props) => {
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
+      <DialogContent className="sm:max-w-[800px] overflow-y-auto h-5/6">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
@@ -209,7 +208,7 @@ export const AddTransaction = (props: Props) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-flow-row md:grid-flow-col gap-8">
+            <div className="grid grid-flow-col space-x-8">
               <div className="space-y-4">
                 {/* Payee */}
                 <FormField
@@ -217,7 +216,7 @@ export const AddTransaction = (props: Props) => {
                   name="payee"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payee*</FormLabel>
+                      <FormLabel>Payee</FormLabel>
                       <FormControl>
                         <Input
                           id="payee"
@@ -236,7 +235,7 @@ export const AddTransaction = (props: Props) => {
                   name="concept"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Concept*</FormLabel>
+                      <FormLabel>Concept</FormLabel>
                       <FormControl>
                         <Input
                           id="concept"
@@ -255,7 +254,7 @@ export const AddTransaction = (props: Props) => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type*</FormLabel>
+                      <FormLabel>Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -281,7 +280,7 @@ export const AddTransaction = (props: Props) => {
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Currency*</FormLabel>
+                      <FormLabel>Currency</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -308,7 +307,7 @@ export const AddTransaction = (props: Props) => {
                   name="amountForm"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount*</FormLabel>
+                      <FormLabel>Amount</FormLabel>
                       <FormControl>
                         <Input
                           id="amountForm"
@@ -330,7 +329,7 @@ export const AddTransaction = (props: Props) => {
                       name="dateDay"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Day*</FormLabel>
+                          <FormLabel>Day</FormLabel>
                           <FormControl>
                             <Input
                               id="dateDay"
@@ -352,7 +351,7 @@ export const AddTransaction = (props: Props) => {
                       name="dateMonth"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Month*</FormLabel>
+                          <FormLabel>Month</FormLabel>
                           <FormControl>
                             <Input
                               id="dateMonth"
@@ -374,7 +373,7 @@ export const AddTransaction = (props: Props) => {
                       name="dateYear"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Year*</FormLabel>
+                          <FormLabel>Year</FormLabel>
                           <FormControl>
                             <Input
                               id="dateYear"
@@ -398,7 +397,7 @@ export const AddTransaction = (props: Props) => {
                       name="timeHour"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Hour*</FormLabel>
+                          <FormLabel>Hour</FormLabel>
                           <FormControl>
                             <Input
                               id="timeHour"
@@ -420,7 +419,7 @@ export const AddTransaction = (props: Props) => {
                       name="timeMinute"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Min.*</FormLabel>
+                          <FormLabel>Min.</FormLabel>
                           <FormControl>
                             <Input
                               id="timeMinute"
@@ -442,7 +441,7 @@ export const AddTransaction = (props: Props) => {
                       name="timeSecond"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sec.*</FormLabel>
+                          <FormLabel>Sec.</FormLabel>
                           <FormControl>
                             <Input
                               id="timeSecond"
