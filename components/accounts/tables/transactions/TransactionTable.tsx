@@ -7,7 +7,7 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import "./index.css";
+import "./TransactionTable.css";
 import { AccountTransaction } from "@/types/Transaction";
 import { currency } from "@/lib/utils";
 
