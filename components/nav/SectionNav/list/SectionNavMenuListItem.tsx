@@ -1,6 +1,5 @@
 "use client";
-import { Account } from "@/types/Account";
-import { Budget } from "@/types/Budget";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -18,6 +17,7 @@ export default function SectionNavMenuListItem({
   const accountSelected = "/accounts/" + item.id === pathname;
   const budgetSelected = "/budgets/" + item.id === pathname;
   const dataSelected = "/data/" + item.id === pathname;
+  const settingsSelected = "/settings/" + item.id === pathname;
 
   return (
     <>
@@ -27,7 +27,8 @@ export default function SectionNavMenuListItem({
           "border-2 border-white flex justify-center items-center mx-2.5 px-4 h-11",
           { "bg-neutral-50 text-sky-900": accountSelected },
           { "bg-neutral-50 text-pink-900": budgetSelected },
-          { "bg-neutral-50 text-lime-900": dataSelected }
+          { "bg-neutral-50 text-lime-900": dataSelected },
+          { "bg-neutral-50 text-stone-900": settingsSelected }
         )}
       >
         <Link
