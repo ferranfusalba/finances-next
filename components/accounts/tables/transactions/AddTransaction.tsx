@@ -571,7 +571,7 @@ export const AddTransaction = (props: Props) => {
                   name="foreignCurrencyAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>FC Amount</FormLabel>
+                      <FormLabel>Foreign Currency Amount</FormLabel>
                       <FormControl>
                         <Input
                           id="foreignCurrencyAmount"
@@ -591,7 +591,7 @@ export const AddTransaction = (props: Props) => {
                   name="foreignCurrencyExchangeRate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>FC Exchange Rate</FormLabel>
+                      <FormLabel>Foreign Currency Exchange Rate</FormLabel>
                       <FormControl>
                         <Input
                           id="foreignCurrencyExchangeRate"
