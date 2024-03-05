@@ -1,7 +1,5 @@
 import SectionNavMenuList from "./list/SectionNavMenuList";
 import SectionNavMenuAdd from "./SectionNavMenuAdd";
-import { Account } from "@/types/Account";
-import { Budget } from "@/types/Budget";
 import { cn } from "@/lib/utils";
 
 export default async function SectionNavMenu({
@@ -20,7 +18,8 @@ export default async function SectionNavMenu({
           "flex fixed top-16 w-full z-10",
           { "bg-sky-900": type === "accounts" },
           { "bg-pink-900": type === "budgets" },
-          { "bg-lime-900": type === "data" }
+          { "bg-lime-900": type === "data" },
+          { "bg-stone-900": type === "settings" }
         )}
       >
         {allowAdd && (
