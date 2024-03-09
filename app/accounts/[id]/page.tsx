@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { currency } from "@/lib/utils";
 
 async function loadAccount({ params }: AccountParamsProps) {
-  return await db.financialAccount.findUnique({
+  return await db.account.findUnique({
     where: {
       id: params.id,
     },
@@ -16,7 +16,7 @@ async function loadAccount({ params }: AccountParamsProps) {
 }
 
 async function loadAccountTransactions(id: string) {
-  return await db.financialAccountTransaction.findMany({
+  return await db.accountTransaction.findMany({
     where: {
       accountId: id,
     },

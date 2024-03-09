@@ -17,17 +17,17 @@ enum UserRole {
 }
 
 model User {
-  id            String             @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?            @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          UserRole           @default(USER)
-  accounts      UserAccount[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  finAccounts   FinancialAccount[]
+  role          UserRole      @default(USER)
+  userAccounts  UserAccount[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  accounts      Account[]
   budgets       Budget[]
 }
 
@@ -68,27 +68,27 @@ model PasswordResetToken {
   @@unique([email, token])
 }
 
-model FinancialAccountTransaction {
-  id                          String            @id @default(uuid())
-  createdAt                   DateTime          @default(now())
-  updatedAt                   DateTime          @updatedAt
-  payee                       String            @default("")
+model AccountTransaction {
+  id                          String   @id @default(uuid())
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  payee                       String   @default("")
   concept                     String
   type                        String
   currency                    String
   amount                      Float
   balance                     Float
-  foreignCurrency             String?           @default("")
-  foreignCurrencyAmount       Float?            @default(0.00)
-  foreignCurrencyExchangeRate Float?            @default(0.00)
-  category                    String            @default("")
-  subcategory                 String?           @default("")
-  tags                        String?           @default("")
-  dateTime                    DateTime          @default(now())
-  timezone                    String?           @default("")
-  location                    String?           @default("")
+  foreignCurrency             String?  @default("")
+  foreignCurrencyAmount       Float?   @default(0.00)
+  foreignCurrencyExchangeRate Float?   @default(0.00)
+  category                    String   @default("")
+  subcategory                 String?  @default("")
+  tags                        String?  @default("")
+  dateTime                    DateTime @default(now())
+  timezone                    String?  @default("")
+  location                    String?  @default("")
   notes                       String
-  Account                     FinancialAccount? @relation(fields: [accountId], references: [id])
+  Account                     Account? @relation(fields: [accountId], references: [id])
   accountId                   String
 }
 
@@ -106,23 +106,23 @@ model BudgetTransaction {
   budgetId  String
 }
 
-model FinancialAccount {
-  id              String                        @id @default(uuid())
-  order           Int                           @default(autoincrement())
+model Account {
+  id              String               @id @default(uuid())
+  order           Int                  @default(autoincrement())
   name            String
   code            String
-  bankName        String                        @default("")
+  bankName        String               @default("")
   active          Boolean
   type            String
   description     String?
-  defaultCurrency String                        @default("")
+  defaultCurrency String               @default("")
   initialBalance  Float
-  currentBalance  Float                         @default(0)
-  createdAt       DateTime                      @default(now())
-  updatedAt       DateTime                      @updatedAt
-  User            User?                         @relation(fields: [userId], references: [id])
+  currentBalance  Float                @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  User            User?                @relation(fields: [userId], references: [id])
   userId          String?
-  transactions    FinancialAccountTransaction[]
+  transactions    AccountTransaction[]
 
   @@unique([userId, code])
 }

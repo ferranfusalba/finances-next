@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 async function loadUserAccounts(userId: string) {
-  return await db.financialAccount.findMany({
+  return await db.account.findMany({
     where: {
       userId: userId,
     },
