@@ -1,6 +1,4 @@
 import { db } from "@/lib/db";
-import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
-import { AddTransaction } from "@/components/accounts/tables/transactions/AddTransaction";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import LevelClient from "@/components/budgets/LevelClient";
