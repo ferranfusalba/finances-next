@@ -309,6 +309,7 @@ export const AddTransaction = (props: Props) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Amount*</FormLabel>
+                      {/* TODO: Check negative amounts with minus sign on mobile */}
                       <FormControl>
                         <Input
                           id="amountForm"
@@ -336,6 +337,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="dateDay"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="00"
                               max="31"
                               placeholder="08"
@@ -358,6 +361,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="dateMonth"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="00"
                               max="12"
                               placeholder="02"
@@ -380,6 +385,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="dateYear"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="1970"
                               max={currentYear}
                               placeholder={currentYear.toString()}
@@ -404,6 +411,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="timeHour"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="00"
                               max="23"
                               placeholder="02"
@@ -426,6 +435,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="timeMinute"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="00"
                               max="59"
                               placeholder="50"
@@ -448,6 +459,8 @@ export const AddTransaction = (props: Props) => {
                             <Input
                               id="timeSecond"
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="00"
                               max="59"
                               placeholder="59"
@@ -598,6 +611,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="foreignCurrencyExchangeRate"
                           type="number"
+                          inputMode="decimal"
                           step="0.01"
                           placeholder="1.595"
                           {...field}
