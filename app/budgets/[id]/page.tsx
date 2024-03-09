@@ -7,9 +7,11 @@ import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/Layou
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-import { currency } from "@/lib/utils";
 import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
 import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
+import { cn, currency } from "@/lib/utils";
+import currencies from "@/statics/currencies.json";
+import { Currency } from "@/types/Currency";
 
 async function loadBudget({ params }: AccountBudgetParamsProps) {
   return await db.budget.findUnique({
@@ -34,6 +36,15 @@ export default async function BudgetLayout({
   const budgetId = budget!.id;
   const budgetCode = budget!.code;
   const budgetTransactions = await loadBudgetTransactions(budgetId);
+  const currenciesList = Object.values(currencies);
+  const defaultCurrency: Currency | undefined = currenciesList.find(
+    (currency) => currency.code === budget?.defaultCurrency
+  );
+  // TODO: Fix this undefined (fallback object ?)
+  const backgroundColor = defaultCurrency
+    ? defaultCurrency.backgroundColor
+    : "";
+  const textColor = defaultCurrency ? defaultCurrency.textColor : "";
 
   return (
     <Layout02>
@@ -48,14 +59,20 @@ export default async function BudgetLayout({
             <span>{budget?.name}</span>
           </div>
           <div>
-            <span className="font-mono p-1 bg-blue-800 v rounded-md text-amber-300">
+            <span
+              className={cn(
+                "font-mono p-1 v rounded-md",
+                backgroundColor,
+                textColor
+              )}
+            >
               {budget?.defaultCurrency}
             </span>
             <span> </span>
             <span>{budget?.type}</span>
             <span> </span>
             <span className="font-mono">
-              {currency("ca-AD", "EUR").format(
+              {currency("ca-AD", budget!.defaultCurrency).format(
                 budget?.currentBalance as number
               )}
             </span>

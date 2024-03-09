@@ -69,7 +69,7 @@ export default function BudgetTransactionAdd(props: Props) {
     defaultValues: {
       concept: "",
       type: "",
-      currency: "",
+      currency: props.budget?.defaultCurrency as string,
       amountForm: "",
       category: "",
       subcategory: "",
@@ -197,23 +197,10 @@ export default function BudgetTransactionAdd(props: Props) {
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Currency*</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="CAD">CAD</SelectItem>
-                          <SelectItem value="CHF">CHF</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Currency* (default by Account)</FormLabel>
+                      <FormControl>
+                        <Input id="currency" type="text" disabled {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
