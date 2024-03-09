@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { Budget } from "@/types/Budget";
-import "./AddBudgetTransaction.css";
+import "./BudgetTransactionAdd.css";
 
 interface Props {
   budgetId: string;
@@ -40,7 +40,7 @@ interface Props {
   budget: Budget | null;
 }
 
-export default function AddBudgetTransaction(props: Props) {
+export default function BudgetTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
