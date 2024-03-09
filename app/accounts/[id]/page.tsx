@@ -1,16 +1,17 @@
 import { db } from "@/lib/db";
-import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
-import { AccountParamsProps } from "@/types/Account";
 import TransactionTable from "@/components/accounts/tables/transactions/TransactionTable";
 import { AddTransaction } from "@/components/accounts/tables/transactions/AddTransaction";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
+import Layout02 from "@/components/layouts/Layout02";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { currency } from "@/lib/utils";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
+import { currency } from "@/lib/utils";
 
-async function loadAccount({ params }: AccountParamsProps) {
+async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({
     where: {
       id: params.id,
@@ -26,14 +27,16 @@ async function loadAccountTransactions(id: string) {
   });
 }
 
-export default async function AccountLayout({ params }: AccountParamsProps) {
+export default async function AccountLayout({
+  params,
+}: AccountBudgetParamsProps) {
   const account = await loadAccount({ params });
   const accountId = account!.id;
   const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
 
   return (
-    <div className="m-auto w-11/12 xl:w-9/12 pb-20">
+    <Layout02>
       <LayoutAccountBudgetHeader>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <Avatar>
@@ -80,6 +83,6 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
       <LayoutAccountBudgetTable>
         <TransactionTable accountTransactions={accountTransactions} />
       </LayoutAccountBudgetTable>
-    </div>
+    </Layout02>
   );
 }

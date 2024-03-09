@@ -1,6 +1,5 @@
 "use client";
 import { useState, useTransition } from "react";
-import { AccountParamsProps } from "@/types/Account";
 import { TrashCan } from "@carbon/icons-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -11,8 +10,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
-export default function DeleteAccount({ params }: AccountParamsProps) {
+export default function DeleteAccount({ params }: AccountBudgetParamsProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
