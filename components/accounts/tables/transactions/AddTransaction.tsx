@@ -209,7 +209,7 @@ export const AddTransaction = (props: Props) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-flow-row md:grid-flow-col gap-8">
+            <div className="grid grid-flow-row md:grid-flow-col gap-4 md:gap-8">
               <div className="space-y-4">
                 {/* Payee */}
                 <FormField
