@@ -313,8 +313,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="amountForm"
                           type="number"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
+                          inputMode="decimal"
                           step="0.01"
                           placeholder="34,50"
                           {...field}
@@ -578,8 +577,7 @@ export const AddTransaction = (props: Props) => {
                         <Input
                           id="foreignCurrencyAmount"
                           type="number"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
+                          inputMode="decimal"
                           step="0.01"
                           placeholder="34,50"
                           {...field}
