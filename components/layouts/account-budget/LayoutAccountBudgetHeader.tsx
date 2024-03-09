@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function AccountBudgetHeaderLayout({
+export default function LayoutAccountBudgetHeader({
   children,
 }: {
   children: React.ReactNode;
