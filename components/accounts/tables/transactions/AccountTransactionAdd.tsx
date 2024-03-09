@@ -571,7 +571,10 @@ export default function AccountTransactionAdd(props: Props) {
                               <hr />
                             </SelectLabel> */}
                             {currenciesList.map((currency: Currency) => (
-                              <SelectItem value={currency.code}>
+                              <SelectItem
+                                value={currency.code}
+                                key={currency.code}
+                              >
                                 {currency.code} - {currency.name} (
                                 {currency.symbol_native})
                               </SelectItem>
