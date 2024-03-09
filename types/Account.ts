@@ -1,23 +1,18 @@
 import { AccountTransaction } from "./Transaction";
 
 export interface Account {
-  active: boolean | null;
-  bankName: string;
-  createdAt: Date;
-  description: string | null;
   id: string;
-  initialBalance: number | null;
-  currentBalance: number;
+  order: number;
   name: string;
   code: string;
+  bankName: string;
+  active: boolean | null;
   type: string | null;
-  order: number;
+  description: string | null;
+  defaultCurrency: string | null;
+  initialBalance: number | null;
+  currentBalance: number;
+  createdAt: Date;
   updatedAt: Date;
   transactions?: Array<AccountTransaction>;
-}
-
-export interface AccountParamsProps {
-  params: {
-    id: string;
-  };
 }

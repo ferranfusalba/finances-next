@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
-import { AccountParamsProps } from "@/types/Account";
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { NextResponse } from "next/server";
 
-export async function GET(request: any, { params }: AccountParamsProps) {
+export async function GET(request: any, { params }: AccountBudgetParamsProps) {
   const account = await db.account.findUnique({
     where: {
       id: params.id,
@@ -12,7 +12,7 @@ export async function GET(request: any, { params }: AccountParamsProps) {
   return NextResponse.json(account);
 }
 
-export async function PUT(request: any, { params }: AccountParamsProps) {
+export async function PUT(request: any, { params }: AccountBudgetParamsProps) {
   const data = await request.json();
   await db.account.update({
     where: {
@@ -24,7 +24,10 @@ export async function PUT(request: any, { params }: AccountParamsProps) {
   return NextResponse.json("Updating Account " + params.id);
 }
 
-export async function DELETE(request: any, { params }: AccountParamsProps) {
+export async function DELETE(
+  request: any,
+  { params }: AccountBudgetParamsProps
+) {
   try {
     const accountDeleted = await db.account.delete({
       where: {
