@@ -7,7 +7,7 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import "./TransactionTable.css";
+import "./AccountTransactionTable.css";
 import { AccountTransaction } from "@/types/Transaction";
 import { currency } from "@/lib/utils";
 
@@ -113,7 +113,7 @@ const columns = [
   }),
 ];
 
-export default function TransactionTable({
+export default function AccountTransactionTable({
   accountTransactions,
 }: {
   accountTransactions: Array<AccountTransaction>;
