@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import getUserId from "@/utils/getUserId";
 import { db } from "@/lib/db";
+import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 
 export const metadata: Metadata = {
@@ -30,9 +31,7 @@ export default async function BudgetsLayout({
     <>
       <SectionNavMenu type="budgets" list={userBudgets} allowAdd={true} />
       {/* TODO: Solve this TS error */}
-      <main className="h-full-main-mobile md:h-full-main pt-11">
-        {children}
-      </main>
+      <Layout01>{children}</Layout01>
     </>
   );
 }

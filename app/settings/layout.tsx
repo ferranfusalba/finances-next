@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 
 export const metadata: Metadata = {
@@ -20,9 +21,7 @@ export default async function SettingsLayout({
   return (
     <>
       <SectionNavMenu type="settings" list={defaultSettings} allowAdd={false} />
-      <main className="h-full-main-mobile md:h-full-main pt-11">
-        {children}
-      </main>
+      <Layout01>{children}</Layout01>
     </>
   );
 }
