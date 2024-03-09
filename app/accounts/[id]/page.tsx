@@ -9,7 +9,9 @@ import LayoutAccountBudgetActions from "@/components/layouts/account-budget/Layo
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
-import { currency } from "@/lib/utils";
+import { cn, currency } from "@/lib/utils";
+import currencies from "@/statics/currencies.json";
+import { Currency } from "@/types/Currency";
 
 async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({
@@ -34,6 +36,15 @@ export default async function AccountLayout({
   const accountId = account!.id;
   const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
+  const currenciesList = Object.values(currencies);
+  const defaultCurrency: Currency | undefined = currenciesList.find(
+    (currency) => currency.code === account?.defaultCurrency
+  );
+  // TODO: Fix this undefined (fallback object ?)
+  const backgroundColor = defaultCurrency
+    ? defaultCurrency.backgroundColor
+    : "";
+  const textColor = defaultCurrency ? defaultCurrency.textColor : "";
 
   return (
     <Layout02>
@@ -55,14 +66,20 @@ export default async function AccountLayout({
             <span>{account?.name}</span>
           </div>
           <div>
-            <span className="font-mono p-1 bg-blue-800 v rounded-md text-amber-300">
+            <span
+              className={cn(
+                "font-mono p-1 v rounded-md",
+                backgroundColor,
+                textColor
+              )}
+            >
               {account?.defaultCurrency}
             </span>
             <span> </span>
             <span>{account?.type}</span>
             <span> </span>
             <span className="font-mono">
-              {currency("ca-AD", "EUR").format(
+              {currency("ca-AD", account!.defaultCurrency).format(
                 account?.currentBalance as number
               )}
             </span>

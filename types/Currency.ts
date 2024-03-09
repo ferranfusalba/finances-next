@@ -6,4 +6,6 @@ export interface Currency {
   rounding: number;
   code: string;
   name_plural: string;
+  backgroundColor?: string;
+  textColor?: string;
 }
