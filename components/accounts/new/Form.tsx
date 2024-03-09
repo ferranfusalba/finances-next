@@ -13,6 +13,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Currency } from "@/types/Currency";
+import currencies from "@/statics/currencies.json";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -25,6 +34,7 @@ type Props = {
 export default function NewAccountForm(props: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const currenciesList = Object.values(currencies);
 
   const formSchema = z.object({
     bankName: z.string().min(1, {
@@ -39,6 +49,9 @@ export default function NewAccountForm(props: Props) {
     type: z.string().min(1, {
       message: "Account Type is required.",
     }),
+    defaultCurrency: z.string().min(1, {
+      message: "Currency is required.",
+    }),
     description: z.string(),
     initialBalance: z.string().min(1, {
       message: "Initial Balance is required.",
@@ -52,6 +65,7 @@ export default function NewAccountForm(props: Props) {
       name: "",
       code: "",
       type: "",
+      defaultCurrency: "",
       description: "",
       initialBalance: "",
     },
@@ -66,7 +80,7 @@ export default function NewAccountForm(props: Props) {
     const description = values.description;
     const initialBalance = parseFloat(values.initialBalance);
     const currentBalance = initialBalance; // TODO: Add this field to the form & update this field handling
-    const defaultCurrency = "EUR"; // TODO: Add this field to the form
+    const defaultCurrency = values.defaultCurrency;
     const userId = props.userId.id;
 
     startTransition(async () => {
@@ -111,12 +125,7 @@ export default function NewAccountForm(props: Props) {
               <FormItem>
                 <FormLabel>Bank Name</FormLabel>
                 <FormControl>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Bank Name"
-                    {...field}
-                  />
+                  <Input id="name" type="text" placeholder="N26" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,7 +142,7 @@ export default function NewAccountForm(props: Props) {
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Account Name"
+                    placeholder="Primary Space"
                     {...field}
                   />
                 </FormControl>
@@ -152,7 +161,7 @@ export default function NewAccountForm(props: Props) {
                   <Input
                     id="code"
                     type="text"
-                    placeholder="Account Code"
+                    placeholder="N26.PS"
                     {...field}
                   />
                 </FormControl>
@@ -171,10 +180,39 @@ export default function NewAccountForm(props: Props) {
                   <Input
                     id="type"
                     type="text"
-                    placeholder="Account Type"
+                    placeholder="Checking"
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Currency */}
+          <FormField
+            control={form.control}
+            name="defaultCurrency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {currenciesList.map((currency: Currency) => (
+                      <SelectItem value={currency.code}>
+                        {currency.code} - {currency.name} (
+                        {currency.symbol_native})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -210,7 +248,7 @@ export default function NewAccountForm(props: Props) {
                     id="initialBalance"
                     type="number"
                     step="0.01"
-                    placeholder="Initial Balance"
+                    placeholder="0"
                     {...field}
                   />
                 </FormControl>
