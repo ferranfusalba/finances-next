@@ -8,7 +8,7 @@ import LayoutAccountBudgetActions from "@/components/layouts/account-budget/Layo
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { currency } from "@/lib/utils";
-import AddBudgetTransaction from "@/components/budgets/tables/transactions/AddBudgetTransaction";
+import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
 import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
 
 async function loadBudget({ params }: AccountBudgetParamsProps) {
@@ -67,7 +67,7 @@ export default async function BudgetLayout({
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
         <ZustandClient></ZustandClient>
-        <AddBudgetTransaction
+        <BudgetTransactionAdd
           budget={budget}
           budgetId={budgetId}
           budgetCode={budgetCode}

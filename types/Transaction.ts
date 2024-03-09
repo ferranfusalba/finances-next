@@ -9,10 +9,9 @@ interface Transaction {
   balance: number;
   category: string;
   subcategory?: string | null;
-  tags?: string | null; // TODO: Move it to string[] ?
+  tags?: string | null;
   notes: string;
 }
-// TODO: Review optional fields & implications (page AccountLayout)
 
 export interface AccountTransaction extends Transaction {
   payee: string;

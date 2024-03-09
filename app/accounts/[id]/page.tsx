@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
-import AddAccountTransaction from "@/components/accounts/tables/transactions/AddAccountTransaction";
+import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import Layout02 from "@/components/layouts/Layout02";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -74,7 +74,7 @@ export default async function AccountLayout({
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
         <ZustandClient></ZustandClient>
-        <AddAccountTransaction
+        <AccountTransactionAdd
           account={account}
           accountId={accountId}
           accountCode={accountCode}

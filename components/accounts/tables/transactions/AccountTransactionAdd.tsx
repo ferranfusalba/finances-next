@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { Account } from "@/types/Account";
-import "./AddAccountTransaction.css";
+import "./AccountTransactionAdd.css";
 
 interface Props {
   accountId: string;
@@ -40,7 +40,7 @@ interface Props {
   account: Account | null;
 }
 
-export default function AddAccountTransaction(props: Props) {
+export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
