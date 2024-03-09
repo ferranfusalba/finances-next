@@ -8,6 +8,8 @@ import LayoutAccountBudgetActions from "@/components/layouts/account-budget/Layo
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { currency } from "@/lib/utils";
+import AddBudgetTransaction from "@/components/budgets/tables/transactions/AddBudgetTransaction";
+import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
 
 async function loadBudget({ params }: AccountBudgetParamsProps) {
   return await db.budget.findUnique({
@@ -17,10 +19,21 @@ async function loadBudget({ params }: AccountBudgetParamsProps) {
   });
 }
 
+async function loadBudgetTransactions(id: string) {
+  return await db.budgetTransaction.findMany({
+    where: {
+      budgetId: id,
+    },
+  });
+}
+
 export default async function BudgetLayout({
   params,
 }: AccountBudgetParamsProps) {
   const budget = await loadBudget({ params });
+  const budgetId = budget!.id;
+  const budgetCode = budget!.code;
+  const budgetTransactions = await loadBudgetTransactions(budgetId);
 
   return (
     <Layout02>
@@ -54,14 +67,15 @@ export default async function BudgetLayout({
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
         <ZustandClient></ZustandClient>
-        {/* <AddTransaction
-          account={account}
-          accountId={accountId}
-          accountCode={accountCode}
-        /> */}
+        <AddBudgetTransaction
+          budget={budget}
+          budgetId={budgetId}
+          budgetCode={budgetCode}
+        />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
-        {/* <TransactionTable accountTransactions={accountTransactions} /> */}
+        <BudgetTransactionTable budgetTransactions={budgetTransactions} />
+        <br />
         <LevelClient />
       </LayoutAccountBudgetTable>
     </Layout02>
