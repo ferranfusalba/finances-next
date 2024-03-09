@@ -6,6 +6,9 @@ import { AddTransaction } from "@/components/accounts/tables/transactions/AddTra
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { currency } from "@/lib/utils";
+import AccountBudgetHeaderLayout from "@/components/layouts/account-budget/AccountBudgetHeaderLayout";
+import AccountBudgetActionsLayout from "@/components/layouts/account-budget/AccountBudgetActionsLayout";
+import AccountBudgetTableLayout from "@/components/layouts/account-budget/AccountBudgetTableLayout";
 
 async function loadAccount({ params }: AccountParamsProps) {
   return await db.account.findUnique({
@@ -31,7 +34,7 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
 
   return (
     <div className="m-auto w-11/12 xl:w-9/12 pb-20">
-      <div className="grid grid-cols-12 py-6">
+      <AccountBudgetHeaderLayout>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <Avatar>
             {/* TODO: Build image & bankCode matchers */}
@@ -65,18 +68,18 @@ export default async function AccountLayout({ params }: AccountParamsProps) {
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <DeleteAccount params={params} />
         </div>
-      </div>
-      <div className="flex justify-between py-2">
+      </AccountBudgetHeaderLayout>
+      <AccountBudgetActionsLayout>
         <ZustandClient></ZustandClient>
         <AddTransaction
           account={account}
           accountId={accountId}
           accountCode={accountCode}
         />
-      </div>
-      <div className="py-2">
+      </AccountBudgetActionsLayout>
+      <AccountBudgetTableLayout>
         <TransactionTable accountTransactions={accountTransactions} />
-      </div>
+      </AccountBudgetTableLayout>
     </div>
   );
 }

@@ -19,6 +19,5 @@ export interface Account {
 export interface AccountParamsProps {
   params: {
     id: string;
-    code: string;
   };
 }
