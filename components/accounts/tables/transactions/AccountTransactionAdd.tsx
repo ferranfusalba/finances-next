@@ -11,12 +11,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import currencies from "@/statics/currencies.json";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -33,6 +36,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Account } from "@/types/Account";
 import "./AccountTransactionAdd.css";
+import { Currency } from "@/types/Currency";
 
 interface Props {
   accountId: string;
@@ -45,6 +49,7 @@ export default function AccountTransactionAdd(props: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
+  const currenciesList = Object.values(currencies);
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -97,7 +102,7 @@ export default function AccountTransactionAdd(props: Props) {
       payee: "",
       concept: "",
       type: "",
-      currency: "",
+      currency: props.account?.defaultCurrency as string,
       amountForm: "",
       foreignCurrency: "",
       foreignCurrencyAmount: "",
@@ -281,23 +286,10 @@ export default function AccountTransactionAdd(props: Props) {
                   name="currency"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Currency*</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="CAD">CAD</SelectItem>
-                          <SelectItem value="CHF">CHF</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Currency* (default by Account)</FormLabel>
+                      <FormControl>
+                        <Input id="currency" type="text" disabled {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -569,10 +561,22 @@ export default function AccountTransactionAdd(props: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="CAD">CAD</SelectItem>
-                          <SelectItem value="CHF">CHF</SelectItem>
+                          {/* <SelectGroup>
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="CAD">CAD</SelectItem>
+                            <SelectItem value="CHF">CHF</SelectItem>
+                          </SelectGroup> */}
+                          <SelectGroup>
+                            {/* <SelectLabel>
+                              <hr />
+                            </SelectLabel> */}
+                            {currenciesList.map((currency: Currency) => (
+                              <SelectItem value={currency.code}>
+                                {currency.code} - {currency.name} (
+                                {currency.symbol_native})
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                       <FormMessage />
