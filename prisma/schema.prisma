@@ -128,19 +128,21 @@ model Account {
 }
 
 model Budget {
-  id             String              @id @default(uuid())
-  order          Int                 @default(autoincrement())
-  name           String
-  code           String
-  active         Boolean
-  type           String
-  description    String?
-  initialBalance Float
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  User           User?               @relation(fields: [userId], references: [id])
-  userId         String?
-  transactions   BudgetTransaction[]
+  id              String              @id @default(uuid())
+  order           Int                 @default(autoincrement())
+  name            String
+  code            String
+  active          Boolean
+  type            String
+  description     String?
+  defaultCurrency String              @default("")
+  initialBalance  Float
+  currentBalance  Float               @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  User            User?               @relation(fields: [userId], references: [id])
+  userId          String?
+  transactions    BudgetTransaction[]
 
   @@unique([userId, code])
 }
