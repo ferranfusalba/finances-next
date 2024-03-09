@@ -15,6 +15,7 @@ export async function POST(request: any) {
       code: data.code,
       createdAt: data.createdAt,
       description: data.description,
+      defaultCurrency: data.defaultCurrency,
       id: data.id,
       initialBalance: data.initialBalance,
       name: data.name,

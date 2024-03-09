@@ -13,6 +13,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Currency } from "@/types/Currency";
+import currencies from "@/statics/currencies.json";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -25,6 +34,7 @@ type Props = {
 export default function NewBudgetForm(props: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const currenciesList = Object.values(currencies);
 
   const formSchema = z.object({
     name: z.string().min(1, {
@@ -35,6 +45,9 @@ export default function NewBudgetForm(props: Props) {
     }),
     type: z.string().min(1, {
       message: "Budget Type is required.",
+    }),
+    defaultCurrency: z.string().min(1, {
+      message: "Currency is required.",
     }),
     description: z.string(),
     initialBalance: z.string().min(1, {
@@ -48,6 +61,7 @@ export default function NewBudgetForm(props: Props) {
       name: "",
       code: "",
       type: "",
+      defaultCurrency: "",
       description: "",
       initialBalance: "",
     },
@@ -60,6 +74,7 @@ export default function NewBudgetForm(props: Props) {
     const type = values.type;
     const description = values.description;
     const initialBalance = parseFloat(values.initialBalance);
+    const defaultCurrency = values.defaultCurrency;
     const userId = props.userId.id;
 
     startTransition(async () => {
@@ -72,6 +87,7 @@ export default function NewBudgetForm(props: Props) {
           type,
           description,
           initialBalance,
+          defaultCurrency,
           userId,
         }),
         headers: {
@@ -146,6 +162,35 @@ export default function NewBudgetForm(props: Props) {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Currency */}
+          <FormField
+            control={form.control}
+            name="defaultCurrency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {currenciesList.map((currency: Currency) => (
+                      <SelectItem value={currency.code}>
+                        {currency.code} - {currency.name} (
+                        {currency.symbol_native})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
