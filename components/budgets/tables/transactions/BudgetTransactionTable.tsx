@@ -14,6 +14,14 @@ import { currency } from "@/lib/utils";
 const columnHelper = createColumnHelper<BudgetTransaction>();
 
 const columns = [
+  columnHelper.accessor((row) => row.createdAt, {
+    id: "createdAt",
+    cell: (info) => {
+      return <i>{info.getValue().toLocaleString("ca")}</i>;
+    },
+    header: () => <span>createdAt</span>,
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
@@ -79,9 +87,8 @@ export default function BudgetTransactionTable({
 
   type SortingState = ColumnSort[];
 
-  // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "dateTime", desc: false },
+    { id: "createdAt", desc: false },
   ]);
 
   const table = useReactTable({
