@@ -5,7 +5,6 @@ export interface Budget {
   order: number;
   name: string;
   code: string;
-  bankName: null;
   active: boolean | null;
   type: string | null;
   description: string | null;
