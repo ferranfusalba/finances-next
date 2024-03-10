@@ -121,6 +121,8 @@ model Account {
   defaultCurrency String               @default("")
   initialBalance  Float
   currentBalance  Float                @default(0)
+  number          String               @default("")
+  country         String               @default("")
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   User            User?                @relation(fields: [userId], references: [id])
