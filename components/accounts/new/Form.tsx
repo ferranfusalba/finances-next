@@ -80,6 +80,8 @@ export default function NewAccountForm(props: Props) {
     const initialBalance = parseFloat(values.initialBalance);
     const currentBalance = initialBalance; // TODO: Add this field to the form & update this field handling
     const defaultCurrency = values.defaultCurrency;
+    const number = "ABC123"; // TODO: Add this field to the form
+    const country = "ES"; // TODO: Add this field to the form
     const userId = props.userId.id;
 
     startTransition(async () => {
@@ -95,6 +97,8 @@ export default function NewAccountForm(props: Props) {
           initialBalance,
           currentBalance,
           defaultCurrency,
+          number,
+          country,
           userId,
         }),
         headers: {

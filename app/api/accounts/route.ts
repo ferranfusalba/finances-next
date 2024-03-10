@@ -20,6 +20,8 @@ export async function POST(request: any) {
       id: data.id,
       initialBalance: data.initialBalance,
       currentBalance: data.currentBalance,
+      number: data.number,
+      country: data.country,
       name: data.name,
       type: data.type,
       updatedAt: data.updatedAt,
