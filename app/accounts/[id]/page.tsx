@@ -65,7 +65,9 @@ export default async function AccountLayout({
             <span>{account?.name}</span>
           </div>
           <div>
-            <span>{account?.country} (Full Name)</span>
+            <span>
+              {account?.country} {/* (Full Name) */}
+            </span>
             <span> - </span>
             <span className="font-mono">{account?.number}</span>
           </div>

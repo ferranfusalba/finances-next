@@ -49,6 +49,9 @@ export default function AccountTransactionAdd(props: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
+  const foreignCurrenciesList = currenciesList.filter(
+    (currency) => currency.code !== props.account?.defaultCurrency
+  );
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -560,6 +563,7 @@ export default function AccountTransactionAdd(props: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          {/* TODO: Add here the common currencies list */}
                           {/* <SelectGroup>
                             <SelectItem value="USD">USD</SelectItem>
                             <SelectItem value="CAD">CAD</SelectItem>
@@ -569,7 +573,7 @@ export default function AccountTransactionAdd(props: Props) {
                             {/* <SelectLabel>
                               <hr />
                             </SelectLabel> */}
-                            {currenciesList.map((currency: Currency) => (
+                            {foreignCurrenciesList.map((currency: Currency) => (
                               <SelectItem
                                 value={currency.code}
                                 key={currency.code}
