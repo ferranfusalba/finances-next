@@ -40,8 +40,9 @@ const columns = [
   columnHelper.accessor("amount", {
     cell: (info) => {
       const number = info.getValue();
+      const defaultCurrency = info.row.original?.currency;
 
-      return <>{currency("ca-AD", "EUR").format(number)}</>;
+      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
     },
     header: "Amount",
     footer: (info) => info.column.id,
@@ -49,8 +50,9 @@ const columns = [
   columnHelper.accessor("balance", {
     cell: (info) => {
       const number = info.getValue();
+      const defaultCurrency = info.row.original?.currency;
 
-      return <>{currency("ca-AD", "EUR").format(number)}</>;
+      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
     },
     header: "Balance",
     footer: (info) => info.column.id,

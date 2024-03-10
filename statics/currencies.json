@@ -42,7 +42,9 @@
     "decimal_digits": 2,
     "rounding": 0,
     "code": "ARS",
-    "name_plural": "Argentine pesos"
+    "name_plural": "Argentine pesos",
+    "backgroundColor": "bg-sky-300",
+    "textColor": "text-yellow-400"
   },
   "AUD": {
     "symbol": "AU$",
@@ -51,7 +53,9 @@
     "decimal_digits": 2,
     "rounding": 0,
     "code": "AUD",
-    "name_plural": "Australian dollars"
+    "name_plural": "Australian dollars",
+    "backgroundColor": "bg-blue-950",
+    "textColor": "text-slate-50"
   },
   "AZN": {
     "symbol": "man.",
@@ -728,7 +732,9 @@
     "decimal_digits": 2,
     "rounding": 0,
     "code": "NZD",
-    "name_plural": "New Zealand dollars"
+    "name_plural": "New Zealand dollars",
+    "backgroundColor": "bg-blue-950",
+    "textColor": "text-red-600"
   },
   "OMR": {
     "symbol": "OMR",
