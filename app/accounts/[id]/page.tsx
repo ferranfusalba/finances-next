@@ -34,16 +34,15 @@ export default async function AccountLayout({
 }: AccountBudgetParamsProps) {
   const account = await loadAccount({ params });
   const accountId = account!.id;
-  const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
-  const defaultCurrency: Currency | undefined = currenciesList.find(
+  const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
     (currency) => currency.code === account?.defaultCurrency
   );
   // TODO: Fix this undefined (fallback object ?)
-  const backgroundColor = defaultCurrency
-    ? defaultCurrency.backgroundColor
+  const backgroundColor = defaultCurrencyMatch
+    ? defaultCurrencyMatch.backgroundColor
     : "";
-  const textColor = defaultCurrency ? defaultCurrency.textColor : "";
+  const textColor = defaultCurrencyMatch ? defaultCurrencyMatch.textColor : "";
 
   return (
     <Layout02a>
@@ -74,9 +73,9 @@ export default async function AccountLayout({
           <div>
             <span
               className={cn(
+                "font-mono p-1 rounded-md",
                 "bg-" + backgroundColor,
-                textColor,
-                "font-mono p-1 rounded-md"
+                textColor
               )}
             >
               {account?.defaultCurrency}
@@ -86,8 +85,8 @@ export default async function AccountLayout({
             <span> </span>
             <span
               className={cn(
-                "border-" + backgroundColor,
-                "font-mono p-1 border-solid border-2 rounded-md"
+                "font-mono p-1 border-solid border-2 rounded-md",
+                "border-" + backgroundColor
               )}
             >
               {currency("ca-AD", account!.defaultCurrency).format(
@@ -102,11 +101,7 @@ export default async function AccountLayout({
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
         <ZustandClient></ZustandClient>
-        <AccountTransactionAdd
-          account={account}
-          accountId={accountId}
-          accountCode={accountCode}
-        />
+        <AccountTransactionAdd account={account} />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
         <AccountTransactionTable accountTransactions={accountTransactions} />
