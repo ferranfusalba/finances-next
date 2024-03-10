@@ -27,7 +27,8 @@ const routes: Array<Section> = [
 
 export default function BottomNav() {
   return (
-    <nav className="md:flex md:justify-between bg-slate-900 px-6 py-3 text-white">
+    // bg-slate-900
+    <nav className="md:flex md:justify-between px-6 py-3 text-white bg-zinc-950 border-t border-t-gray-400 shadow-gray-400">
       <ul className="flex justify-between md:justify-start">
         {routes.map((route) => {
           return <BottomNavSection key={route.path} section={route} />;

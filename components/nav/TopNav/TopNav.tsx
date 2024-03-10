@@ -18,7 +18,7 @@ const TopNav = async () => {
   const user = await currentUser();
 
   return (
-    <nav className="h-16 bg-slate-900 flex items-center px-6 py-3 justify-between text-white">
+    <nav className="h-16 flex items-center px-6 py-3 justify-between text-white bg-zinc-950">
       <Link href="/">
         <div className="flex gap-4">
           <h1>Finances</h1>

@@ -50,7 +50,7 @@ export default async function RootLayout({
           sizes="<generated>"
         />
       </head>
-      <body className={`${ibm.className} bg-zinc-950 text-slate-100`}>
+      <body className={`${ibm.className} text-slate-100`}>
         <SessionProvider session={session}>
           <header className="fixed top-0 w-full">
             <TopNav />

@@ -10,7 +10,6 @@ import LayoutAccountBudgetTable from "@/components/layouts/account-budget/Layout
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { cn, currency } from "@/lib/utils";
-import currencies from "@/statics/currencies.json";
 import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
 
@@ -64,6 +63,11 @@ export default async function AccountLayout({
             </span>
             <span> </span>
             <span>{account?.name}</span>
+          </div>
+          <div>
+            <span>{account?.country} (Full Name)</span>
+            <span> - </span>
+            <span className="font-mono">{account?.number}</span>
           </div>
           <div>
             <span
