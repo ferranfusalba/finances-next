@@ -59,7 +59,7 @@ export default async function AccountLayout({
         <div className="col-span-8 md:col-span-10 grid gap-2">
           <span className="text-2xl">{account?.bankName}</span>
           <div>
-            <span className="font-mono p-1 bg-slate-100 v rounded-md text-stone-900">
+            <span className="font-mono p-1 bg-slate-100 rounded-md text-stone-900">
               {account?.code}
             </span>
             <span> </span>
@@ -68,9 +68,9 @@ export default async function AccountLayout({
           <div>
             <span
               className={cn(
-                backgroundColor,
+                "bg-" + backgroundColor,
                 textColor,
-                "font-mono p-1 v rounded-md"
+                "font-mono p-1 rounded-md"
               )}
             >
               {account?.defaultCurrency}
@@ -78,7 +78,12 @@ export default async function AccountLayout({
             <span> </span>
             <span>{account?.type}</span>
             <span> </span>
-            <span className="font-mono">
+            <span
+              className={cn(
+                "border-" + backgroundColor,
+                "font-mono p-1 border-solid border-2 rounded-md"
+              )}
+            >
               {currency("ca-AD", account!.defaultCurrency).format(
                 account?.currentBalance as number
               )}
