@@ -1,12 +1,12 @@
 "use client";
-import useWindowDimensions from "@/hooks/use-window-dimensions";
+import Layout02b from "@/components/layouts/Layout02b";
 
 export default function DataSubscriptionsLayout() {
   return (
-    <div className="pb-20 md:pb-12">
+    <Layout02b>
       Data Subscriptions from own page
       <br />
       (Table)
-    </div>
+    </Layout02b>
   );
 }

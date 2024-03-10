@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import LevelClient from "@/components/budgets/LevelClient";
-import Layout02 from "@/components/layouts/Layout02";
+import Layout02a from "@/components/layouts/Layout02a";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
@@ -47,7 +47,7 @@ export default async function BudgetLayout({
   const textColor = defaultCurrency ? defaultCurrency.textColor : "";
 
   return (
-    <Layout02>
+    <Layout02a>
       <LayoutAccountBudgetHeader>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center"></div>
         <div className="col-span-8 md:col-span-10 grid gap-2">
@@ -61,9 +61,9 @@ export default async function BudgetLayout({
           <div>
             <span
               className={cn(
-                "font-mono p-1 v rounded-md",
                 backgroundColor,
-                textColor
+                textColor,
+                "font-mono p-1 v rounded-md"
               )}
             >
               {budget?.defaultCurrency}
@@ -95,6 +95,6 @@ export default async function BudgetLayout({
         <br />
         <LevelClient />
       </LayoutAccountBudgetTable>
-    </Layout02>
+    </Layout02a>
   );
 }
