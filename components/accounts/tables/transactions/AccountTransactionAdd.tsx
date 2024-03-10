@@ -39,8 +39,6 @@ import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
 
 interface Props {
-  accountId: string;
-  accountCode: string;
   account: Account | null;
 }
 
@@ -154,7 +152,7 @@ export default function AccountTransactionAdd(props: Props) {
     const timezone = values.timezone;
     const location = values.location;
     const notes = values.notes;
-    const accountId = props.accountId;
+    const accountId = props.account?.id;
     const balance = balanceOnAccount + amountForm;
 
     startTransition(async () => {

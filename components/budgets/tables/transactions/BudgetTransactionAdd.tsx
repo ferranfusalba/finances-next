@@ -35,8 +35,6 @@ import { Budget } from "@/types/Budget";
 import "./BudgetTransactionAdd.css";
 
 interface Props {
-  budgetId: string;
-  budgetCode: string;
   budget: Budget | null;
 }
 
@@ -89,7 +87,7 @@ export default function BudgetTransactionAdd(props: Props) {
     const subcategory = values.subcategory;
     const tags = values.tags;
     const notes = values.notes;
-    const budgetId = props.budgetId;
+    const budgetId = props.budget?.id;
     const balance = balanceOnBudget + amountForm;
 
     startTransition(async () => {
