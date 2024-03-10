@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
-import Layout02 from "@/components/layouts/Layout02";
+import Layout02a from "@/components/layouts/Layout02a";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
@@ -47,7 +47,7 @@ export default async function AccountLayout({
   const textColor = defaultCurrency ? defaultCurrency.textColor : "";
 
   return (
-    <Layout02>
+    <Layout02a>
       <LayoutAccountBudgetHeader>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
           <Avatar>
@@ -68,9 +68,9 @@ export default async function AccountLayout({
           <div>
             <span
               className={cn(
-                "font-mono p-1 v rounded-md",
                 backgroundColor,
-                textColor
+                textColor,
+                "font-mono p-1 v rounded-md"
               )}
             >
               {account?.defaultCurrency}
@@ -100,6 +100,6 @@ export default async function AccountLayout({
       <LayoutAccountBudgetTable>
         <AccountTransactionTable accountTransactions={accountTransactions} />
       </LayoutAccountBudgetTable>
-    </Layout02>
+    </Layout02a>
   );
 }

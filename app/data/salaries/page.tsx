@@ -1,11 +1,13 @@
 "use client";
 
+import Layout02b from "@/components/layouts/Layout02b";
+
 export default function DataSalariesLayout() {
   return (
-    <div className="pb-20 md:pb-12">
+    <Layout02b>
       Data Salaries from own page
       <br />
       (Table)
-    </div>
+    </Layout02b>
   );
 }
