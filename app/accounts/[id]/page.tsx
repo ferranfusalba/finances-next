@@ -12,6 +12,7 @@ import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import { cn, currency } from "@/lib/utils";
 import currencies from "@/statics/currencies.json";
 import { Currency } from "@/types/Currency";
+import { currenciesList } from "@/utils/getCurrenciesList";
 
 async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({
@@ -36,7 +37,6 @@ export default async function AccountLayout({
   const accountId = account!.id;
   const accountCode = account!.code;
   const accountTransactions = await loadAccountTransactions(accountId);
-  const currenciesList = Object.values(currencies);
   const defaultCurrency: Currency | undefined = currenciesList.find(
     (currency) => currency.code === account?.defaultCurrency
   );
