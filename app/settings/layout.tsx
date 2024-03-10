@@ -16,6 +16,8 @@ export default async function SettingsLayout({
     { id: "admin", name: "Admin" },
     { id: "server", name: "Server" },
     { id: "client", name: "Client" },
+    { id: "playground-client", name: "Playground (Client)" },
+    { id: "playground-server", name: "Playground (Server)" },
   ];
 
   return (
