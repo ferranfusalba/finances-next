@@ -12,6 +12,8 @@ import BudgetTransactionTable from "@/components/budgets/tables/transactions/Bud
 import { cn, currency } from "@/lib/utils";
 import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
+import BackgroundChip from "@/components/chips/BackgroundChip";
+import BorderChip from "@/components/chips/BorderChip";
 
 async function loadBudget({ params }: AccountBudgetParamsProps) {
   return await db.budget.findUnique({
@@ -39,10 +41,8 @@ export default async function BudgetLayout({
     (currency) => currency.code === budget?.defaultCurrency
   );
   // TODO: Fix this undefined (fallback object ?)
-  const backgroundColor = defaultCurrencyMatch
-    ? defaultCurrencyMatch.backgroundColor
-    : "";
-  const textColor = defaultCurrencyMatch ? defaultCurrencyMatch.textColor : "";
+  const color0 = defaultCurrencyMatch ? defaultCurrencyMatch.color0 : "";
+  const color1 = defaultCurrencyMatch ? defaultCurrencyMatch.color1 : "";
 
   return (
     <Layout02a>
@@ -57,28 +57,21 @@ export default async function BudgetLayout({
             <span>{budget?.name}</span>
           </div>
           <div>
-            <span
-              className={cn(
-                "font-mono p-1 rounded-md",
-                "bg-" + backgroundColor,
-                textColor
-              )}
-            >
-              {budget?.defaultCurrency}
-            </span>
+            <BackgroundChip
+              data={budget?.defaultCurrency as string}
+              backgroundColor={color0 as string}
+              textColor={color1 as string}
+            />
             <span> </span>
             <span>{budget?.type}</span>
             <span> </span>
-            <span
-              className={cn(
-                "font-mono p-1 border-solid border-2 rounded-md",
-                "border-" + backgroundColor
-              )}
-            >
-              {currency("ca-AD", budget!.defaultCurrency).format(
+
+            <BorderChip
+              data={currency("ca-AD", budget!.defaultCurrency).format(
                 budget?.currentBalance as number
               )}
-            </span>
+              borderColor={color0 as string}
+            />
           </div>
         </div>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
