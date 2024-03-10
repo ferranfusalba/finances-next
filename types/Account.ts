@@ -12,6 +12,8 @@ export interface Account {
   defaultCurrency: string | null;
   initialBalance: number | null;
   currentBalance: number;
+  number: string;
+  country: string;
   createdAt: Date;
   updatedAt: Date;
   transactions?: Array<AccountTransaction>;
