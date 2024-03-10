@@ -43,7 +43,7 @@
     "rounding": 0,
     "code": "ARS",
     "name_plural": "Argentine pesos",
-    "backgroundColor": "bg-sky-300",
+    "backgroundColor": "sky-300",
     "textColor": "text-yellow-400"
   },
   "AUD": {
@@ -54,7 +54,7 @@
     "rounding": 0,
     "code": "AUD",
     "name_plural": "Australian dollars",
-    "backgroundColor": "bg-blue-950",
+    "backgroundColor": "blue-950",
     "textColor": "text-slate-50"
   },
   "AZN": {
@@ -326,7 +326,7 @@
     "rounding": 0,
     "code": "EUR",
     "name_plural": "euros",
-    "backgroundColor": "bg-blue-800",
+    "backgroundColor": "blue-800",
     "textColor": "text-amber-300"
   },
   "GBP": {
@@ -733,7 +733,7 @@
     "rounding": 0,
     "code": "NZD",
     "name_plural": "New Zealand dollars",
-    "backgroundColor": "bg-blue-950",
+    "backgroundColor": "blue-950",
     "textColor": "text-red-600"
   },
   "OMR": {
@@ -987,7 +987,7 @@
     "rounding": 0,
     "code": "USD",
     "name_plural": "US dollars",
-    "backgroundColor": "bg-lime-900",
+    "backgroundColor": "lime-900",
     "textColor": "text-slate-50"
   },
   "UYU": {

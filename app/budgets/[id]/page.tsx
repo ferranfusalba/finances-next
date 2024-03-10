@@ -52,7 +52,7 @@ export default async function BudgetLayout({
         <div className="col-span-2 md:col-span-1 grid justify-center content-center"></div>
         <div className="col-span-8 md:col-span-10 grid gap-2">
           <div>
-            <span className="font-mono p-1 bg-slate-100 v rounded-md text-stone-900">
+            <span className="font-mono p-1 bg-slate-100 rounded-md text-stone-900">
               {budget?.code}
             </span>
             <span> </span>
@@ -61,9 +61,9 @@ export default async function BudgetLayout({
           <div>
             <span
               className={cn(
-                backgroundColor,
+                "bg-" + backgroundColor,
                 textColor,
-                "font-mono p-1 v rounded-md"
+                "font-mono p-1 rounded-md"
               )}
             >
               {budget?.defaultCurrency}
@@ -71,7 +71,12 @@ export default async function BudgetLayout({
             <span> </span>
             <span>{budget?.type}</span>
             <span> </span>
-            <span className="font-mono">
+            <span
+              className={cn(
+                "border-" + backgroundColor,
+                "font-mono p-1 border-solid border-2 rounded-md"
+              )}
+            >
               {currency("ca-AD", budget!.defaultCurrency).format(
                 budget?.currentBalance as number
               )}
