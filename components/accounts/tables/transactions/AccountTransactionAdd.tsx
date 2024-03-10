@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import currencies from "@/statics/currencies.json";
 import {
   Select,
   SelectContent,

@@ -10,7 +10,6 @@ import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
 import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
 import { cn, currency } from "@/lib/utils";
-import currencies from "@/statics/currencies.json";
 import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
 
