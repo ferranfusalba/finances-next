@@ -37,6 +37,7 @@ import { useRouter } from "next/navigation";
 import { Account } from "@/types/Account";
 import "./AccountTransactionAdd.css";
 import { Currency } from "@/types/Currency";
+import { currenciesList } from "@/utils/getCurrenciesList";
 
 interface Props {
   accountId: string;
@@ -49,7 +50,6 @@ export default function AccountTransactionAdd(props: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
-  const currenciesList = Object.values(currencies);
 
   const formSchema = z.object({
     payee: z.string().min(1, {

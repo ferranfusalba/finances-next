@@ -12,6 +12,7 @@ import BudgetTransactionTable from "@/components/budgets/tables/transactions/Bud
 import { cn, currency } from "@/lib/utils";
 import currencies from "@/statics/currencies.json";
 import { Currency } from "@/types/Currency";
+import { currenciesList } from "@/utils/getCurrenciesList";
 
 async function loadBudget({ params }: AccountBudgetParamsProps) {
   return await db.budget.findUnique({
@@ -36,7 +37,6 @@ export default async function BudgetLayout({
   const budgetId = budget!.id;
   const budgetCode = budget!.code;
   const budgetTransactions = await loadBudgetTransactions(budgetId);
-  const currenciesList = Object.values(currencies);
   const defaultCurrency: Currency | undefined = currenciesList.find(
     (currency) => currency.code === budget?.defaultCurrency
   );

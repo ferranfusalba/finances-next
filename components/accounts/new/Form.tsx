@@ -26,6 +26,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { currenciesList } from "@/utils/getCurrenciesList";
 
 type Props = {
   userId: User;
@@ -34,7 +35,6 @@ type Props = {
 export default function NewAccountForm(props: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const currenciesList = Object.values(currencies);
 
   const formSchema = z.object({
     bankName: z.string().min(1, {
