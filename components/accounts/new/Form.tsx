@@ -241,7 +241,10 @@ export default function NewAccountForm(props: Props) {
                         value={country["alpha-2"]}
                         key={country["alpha-2"]}
                       >
-                        {country["alpha-2"]} - {country.name}
+                        {country["emoji-flag"]} {country["alpha-2"]} -{" "}
+                        {country.name}{" "}
+                        {country["full-name"] &&
+                          "(" + country["full-name"] + ")"}
                       </SelectItem>
                     ))}
                   </SelectContent>
