@@ -237,7 +237,10 @@ export default function NewAccountForm(props: Props) {
                   </FormControl>
                   <SelectContent>
                     {countries.map((country: any) => (
-                      <SelectItem value={country.name} key={country["alpha-2"]}>
+                      <SelectItem
+                        value={country["alpha-2"]}
+                        key={country["alpha-2"]}
+                      >
                         {country["alpha-2"]} - {country.name}
                       </SelectItem>
                     ))}

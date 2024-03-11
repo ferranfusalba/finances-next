@@ -4,15 +4,33 @@
   { "name": "Albania", "alpha-2": "AL", "country-code": "008" },
   { "name": "Algeria", "alpha-2": "DZ", "country-code": "012" },
   { "name": "American Samoa", "alpha-2": "AS", "country-code": "016" },
-  { "name": "Andorra", "alpha-2": "AD", "country-code": "020" },
+  {
+    "name": "Andorra",
+    "alpha-2": "AD",
+    "country-code": "020",
+    "emoji-flag": "🇦🇩",
+    "full-name": "Principat d'Andorra"
+  },
   { "name": "Angola", "alpha-2": "AO", "country-code": "024" },
   { "name": "Anguilla", "alpha-2": "AI", "country-code": "660" },
   { "name": "Antarctica", "alpha-2": "AQ", "country-code": "010" },
   { "name": "Antigua and Barbuda", "alpha-2": "AG", "country-code": "028" },
-  { "name": "Argentina", "alpha-2": "AR", "country-code": "032" },
+  {
+    "name": "Argentina",
+    "alpha-2": "AR",
+    "country-code": "032",
+    "emoji-flag": "🇦🇷",
+    "full-name": "República Argentina"
+  },
   { "name": "Armenia", "alpha-2": "AM", "country-code": "051" },
   { "name": "Aruba", "alpha-2": "AW", "country-code": "533" },
-  { "name": "Australia", "alpha-2": "AU", "country-code": "036" },
+  {
+    "name": "Australia",
+    "alpha-2": "AU",
+    "country-code": "036",
+    "emoji-flag": "🇦🇺",
+    "full-name": "Commonwealth of Australia"
+  },
   { "name": "Austria", "alpha-2": "AT", "country-code": "040" },
   { "name": "Azerbaijan", "alpha-2": "AZ", "country-code": "031" },
   { "name": "Bahamas", "alpha-2": "BS", "country-code": "044" },
@@ -51,7 +69,12 @@
   { "name": "Cabo Verde", "alpha-2": "CV", "country-code": "132" },
   { "name": "Cambodia", "alpha-2": "KH", "country-code": "116" },
   { "name": "Cameroon", "alpha-2": "CM", "country-code": "120" },
-  { "name": "Canada", "alpha-2": "CA", "country-code": "124" },
+  {
+    "name": "Canada",
+    "alpha-2": "CA",
+    "country-code": "124",
+    "emoji-flag": "🇨🇦"
+  },
   { "name": "Cayman Islands", "alpha-2": "KY", "country-code": "136" },
   {
     "name": "Central African Republic",
@@ -205,7 +228,12 @@
   { "name": "Nepal", "alpha-2": "NP", "country-code": "524" },
   { "name": "Netherlands", "alpha-2": "NL", "country-code": "528" },
   { "name": "New Caledonia", "alpha-2": "NC", "country-code": "540" },
-  { "name": "New Zealand", "alpha-2": "NZ", "country-code": "554" },
+  {
+    "name": "New Zealand",
+    "alpha-2": "NZ",
+    "country-code": "554",
+    "emoji-flag": "🇳🇿"
+  },
   { "name": "Nicaragua", "alpha-2": "NI", "country-code": "558" },
   { "name": "Niger", "alpha-2": "NE", "country-code": "562" },
   { "name": "Nigeria", "alpha-2": "NG", "country-code": "566" },
@@ -284,13 +312,25 @@
     "country-code": "239"
   },
   { "name": "South Sudan", "alpha-2": "SS", "country-code": "728" },
-  { "name": "Spain", "alpha-2": "ES", "country-code": "724" },
+  {
+    "name": "Spain",
+    "alpha-2": "ES",
+    "country-code": "724",
+    "emoji-flag": "🇪🇸",
+    "full-name": "Reino de España"
+  },
   { "name": "Sri Lanka", "alpha-2": "LK", "country-code": "144" },
   { "name": "Sudan", "alpha-2": "SD", "country-code": "729" },
   { "name": "Suriname", "alpha-2": "SR", "country-code": "740" },
   { "name": "Svalbard and Jan Mayen", "alpha-2": "SJ", "country-code": "744" },
   { "name": "Sweden", "alpha-2": "SE", "country-code": "752" },
-  { "name": "Switzerland", "alpha-2": "CH", "country-code": "756" },
+  {
+    "name": "Switzerland",
+    "alpha-2": "CH",
+    "country-code": "756",
+    "emoji-flag": "🇨🇭",
+    "full-name": "Schweizerische Eidgenossenschaft | Confédération suisse | Confederazione Svizzera | Confederaziun svizra | Confoederatio helvetica"
+  },
   { "name": "Syrian Arab Republic", "alpha-2": "SY", "country-code": "760" },
   {
     "name": "Taiwan, Province of China",
@@ -329,7 +369,8 @@
   {
     "name": "United States of America",
     "alpha-2": "US",
-    "country-code": "840"
+    "country-code": "840",
+    "emoji-flag": "🇺🇸"
   },
   {
     "name": "United States Minor Outlying Islands",
