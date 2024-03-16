@@ -29,6 +29,12 @@ export async function DELETE(
   { params }: AccountBudgetParamsProps
 ) {
   try {
+    await db.budgetTransaction.deleteMany({
+      where: {
+        budgetId: params.id,
+      },
+    });
+
     const budgetDeleted = await db.budget.delete({
       where: {
         id: params.id,

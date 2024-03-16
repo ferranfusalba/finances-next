@@ -14,6 +14,7 @@ import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
+import countries from "@/statics/countries.json";
 
 async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({
@@ -44,6 +45,41 @@ export default async function AccountLayout({
   const color0 = defaultCurrencyMatch ? defaultCurrencyMatch.color0 : "";
   const color1 = defaultCurrencyMatch ? defaultCurrencyMatch.color1 : "";
 
+  function getCountryEmojiFlag(alpha2Code: string) {
+    const country = countries.filter(
+      (country) => country["alpha-2"] === alpha2Code
+    )[0];
+    if (country) {
+      return country["emoji-flag"] || "No emoji flag available";
+    } else {
+      return "Country not found";
+    }
+  }
+
+  function getCountryName(alpha2Code: string) {
+    const country = countries.filter(
+      (country) => country["alpha-2"] === alpha2Code
+    )[0];
+    if (country) {
+      return country["name"] || "No country name available";
+    } else {
+      return "Country not found";
+    }
+  }
+
+  function getCountryFullName(alpha2Code: string) {
+    const country = countries.filter(
+      (country) => country["alpha-2"] === alpha2Code
+    )[0];
+    if (country && country["full-name"]) {
+      return "(" + country["full-name"] + ")";
+    } else if (country) {
+      return "";
+    } else {
+      return "Country not found";
+    }
+  }
+
   return (
     <Layout02a>
       <LayoutAccountBudgetHeader>
@@ -65,7 +101,10 @@ export default async function AccountLayout({
           </div>
           <div>
             <span>
-              {account?.country} {/* (Full Name) */}
+              {getCountryEmojiFlag(account?.country as string)}
+              {"  "}
+              {account?.country} - {getCountryName(account?.country as string)}{" "}
+              {getCountryFullName(account?.country as string)}
             </span>
             <span> - </span>
             <span className="font-mono">{account?.number}</span>
