@@ -73,6 +73,15 @@ const columns = [
     header: "Notes",
     footer: (info) => info.column.id,
   }),
+  columnHelper.accessor("id", {
+    cell: (info) => {
+      const transactionId = info.row.original?.id;
+
+      return <>{transactionId}</>;
+    },
+    header: "Transaction ID",
+    footer: (info) => info.column.id,
+  }),
 ];
 
 export default function BudgetTransactionTable({

@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { currenciesList } from "@/utils/getCurrenciesList";
+import countries from "@/statics/countries.json";
 
 type Props = {
   userId: User;
@@ -48,6 +49,12 @@ export default function NewAccountForm(props: Props) {
     type: z.string().min(1, {
       message: "Account Type is required.",
     }),
+    number: z.string().min(1, {
+      message: "Account Number is required.",
+    }),
+    country: z.string().min(1, {
+      message: "Country is required.",
+    }),
     defaultCurrency: z.string().min(1, {
       message: "Currency is required.",
     }),
@@ -64,6 +71,8 @@ export default function NewAccountForm(props: Props) {
       name: "",
       code: "",
       type: "",
+      number: "",
+      country: "",
       defaultCurrency: "",
       description: "",
       initialBalance: "",
@@ -80,8 +89,8 @@ export default function NewAccountForm(props: Props) {
     const initialBalance = parseFloat(values.initialBalance);
     const currentBalance = initialBalance; // TODO: Add this field to the form & update this field handling
     const defaultCurrency = values.defaultCurrency;
-    const number = "ABC123"; // TODO: Add this field to the form
-    const country = "ES"; // TODO: Add this field to the form
+    const number = values.number;
+    const country = values.country;
     const userId = props.userId.id;
 
     startTransition(async () => {
@@ -187,6 +196,59 @@ export default function NewAccountForm(props: Props) {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Number */}
+          <FormField
+            control={form.control}
+            name="number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Number</FormLabel>
+                <FormControl>
+                  <Input
+                    id="number"
+                    type="text"
+                    placeholder="ES12 3456 7890"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Country */}
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {countries.map((country: any) => (
+                      <SelectItem
+                        value={country["alpha-2"]}
+                        key={country["alpha-2"]}
+                      >
+                        {country["emoji-flag"]} {country["alpha-2"]} -{" "}
+                        {country.name}{" "}
+                        {country["full-name"] &&
+                          "(" + country["full-name"] + ")"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

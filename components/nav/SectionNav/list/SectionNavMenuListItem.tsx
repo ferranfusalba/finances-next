@@ -9,7 +9,7 @@ export default function SectionNavMenuListItem({
   index,
   type,
 }: {
-  item: { id: string; name: string };
+  item: { id: string; name: string; bankName?: string };
   index: number;
   type: string;
 }) {
@@ -35,8 +35,14 @@ export default function SectionNavMenuListItem({
           className="w-max min-w-10rem text-center"
           href={`/${type}/` + item.id}
         >
-          {item.name}
-        </Link>{" "}
+          {item.bankName ? (
+            <>
+              <small>{item.bankName}</small> · {item.name}
+            </>
+          ) : (
+            item.name
+          )}
+        </Link>
       </li>
     </>
   );

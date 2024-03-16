@@ -1,5 +1,3 @@
-import { Account } from "@/types/Account";
-import { Budget } from "@/types/Budget";
 import SectionNavMenuListItem from "./SectionNavMenuListItem";
 
 export default function SectionNavMenuList({
@@ -18,7 +16,7 @@ export default function SectionNavMenuList({
             index={index}
             key={item.id}
             type={type}
-          ></SectionNavMenuListItem>
+          />
         ))}
       </ol>
     </>
