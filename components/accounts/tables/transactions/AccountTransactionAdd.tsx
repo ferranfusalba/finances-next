@@ -46,10 +46,85 @@ export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const currentYear = new Date().getFullYear();
+
   const foreignCurrenciesList = currenciesList.filter(
     (currency) => currency.code !== props.account?.defaultCurrency
   );
+
+  const currentDate = new Date().getDate().toString().padStart(2, "0");
+  const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, "0");
+  const currentYear = new Date().getFullYear().toString();
+  const currentHour = new Date().getHours().toString().padStart(2, "0");
+  const currentMinute = new Date().getMinutes().toString().padStart(2, "0");
+  const currentSecond = new Date().getSeconds().toString().padStart(2, "0");
+
+  // Minutes & Seconds
+  const minSec = Array.from({ length: 60 }, (_, i) =>
+    String(i).padStart(2, "0")
+  );
+  const minSecString = minSec.map((unit) => String(unit));
+
+  // Hours
+  const hours = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0")
+  );
+  const hoursString = hours.map((hour) => String(hour));
+
+  // Days
+  function getDaysInMonth(month: number, year: number) {
+    // Number of days in each month (January is at index 0)
+    const daysInMonth = [
+      31,
+      28 + Number(year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)),
+      31,
+      30,
+      31,
+      30,
+      31,
+      31,
+      30,
+      31,
+      30,
+      31,
+    ];
+
+    // Return the number of days for the given month and year
+    return daysInMonth[month - 1]; // Subtract 1 because month is 1-indexed
+  }
+
+  // Months
+  const months = Array.from({ length: 12 }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  );
+  const monthsString = months.map((month) => String(month));
+
+  const years = [
+    "2000",
+    "2001",
+    "2002",
+    "2003",
+    "2004",
+    "2005",
+    "2006",
+    "2007",
+    "2008",
+    "2009",
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+  ];
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -110,18 +185,39 @@ export default function AccountTransactionAdd(props: Props) {
       category: "",
       subcategory: "",
       tags: "",
-      dateDay: "",
-      dateMonth: "",
-      dateYear: "",
-      timeHour: "",
-      timeMinute: "",
-      timeSecond: "",
+      dateDay: currentDate,
+      dateMonth: currentMonth,
+      dateYear: currentYear,
+      timeHour: currentHour,
+      timeMinute: currentMinute,
+      timeSecond: currentSecond,
       timezone: "",
       location: "",
       notes: "",
     },
   });
 
+  const dateYear = form.getValues().dateYear;
+  const dateMonth = form.getValues().dateMonth;
+  const dateDay = form.getValues().dateDay;
+
+  const buildDateDay = new Date(
+    Number(dateYear),
+    Number(dateMonth) - 1,
+    Number(dateDay),
+    Number(currentHour),
+    Number(currentMinute),
+    Number(currentSecond),
+    0
+  );
+
+  const daysNumber = getDaysInMonth(Number(dateMonth), Number(dateYear));
+
+  const days = Array.from({ length: daysNumber }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  );
+
+  const daysString = days.map((day) => String(day));
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
 
@@ -323,20 +419,47 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="dateDay"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Day*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="dateDay"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="00"
+                        //       max="31"
+                        //       placeholder="08"
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Day*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateDay"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="31"
-                              placeholder="08"
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {daysString.map((day) => {
+                                return (
+                                  <SelectItem
+                                    value={day}
+                                    key={day}
+                                    disabled={buildDateDay > new Date()}
+                                  >
+                                    {day}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -347,20 +470,59 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="dateMonth"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Month*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="dateMonth"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="00"
+                        //       max="12"
+                        //       placeholder="02"
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Month*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateMonth"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="12"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {monthsString.map((month) => {
+                                const dateYear = form.getValues().dateYear;
+
+                                const buildDate = new Date(
+                                  Number(dateYear),
+                                  Number(month) - 1,
+                                  Number(currentDate),
+                                  Number(currentHour),
+                                  Number(currentMinute),
+                                  Number(currentSecond),
+                                  0
+                                );
+
+                                return (
+                                  <SelectItem
+                                    value={month}
+                                    key={month}
+                                    disabled={buildDate > new Date()}
+                                  >
+                                    {month}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -371,20 +533,41 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="dateYear"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Year*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="dateYear"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="1970"
+                        //       max={currentYear}
+                        //       placeholder={currentYear.toString()}
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Year*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateYear"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="1970"
-                              max={currentYear}
-                              placeholder={currentYear.toString()}
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {years.map((year) => (
+                                <SelectItem value={year} key={year}>
+                                  {year}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -397,20 +580,41 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="timeHour"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Hour*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="timeHour"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="00"
+                        //       max="23"
+                        //       placeholder="02"
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Hour*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeHour"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="23"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {hoursString.map((hour) => (
+                                <SelectItem value={hour} key={hour}>
+                                  {hour}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -421,20 +625,41 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="timeMinute"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Min.*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="timeMinute"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="00"
+                        //       max="59"
+                        //       placeholder="50"
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Min.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeMinute"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="50"
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {minSecString.map((min) => (
+                                <SelectItem value={min} key={min}>
+                                  {min}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -445,20 +670,41 @@ export default function AccountTransactionAdd(props: Props) {
                       control={form.control}
                       name="timeSecond"
                       render={({ field }) => (
+                        // <FormItem>
+                        //   <FormLabel>Sec.*</FormLabel>
+                        //   <FormControl>
+                        //     <Input
+                        //       id="timeSecond"
+                        //       type="number"
+                        //       inputMode="numeric"
+                        //       pattern="[0-9]*"
+                        //       min="00"
+                        //       max="59"
+                        //       placeholder="59"
+                        //       {...field}
+                        //     />
+                        //   </FormControl>
+                        //   <FormMessage />
+                        // </FormItem>
                         <FormItem>
                           <FormLabel>Sec.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeSecond"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="59"
-                              {...field}
-                            />
-                          </FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {minSecString.map((sec) => (
+                                <SelectItem value={sec} key={sec}>
+                                  {sec}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
