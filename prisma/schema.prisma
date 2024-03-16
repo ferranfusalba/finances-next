@@ -129,7 +129,7 @@ model Account {
   userId          String?
   transactions    AccountTransaction[]
 
-  @@unique([userId, code])
+  @@unique([userId, code, number])
 }
 
 model Budget {
