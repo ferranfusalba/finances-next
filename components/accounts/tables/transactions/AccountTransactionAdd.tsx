@@ -37,6 +37,7 @@ import { Account } from "@/types/Account";
 import "./AccountTransactionAdd.css";
 import { Currency } from "@/types/Currency";
 import { currenciesList } from "@/utils/getCurrenciesList";
+import { useUserState } from "@/store/userStore";
 
 interface Props {
   account: Account | null;
@@ -51,6 +52,10 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
+  const userStore = useUserState((state) => ({
+    id: state.id,
+  }));
+
   const formSchema = z.object({
     payee: z.string().min(1, {
       message: "A Payee is required.",
@@ -59,6 +64,9 @@ export default function AccountTransactionAdd(props: Props) {
       message: "Concept Type is required.",
     }),
     type: z.string().min(1, {
+      message: "Transaction Type is required.",
+    }),
+    typeTransferAccount: z.string().min(1, {
       message: "Transaction Type is required.",
     }),
     currency: z.string().min(3, {
@@ -102,6 +110,7 @@ export default function AccountTransactionAdd(props: Props) {
       payee: "",
       concept: "",
       type: "",
+      typeTransferAccount: "",
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
       foreignCurrency: "",
@@ -273,13 +282,44 @@ export default function AccountTransactionAdd(props: Props) {
                         <SelectContent>
                           <SelectItem value="INCOME">INCOME</SelectItem>
                           <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                          <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                          <SelectItem value="TRANSFER_TO">
+                            TRANSFER TO
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {form.getValues().type === "TRANSFER_TO" && (
+                  <FormField
+                    control={form.control}
+                    name="typeTransferAccount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Transfer to Destination Account</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select destination account" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="INCOME">
+                              TRANSFER ACCOUNT
+                            </SelectItem>
+                            <SelectItem value="EXPENSE">EXPENSE</SelectItem>
+                            <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 {/* Currency */}
                 <FormField
                   control={form.control}
