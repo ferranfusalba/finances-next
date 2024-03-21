@@ -1,3 +1,6 @@
+import { Account } from "./Account";
+import { Budget } from "./Budget";
+
 export interface User {
   id: string;
   name: string | null;
@@ -6,6 +9,8 @@ export interface User {
   image: string | null;
   password: string | null;
   role: "ADMIN" | "ROLE" | string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  accounts: Array<Account>;
+  budgets: Array<Budget>;
 }

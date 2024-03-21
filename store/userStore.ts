@@ -1,37 +1,35 @@
 import { User } from "@/types/User";
 import { create } from "zustand";
 
-interface UserState {
-  id: string;
-  // name: string | null;
-  // email: string | null;
-  // emailVerified: Date | null;
-  // image: string | null;
-  // password: string | null;
-  // role: string | null;
-  // createdAt: Date | null;
-  // updatedAt: Date | null;
+interface UserState extends User {
   initUserStore: (user: User) => void;
 }
 
 export const useUserState = create<UserState>((set) => ({
   id: "",
-  // name: "",
-  // email: "",
-  // emailVerified: null,
-  // image: "",
-  // password: "",
-  // role: "",
-  // createdAt: null,
-  // updatedAt: null,
+  name: "",
+  email: "",
+  emailVerified: null,
+  image: "",
+  password: "",
+  role: "",
+  createdAt: null,
+  updatedAt: null,
+  accounts: [],
+  budgets: [],
   initUserStore: (user: User) =>
     set(() => ({
       id: user.id,
-      // name: user.name,
-      // email: user.email,
-      // role: user.role,
-      // createdAt: user.createdAt,
-      // updatedAt: user.updatedAt,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      image: user.image,
+      password: user.password,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      accounts: user.accounts,
+      budgets: user.budgets,
     })),
   clearStore: () => {
     set({}, true);

@@ -2,6 +2,7 @@ import ClientSession from "@/components/home/ClientSession";
 import getUserId from "@/utils/getUserId";
 import { auth } from "@/auth";
 import ZustandUserClient from "./ZustandUserClient";
+import { User } from "@/types/User";
 
 export default async function Home() {
   const serverSession = await auth();
@@ -23,7 +24,7 @@ export default async function Home() {
           />
         </p>
         <ClientSession />
-        <ZustandUserClient user={user}></ZustandUserClient>
+        <ZustandUserClient user={user as User}></ZustandUserClient>
         <h3>User info</h3>
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
