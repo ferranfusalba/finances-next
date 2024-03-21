@@ -52,9 +52,7 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
-  const userStore = useUserState((state) => ({
-    id: state.id,
-  }));
+  const userStore = useUserState((state) => state);
 
   const formSchema = z.object({
     payee: z.string().min(1, {
