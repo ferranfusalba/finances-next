@@ -53,6 +53,7 @@ export default function AccountTransactionAdd(props: Props) {
   );
 
   const userStore = useUserState((state) => state);
+  const userAccounts = userStore.accounts;
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -306,11 +307,13 @@ export default function AccountTransactionAdd(props: Props) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="INCOME">
-                              TRANSFER ACCOUNT
-                            </SelectItem>
-                            <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                            <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                            <SelectGroup>
+                              {userAccounts.map((account: Account) => (
+                                <SelectItem value={account.id} key={account.id}>
+                                  {account.bankName} - {account.name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
                           </SelectContent>
                         </Select>
                         <FormMessage />
