@@ -3,23 +3,30 @@
 import { useEffect } from "react";
 import { useUserState } from "@/store/userStore";
 import { User } from "@/types/User";
+import { Account } from "@/types/Account";
+import { Budget } from "@/types/Budget";
 
-export default function ZustandUserClient({ user }: { user: User }) {
+export default function ZustandUserClient({
+  user,
+  userAccounts,
+  userBudgets,
+}: {
+  user: User;
+  userAccounts: Array<Account>;
+  userBudgets: Array<Budget>;
+}) {
   const { initUserStore } = useUserState();
 
-  // TODO: Finish this
   const fullUser = {
     ...user,
-    accounts: [{ id: "", order: 0 }],
-    // budgets: [{}, {}, {}],
+    accounts: userAccounts,
+    budgets: userBudgets,
   };
 
-  //
   const userStore = useUserState((state) => state);
-  //
 
   useEffect(() => {
-    initUserStore(user);
+    initUserStore(fullUser);
   }, []);
 
   return (
