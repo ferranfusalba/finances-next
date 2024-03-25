@@ -38,6 +38,7 @@ export default async function AccountLayout({
   const account = await loadAccount({ params });
   const accountId = account!.id;
   const accountTransactions = await loadAccountTransactions(accountId);
+
   const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
     (currency) => currency.code === account?.defaultCurrency
   );

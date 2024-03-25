@@ -2,12 +2,33 @@ import ClientSession from "@/components/home/ClientSession";
 import getUserId from "@/utils/getUserId";
 import { auth } from "@/auth";
 import ZustandUserClient from "./ZustandUserClient";
+import { db } from "@/lib/db";
 import { User } from "@/types/User";
+
+async function loadUserAccounts(userId: string) {
+  return await db.account.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
+async function loadUserBudgets(userId: string) {
+  return await db.budget.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 
 export default async function Home() {
   const serverSession = await auth();
 
   const user = await getUserId(serverSession?.user?.email as string);
+  const userAccounts = await loadUserAccounts(
+    serverSession?.user?.id as string
+  );
+  const userBudgets = await loadUserBudgets(serverSession?.user?.id as string);
 
   if (serverSession) {
     return (
@@ -24,7 +45,11 @@ export default async function Home() {
           />
         </p>
         <ClientSession />
-        <ZustandUserClient user={user as User}></ZustandUserClient>
+        <ZustandUserClient
+          user={user as User}
+          userAccounts={userAccounts}
+          userBudgets={userBudgets}
+        ></ZustandUserClient>
         <h3>User info</h3>
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
