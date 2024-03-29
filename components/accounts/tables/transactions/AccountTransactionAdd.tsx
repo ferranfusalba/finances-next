@@ -418,6 +418,17 @@ export default function AccountTransactionAdd(props: Props) {
                           type="number"
                           inputMode="decimal"
                           step="0.01"
+                          min={
+                            form.getValues().type === "INCOME"
+                              ? 0
+                              : Number.MIN_SAFE_INTEGER
+                          }
+                          max={
+                            form.getValues().type === "EXPENSE" ||
+                            form.getValues().type === "TRANSFER_TO"
+                              ? 0
+                              : Number.MAX_SAFE_INTEGER
+                          }
                           placeholder="34,50"
                           {...field}
                         />
