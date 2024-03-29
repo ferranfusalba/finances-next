@@ -54,6 +54,9 @@ export default function AccountTransactionAdd(props: Props) {
 
   const userStore = useUserState((state) => state);
   const userAccounts = userStore.accounts;
+  const userAccounts4Transactions = userAccounts.filter(
+    (account) => account.name !== props.account?.name
+  );
 
   const formSchema = z.object({
     payee: z.string().min(1, {
@@ -199,10 +202,66 @@ export default function AccountTransactionAdd(props: Props) {
           "Content-Type": "application/json",
         },
       }).then(() => {
+        if (form.getValues().type === "TRANSFER_TO") {
+          startTransition(async () => {
+            // TODO: Zustand?
+            const fetchBalance = async (accountId: string) => {
+              const response = await fetch(`/api/accounts/${accountId}`);
+              const data = await response.json();
+              return data.currentBalance;
+            };
+
+            // TODO: Zustand?
+            const currentBalanceDestination = await fetchBalance(
+              form.getValues().typeTransferAccount
+            );
+
+            await fetch(
+              `/api/accounts/${form.getValues().typeTransferAccount}`,
+              {
+                method: "PUT",
+                body: JSON.stringify({
+                  currentBalance: currentBalanceDestination + -amountForm,
+                }),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            await fetch("/api/accounts/transactions/", {
+              method: "POST",
+              body: JSON.stringify({
+                payee,
+                concept,
+                type,
+                currency,
+                amount: -amountForm,
+                foreignCurrency,
+                foreignCurrencyAmount,
+                foreignCurrencyExchangeRate,
+                category,
+                subcategory,
+                tags,
+                dateTime,
+                timezone,
+                location,
+                notes,
+                accountId: form.getValues().typeTransferAccount,
+                balance: currentBalanceDestination + -amountForm,
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          });
+        }
+
         setOpen(false);
         toast(`Transaction for ${concept} has been added`, {
           description: `${amountForm + " " + currency}`,
         });
+
         router.refresh();
       });
     });
@@ -308,11 +367,21 @@ export default function AccountTransactionAdd(props: Props) {
                           </FormControl>
                           <SelectContent>
                             <SelectGroup>
-                              {userAccounts.map((account: Account) => (
-                                <SelectItem value={account.id} key={account.id}>
-                                  {account.bankName} - {account.name}
-                                </SelectItem>
-                              ))}
+                              {userAccounts4Transactions.map(
+                                (account: Account) => (
+                                  <SelectItem
+                                    value={account.id}
+                                    key={account.id}
+                                    disabled={
+                                      props.account?.defaultCurrency !==
+                                      account.defaultCurrency
+                                    }
+                                  >
+                                    {account.bankName} - {account.name} (
+                                    {account.defaultCurrency})
+                                  </SelectItem>
+                                )
+                              )}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
