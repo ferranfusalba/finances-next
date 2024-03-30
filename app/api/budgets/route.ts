@@ -27,15 +27,3 @@ export async function POST(request: any) {
 
   return NextResponse.json(newBudget);
 }
-
-export function PUT() {
-  return NextResponse.json({
-    message: "PUT works!",
-  });
-}
-
-export function DELETE() {
-  return NextResponse.json({
-    message: "DELETE works!",
-  });
-}
