@@ -49,7 +49,6 @@ export async function DELETE(
   request: any,
   { params }: AccountBudgetParamsProps
 ) {
-  console.log("on delete", params);
   try {
     const transactionDeleted = await db.accountTransaction.delete({
       where: {

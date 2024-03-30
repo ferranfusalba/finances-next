@@ -60,7 +60,7 @@ export default function AccountTransactionAdd(props: Props) {
 
   const userStore = useUserState((state) => state);
   const userAccounts = userStore.accounts;
-  const userAccounts4Transactions = userAccounts.filter(
+  const userAccounts4Transactions = userAccounts?.filter(
     (account) => account.name !== props.account?.name
   );
 

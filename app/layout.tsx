@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { auth } from "@/auth";
 import "./globals.css";
+import Providers from "@/app/Providers";
 
 import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import TopNav from "@/components/nav/TopNav/TopNav";
@@ -36,6 +37,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+
   return (
     <html lang="en">
       <head>
@@ -54,7 +56,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${ibm.className} text-slate-100`}>
-        <SessionProvider session={session}>
+        <Providers session={session}>
           <header className="fixed top-0 w-full">
             <TopNav />
             {/* TODO: Solve this TS error */}
@@ -73,7 +75,7 @@ export default async function RootLayout({
           <footer className="fixed bottom-0 w-full">
             <BottomNav />
           </footer>
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );
