@@ -14,15 +14,21 @@ export default function Providers({
 }) {
   const { initUserStore } = useUserState();
 
-  axios.get("/api/accounts").then(function (response) {
-    const fullUser = {
-      ...session?.user,
-      accounts: response.data,
-      // budgets: userBudgets,
-    };
+  const fullUser = {
+    ...session?.user,
+  };
 
-    initUserStore(fullUser);
-  });
+  initUserStore(fullUser);
+
+  // axios.get("/api/accounts").then(function (response) {
+  //   const fullUser = {
+  //     ...session?.user,
+  //     accounts: response.data,
+  //     // budgets: userBudgets,
+  //   };
+
+  //   initUserStore(fullUser);
+  // });
 
   return <SessionProvider session={session}>{children}</SessionProvider>;
 }

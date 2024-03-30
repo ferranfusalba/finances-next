@@ -1,39 +1,39 @@
 import { auth } from "@/auth";
 
-// import ZustandUserClient from "@/app/ZustandUserClient";
+import ZustandUserClient from "@/app/ZustandUserClient";
 
 import ClientSession from "@/components/home/ClientSession";
 
-// import { db } from "@/lib/db";
+import { db } from "@/lib/db";
 
-// import { User } from "@/types/User";
+import { User } from "@/types/User";
 
 import getUserId from "@/utils/getUserId";
 
-// async function loadUserAccounts(userId: string) {
-//   return await db.account.findMany({
-//     where: {
-//       userId: userId,
-//     },
-//   });
-// }
+async function loadUserAccounts(userId: string) {
+  return await db.account.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 
-// async function loadUserBudgets(userId: string) {
-//   return await db.budget.findMany({
-//     where: {
-//       userId: userId,
-//     },
-//   });
-// }
+async function loadUserBudgets(userId: string) {
+  return await db.budget.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
 
 export default async function Home() {
   const serverSession = await auth();
 
   const user = await getUserId(serverSession?.user?.email as string);
-  // const userAccounts = await loadUserAccounts(
-  //   serverSession?.user?.id as string
-  // );
-  // const userBudgets = await loadUserBudgets(serverSession?.user?.id as string);
+  const userAccounts = await loadUserAccounts(
+    serverSession?.user?.id as string
+  );
+  const userBudgets = await loadUserBudgets(serverSession?.user?.id as string);
 
   if (serverSession) {
     return (
@@ -50,11 +50,11 @@ export default async function Home() {
           />
         </p>
         <ClientSession />
-        {/* <ZustandUserClient
+        <ZustandUserClient
           user={user as User}
           userAccounts={userAccounts}
           userBudgets={userBudgets}
-        ></ZustandUserClient> */}
+        ></ZustandUserClient>
         <h3>User info</h3>
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
