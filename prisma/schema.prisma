@@ -75,6 +75,8 @@ model AccountTransaction {
   payee                       String   @default("")
   concept                     String
   type                        String
+  typeTransferOrigin          String?  @default("")
+  typeTransferDestination     String?  @default("")
   currency                    String
   amount                      Float
   balance                     Float

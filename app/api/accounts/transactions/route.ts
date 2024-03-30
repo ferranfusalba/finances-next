@@ -25,6 +25,8 @@ export async function POST(request: any) {
       payee: data.payee,
       concept: data.concept,
       type: data.type,
+      typeTransferOrigin: data.typeTransferOrigin,
+      typeTransferDestination: data.typeTransferDestination,
       currency: data.currency,
       amount: data.amount,
       balance: data.balance,

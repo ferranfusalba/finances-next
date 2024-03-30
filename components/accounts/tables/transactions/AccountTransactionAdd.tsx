@@ -74,7 +74,7 @@ export default function AccountTransactionAdd(props: Props) {
     type: z.string().min(1, {
       message: "Transaction Type is required.",
     }),
-    typeTransferAccount: z.string(), // TODO: Add validation by conditional "type"
+    typeTransferDestinationAccount: z.string(), // TODO: Add validation by conditional "type"
     currency: z.string().min(3, {
       message: "Currency code is required.",
     }),
@@ -116,7 +116,7 @@ export default function AccountTransactionAdd(props: Props) {
       payee: "",
       concept: "",
       type: "",
-      typeTransferAccount: "",
+      typeTransferDestinationAccount: "",
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
       foreignCurrency: "",
@@ -187,6 +187,9 @@ export default function AccountTransactionAdd(props: Props) {
           payee,
           concept,
           type,
+          typeTransferOrigin: accountId,
+          typeTransferDestination:
+            form.getValues().typeTransferDestinationAccount,
           currency,
           amount: amountForm,
           foreignCurrency,
@@ -217,11 +220,13 @@ export default function AccountTransactionAdd(props: Props) {
 
             // TODO: Zustand?
             const currentBalanceDestination = await fetchBalance(
-              form.getValues().typeTransferAccount
+              form.getValues().typeTransferDestinationAccount
             );
 
             await fetch(
-              `/api/accounts/${form.getValues().typeTransferAccount}`,
+              `/api/accounts/${
+                form.getValues().typeTransferDestinationAccount
+              }`,
               {
                 method: "PUT",
                 body: JSON.stringify({
@@ -239,6 +244,9 @@ export default function AccountTransactionAdd(props: Props) {
                 payee,
                 concept,
                 type,
+                typeTransferOrigin: accountId,
+                typeTransferDestination:
+                  form.getValues().typeTransferDestinationAccount,
                 currency,
                 amount: -amountForm,
                 foreignCurrency,
@@ -251,7 +259,7 @@ export default function AccountTransactionAdd(props: Props) {
                 timezone,
                 location,
                 notes,
-                accountId: form.getValues().typeTransferAccount,
+                accountId: form.getValues().typeTransferDestinationAccount,
                 balance: currentBalanceDestination + -amountForm,
               }),
               headers: {
@@ -360,7 +368,7 @@ export default function AccountTransactionAdd(props: Props) {
                 {form.getValues().type === "TRANSFER" && (
                   <FormField
                     control={form.control}
-                    name="typeTransferAccount"
+                    name="typeTransferDestinationAccount"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Transfer to Destination Account</FormLabel>

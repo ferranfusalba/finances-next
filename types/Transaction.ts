@@ -14,6 +14,8 @@ interface Transaction {
 }
 
 export interface AccountTransaction extends Transaction {
+  typeTransferOrigin: string | null;
+  typeTransferDestination: string | null;
   payee: string;
   foreignCurrency?: string | null;
   foreignCurrencyAmount?: number | null;
