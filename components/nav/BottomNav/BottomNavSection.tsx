@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Section } from "./BottomNav";
+
+import { Section } from "@/components/nav/BottomNav/BottomNav";
 
 export default function BottomNavSection({ section }: { section: Section }) {
   return (

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import {
   createColumnHelper,
@@ -7,9 +8,12 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import "./BudgetTransactionTable.css";
-import { BudgetTransaction } from "@/types/Transaction";
+
+import "@/components/budgets/tables/transactions/BudgetTransactionTable.css";
+
 import { currency } from "@/lib/utils";
+
+import { BudgetTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<BudgetTransaction>();
 

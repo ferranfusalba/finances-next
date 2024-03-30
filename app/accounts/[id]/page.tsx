@@ -1,20 +1,24 @@
-import { db } from "@/lib/db";
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
+import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
+import BackgroundChip from "@/components/chips/BackgroundChip";
+import BorderChip from "@/components/chips/BorderChip";
 import Layout02a from "@/components/layouts/Layout02a";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { db } from "@/lib/db";
 import { cn, currency } from "@/lib/utils";
-import { Currency } from "@/types/Currency";
-import { currenciesList } from "@/utils/getCurrenciesList";
-import BackgroundChip from "@/components/chips/BackgroundChip";
-import BorderChip from "@/components/chips/BorderChip";
+
 import countries from "@/statics/countries.json";
+
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import { Currency } from "@/types/Currency";
+
+import { currenciesList } from "@/utils/getCurrenciesList";
 
 async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({

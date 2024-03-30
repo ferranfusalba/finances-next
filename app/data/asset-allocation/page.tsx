@@ -1,6 +1,8 @@
 "use client";
+
 import Pie from "@/components/data/graphics/Pie";
 import Layout02b from "@/components/layouts/Layout02b";
+
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 
 export default function DataAssetAllocationLayout() {

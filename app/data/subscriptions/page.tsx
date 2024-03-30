@@ -1,4 +1,5 @@
 "use client";
+
 import Layout02b from "@/components/layouts/Layout02b";
 
 export default function DataSubscriptionsLayout() {

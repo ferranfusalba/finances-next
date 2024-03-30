@@ -1,6 +1,8 @@
-import { db } from "@/lib/db";
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { NextResponse } from "next/server";
+
+import { db } from "@/lib/db";
+
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
 export async function GET(request: any, { params }: AccountBudgetParamsProps) {
   const account = await db.account.findUnique({

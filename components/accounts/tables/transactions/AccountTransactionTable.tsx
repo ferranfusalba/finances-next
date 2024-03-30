@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -9,10 +10,14 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { TrashCan } from "@carbon/icons-react";
+
 import { Button } from "@/components/ui/button";
-import "./AccountTransactionTable.css";
-import { AccountTransaction } from "@/types/Transaction";
+
+import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
+
 import { currency } from "@/lib/utils";
+
+import { AccountTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 

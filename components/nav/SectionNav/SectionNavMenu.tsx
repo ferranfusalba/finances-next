@@ -1,5 +1,6 @@
-import SectionNavMenuList from "./list/SectionNavMenuList";
-import SectionNavMenuAdd from "./SectionNavMenuAdd";
+import SectionNavMenuAdd from "@/components/nav/SectionNav/SectionNavMenuAdd";
+import SectionNavMenuList from "@/components/nav/SectionNav/list/SectionNavMenuList";
+
 import { cn } from "@/lib/utils";
 
 export default async function SectionNavMenu({

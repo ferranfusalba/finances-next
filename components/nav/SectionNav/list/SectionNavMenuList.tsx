@@ -1,4 +1,4 @@
-import SectionNavMenuListItem from "./SectionNavMenuListItem";
+import SectionNavMenuListItem from "@/components/nav/SectionNav/list/SectionNavMenuListItem";
 
 export default function SectionNavMenuList({
   list,

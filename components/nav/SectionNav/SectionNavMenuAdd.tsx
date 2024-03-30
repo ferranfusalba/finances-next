@@ -1,7 +1,9 @@
 "use client";
-import Link from "next/link";
+
 import { AddAlt } from "@carbon/icons-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { cn } from "@/lib/utils";
 
 export default function SectionNavMenuAdd({ type }: { type: string }) {

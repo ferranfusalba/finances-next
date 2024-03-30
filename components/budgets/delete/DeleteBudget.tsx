@@ -1,8 +1,10 @@
 "use client";
+
 import { useState, useTransition } from "react";
 import { TrashCan } from "@carbon/icons-react";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
 export default function DeleteBudget({ params }: AccountBudgetParamsProps) {

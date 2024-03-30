@@ -1,9 +1,14 @@
-import ClientSession from "@/components/home/ClientSession";
-import getUserId from "@/utils/getUserId";
 import { auth } from "@/auth";
-import ZustandUserClient from "./ZustandUserClient";
+
+import ZustandUserClient from "@/app/ZustandUserClient";
+
+import ClientSession from "@/components/home/ClientSession";
+
 import { db } from "@/lib/db";
+
 import { User } from "@/types/User";
+
+import getUserId from "@/utils/getUserId";
 
 async function loadUserAccounts(userId: string) {
   return await db.account.findMany({

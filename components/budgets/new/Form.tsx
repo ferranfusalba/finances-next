@@ -1,9 +1,12 @@
 "use client";
+
 import { useTransition } from "react";
-import { User } from "@/types/User";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,11 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Currency } from "@/types/Currency";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+import { Currency } from "@/types/Currency";
+import { User } from "@/types/User";
+
 import { currenciesList } from "@/utils/getCurrenciesList";
 
 type Props = {

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import LogoutButtonClient from "./LogoutButtonClient";
-import { currentUser } from "@/lib/auth";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,9 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import LogoutButtonClient from "@/components/nav/TopNav/LogoutButtonClient";
+
+import { currentUser } from "@/lib/auth";
 
 const TopNav = async () => {
   const user = await currentUser();

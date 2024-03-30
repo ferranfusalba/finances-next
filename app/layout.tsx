@@ -1,10 +1,13 @@
-import BottomNav from "@/components/nav/BottomNav/BottomNav";
-import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter, IBM_Plex_Sans } from "next/font/google";
-import TopNav from "@/components/nav/TopNav/TopNav";
 import { SessionProvider } from "next-auth/react";
+
 import { auth } from "@/auth";
+import "./globals.css";
+
+import BottomNav from "@/components/nav/BottomNav/BottomNav";
+import TopNav from "@/components/nav/TopNav/TopNav";
+
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 

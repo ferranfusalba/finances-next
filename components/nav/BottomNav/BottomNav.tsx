@@ -5,7 +5,8 @@ import {
   ChartLineData,
   Settings,
 } from "@carbon/icons-react";
-import BottomNavSection from "./BottomNavSection";
+
+import BottomNavSection from "@/components/nav/BottomNav/BottomNavSection";
 
 export type Section = {
   path: string;

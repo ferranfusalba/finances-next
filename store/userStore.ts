@@ -1,5 +1,6 @@
-import { User } from "@/types/User";
 import { create } from "zustand";
+
+import { User } from "@/types/User";
 
 interface UserState extends User {
   initUserStore: (user: User) => void;
