@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 
+import { currentUser } from "@/lib/auth";
+
 export async function GET() {
-  const accounts = await db.account.findMany();
+  const user = await currentUser();
+
+  const accounts = await db.account.findMany({
+    where: {
+      userId: user?.id,
+    },
+  });
   return NextResponse.json(accounts);
 }
 
