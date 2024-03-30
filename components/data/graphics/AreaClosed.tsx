@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useMemo, useCallback } from "react";
 import { AreaClosed, Line, Bar } from "@visx/shape";
 import appleStock, { AppleStock } from "@visx/mock-data/lib/mocks/appleStock";

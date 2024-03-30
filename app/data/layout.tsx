@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 

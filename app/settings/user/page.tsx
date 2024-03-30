@@ -1,9 +1,16 @@
 "use client";
 
+import { useTransition, useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SettingsSchema } from "@/schemas";
+import { useSession } from "next-auth/react";
+
+import { settings } from "@/actions/settings";
+
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
+import Layout02b from "@/components/layouts/Layout02b";
 import {
   Form,
   FormField,
@@ -12,15 +19,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { settings } from "@/actions/settings";
-import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { FormError } from "@/components/form-error";
-import { FormSuccess } from "@/components/form-success";
 import {
   Select,
   SelectContent,
@@ -28,8 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { useCurrentUser } from "@/hooks/use-current-user";
+
 import { UserRole } from "@prisma/client";
-import Layout02b from "@/components/layouts/Layout02b";
+
+import { SettingsSchema } from "@/schemas";
 
 const UserPage = () => {
   const user = useCurrentUser();

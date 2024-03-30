@@ -1,7 +1,10 @@
-import NewBudgetForm from "@/components/budgets/new/Form";
-import { User } from "@/types/User";
-import getUserId from "@/utils/getUserId";
 import { auth } from "@/auth";
+
+import NewBudgetForm from "@/components/budgets/new/Form";
+
+import { User } from "@/types/User";
+
+import getUserId from "@/utils/getUserId";
 
 export default async function NewBudget() {
   const session = await auth();

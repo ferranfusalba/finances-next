@@ -12,7 +12,8 @@ import { Group } from "@visx/group";
 import { LinearGradient } from "@visx/gradient";
 import { max, extent } from "@visx/vendor/d3-array";
 import { BrushHandleRenderProps } from "@visx/brush/lib/BrushHandle";
-import AreaChart from "./AreaChart";
+
+import AreaChart from "@/components/data/graphics/AreaChart";
 
 // Initialize some variables
 const stock = appleStock.slice(1000);

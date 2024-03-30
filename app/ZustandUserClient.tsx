@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { useUserState } from "@/store/userStore";
+
 import { User } from "@/types/User";
 import { Account } from "@/types/Account";
 import { Budget } from "@/types/Budget";

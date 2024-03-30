@@ -1,8 +1,12 @@
-import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
+
 import { auth } from "@/auth";
+
 import Layout01 from "@/components/layouts/Layout01";
+import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
+
+import { db } from "@/lib/db";
+
 import getUserId from "@/utils/getUserId";
 
 export const metadata: Metadata = {

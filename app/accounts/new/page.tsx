@@ -1,7 +1,10 @@
-import NewAccountForm from "@/components/accounts/new/Form";
-import { User } from "@/types/User";
-import getUserId from "@/utils/getUserId";
 import { auth } from "@/auth";
+
+import NewAccountForm from "@/components/accounts/new/Form";
+
+import { User } from "@/types/User";
+
+import getUserId from "@/utils/getUserId";
 
 export default async function NewAccount() {
   const session = await auth();

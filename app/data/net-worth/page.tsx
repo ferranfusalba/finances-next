@@ -1,6 +1,8 @@
 "use client";
+
 import Brush from "@/components/data/graphics/Brush";
 import Layout02b from "@/components/layouts/Layout02b";
+
 import useWindowDimensions from "@/hooks/use-window-dimensions";
 
 export default function DataNetWorthInceptionLayout() {

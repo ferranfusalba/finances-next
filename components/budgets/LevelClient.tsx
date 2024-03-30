@@ -1,8 +1,10 @@
 "use client";
 
-import { useCounterStore } from "@/store/counterStore";
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
+
+import { useCounterStore } from "@/store/counterStore";
 
 export default function LevelClient() {
   const storeCount = useCounterStore((state) => ({

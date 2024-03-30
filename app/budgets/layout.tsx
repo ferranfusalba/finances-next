@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+
 import { auth } from "@/auth";
-import getUserId from "@/utils/getUserId";
-import { db } from "@/lib/db";
+
 import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
+
+import { db } from "@/lib/db";
+
+import getUserId from "@/utils/getUserId";
 
 export const metadata: Metadata = {
   title: "Budgets | Finances Next",
