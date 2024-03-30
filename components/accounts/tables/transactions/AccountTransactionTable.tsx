@@ -73,7 +73,13 @@ export default function AccountTransactionTable({
     }),
     columnHelper.accessor("typeTransferOrigin", {
       cell: (info) => {
-        return info.getValue();
+        const type = info.row.original?.type;
+
+        if (type === "TRANSFER") {
+          return <>{info.getValue()}</>;
+        }
+
+        return <></>;
       },
       header: "Transfer Origin Account",
       footer: (info) => info.column.id,
@@ -191,7 +197,7 @@ export default function AccountTransactionTable({
 
   // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "dateTime", desc: false },
+    { id: "dateTime", desc: true },
   ]);
 
   const table = useReactTable({

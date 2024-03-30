@@ -359,6 +359,7 @@ export default function AccountTransactionAdd(props: Props) {
                             EXPENSE (Not counted as such)
                           </SelectItem>
                           <SelectItem value="TRANSFER">TRANSFER TO</SelectItem>
+                          <SelectItem value="OPENING">OPENING</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
