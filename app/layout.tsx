@@ -57,7 +57,7 @@ export default async function RootLayout({
       </head>
       <body className={`${ibm.className} text-slate-100`}>
         <SessionProvider session={session}>
-          <header className="fixed top-0 w-full">
+          <header className="fixed top-0 w-full z-10">
             <TopNav />
             {/* TODO: Solve this TS error */}
           </header>
@@ -72,7 +72,7 @@ export default async function RootLayout({
               {children}
             </ThemeProvider>
           </main>
-          <footer className="fixed bottom-0 w-full">
+          <footer className="fixed bottom-0 w-full h-auto">
             <BottomNav />
           </footer>
         </SessionProvider>
