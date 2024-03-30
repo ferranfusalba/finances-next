@@ -429,7 +429,7 @@ export default function AccountTransactionAdd(props: Props) {
                               ? 0
                               : Number.MAX_SAFE_INTEGER
                           }
-                          placeholder="34,50"
+                          placeholder="+ / -"
                           {...field}
                         />
                       </FormControl>
