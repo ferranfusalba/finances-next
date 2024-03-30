@@ -1,5 +1,16 @@
 import { db } from "@/lib/db";
+import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { NextResponse } from "next/server";
+
+export async function GET(request: any, { params }: AccountBudgetParamsProps) {
+  const account = await db.accountTransaction.findUnique({
+    where: {
+      id: params.id,
+    },
+  });
+
+  return NextResponse.json(account);
+}
 
 export async function POST(request: any) {
   const data = await request.json();
@@ -30,4 +41,22 @@ export async function POST(request: any) {
   });
 
   return NextResponse.json(newTransaction);
+}
+
+export async function DELETE(
+  request: any,
+  { params }: AccountBudgetParamsProps
+) {
+  console.log("on delete", params);
+  try {
+    const transactionDeleted = await db.accountTransaction.delete({
+      where: {
+        id: params.id,
+      },
+    });
+
+    return NextResponse.json(transactionDeleted);
+  } catch (error: any) {
+    return NextResponse.json(error.message);
+  }
 }

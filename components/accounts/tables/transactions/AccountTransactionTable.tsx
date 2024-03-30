@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   createColumnHelper,
   flexRender,
@@ -7,128 +8,158 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
+import { TrashCan } from "@carbon/icons-react";
+import { Button } from "@/components/ui/button";
 import "./AccountTransactionTable.css";
 import { AccountTransaction } from "@/types/Transaction";
 import { currency } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
-const columns = [
-  columnHelper.accessor((row) => row.dateTime, {
-    id: "dateTime",
-    cell: (info) => {
-      return <i>{info.getValue().toLocaleString("ca")}</i>;
-    },
-    header: () => <span>Date & Time</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("timezone", {
-    header: "Timezone",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("payee", {
-    header: () => <span>Payee</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("concept", {
-    header: () => <span>Concept</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("type", {
-    cell: (info) => {
-      return info.getValue();
-    },
-    header: "Type",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("currency", {
-    header: "Currency",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("amount", {
-    cell: (info) => {
-      const number = info.getValue();
-      const defaultCurrency = info.row.original?.currency;
-
-      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
-    },
-    header: "Amount",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("balance", {
-    cell: (info) => {
-      const number = info.getValue();
-      const defaultCurrency = info.row.original?.currency;
-
-      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
-    },
-    header: "Balance",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrency", {
-    header: "Foreign Currency",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrencyAmount", {
-    cell: (info) => {
-      const number = info.getValue();
-      const foreignCurrency = info.row.original?.foreignCurrency;
-
-      if (foreignCurrency) {
-        return (
-          <>
-            {currency("ca-AD", foreignCurrency as string).format(
-              number as number
-            )}
-          </>
-        );
-      }
-
-      return <></>;
-    },
-    header: "Foreign Currency Amount",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrencyExchangeRate", {
-    header: "Exchange Rate",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("category", {
-    header: "Category",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("subcategory", {
-    header: "Subcategory",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("tags", {
-    header: "Tags",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("location", {
-    header: "Location",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("notes", {
-    header: "Notes",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("id", {
-    cell: (info) => {
-      const transactionId = info.row.original?.id;
-
-      return <>{transactionId}</>;
-    },
-    header: "Transaction ID",
-    footer: (info) => info.column.id,
-  }),
-];
-
 export default function AccountTransactionTable({
   accountTransactions,
 }: {
   accountTransactions: Array<AccountTransaction>;
 }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  // TODO: Finish delete transaction
+  const handleDeleteTransaction = async (transactionId: string) => {
+    const params = {
+      id: transactionId,
+    };
+
+    startTransition(async () => {
+      await fetch(`/api/accounts/transactions/${params.id}`, {
+        method: "DELETE",
+      });
+      router.refresh();
+    });
+  };
+
+  const columns = [
+    columnHelper.accessor((row) => row.dateTime, {
+      id: "dateTime",
+      cell: (info) => {
+        return <i>{info.getValue().toLocaleString("ca")}</i>;
+      },
+      header: () => <span>Date & Time</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("timezone", {
+      header: "Timezone",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("payee", {
+      header: () => <span>Payee</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("concept", {
+      header: () => <span>Concept</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("type", {
+      cell: (info) => {
+        return info.getValue();
+      },
+      header: "Type",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("currency", {
+      header: "Currency",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("amount", {
+      cell: (info) => {
+        const number = info.getValue();
+        const defaultCurrency = info.row.original?.currency;
+
+        return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
+      },
+      header: "Amount",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("balance", {
+      cell: (info) => {
+        const number = info.getValue();
+        const defaultCurrency = info.row.original?.currency;
+
+        return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
+      },
+      header: "Balance",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrency", {
+      header: "Foreign Currency",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrencyAmount", {
+      cell: (info) => {
+        const number = info.getValue();
+        const foreignCurrency = info.row.original?.foreignCurrency;
+
+        if (foreignCurrency) {
+          return (
+            <>
+              {currency("ca-AD", foreignCurrency as string).format(
+                number as number
+              )}
+            </>
+          );
+        }
+
+        return <></>;
+      },
+      header: "Foreign Currency Amount",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrencyExchangeRate", {
+      header: "Exchange Rate",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("category", {
+      header: "Category",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("subcategory", {
+      header: "Subcategory",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("tags", {
+      header: "Tags",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("location", {
+      header: "Location",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("notes", {
+      header: "Notes",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("id", {
+      cell: (info) => {
+        const transactionId = info.row.original?.id;
+
+        return (
+          <div style={{ display: "flex" }}>
+            {transactionId}
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => handleDeleteTransaction(transactionId)}
+            >
+              <TrashCan />
+            </Button>
+          </div>
+        );
+      },
+      header: "Transaction ID",
+      footer: (info) => info.column.id,
+    }),
+  ];
+
   const data = accountTransactions;
 
   type ColumnSort = {
