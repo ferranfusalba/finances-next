@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import axios from "axios";
 import { SessionProvider } from "next-auth/react";
 
 import { useUserState } from "@/store/userStore";
-
-import { Account } from "@/types/Account";
 
 export default function Providers({
   session,
@@ -15,21 +13,11 @@ export default function Providers({
   children: React.ReactNode;
 }) {
   const { initUserStore } = useUserState();
-  const userStore = useUserState((state) => state);
 
-  var userAccounts: Array<Account> = [];
-  const fetchAccounts = async () => {
-    const response = await fetch("/api/accounts"); // TODO: Fix terminal error
-    const data = await response.json();
-    return data;
-  };
-
-  fetchAccounts().then((res) => {
-    userAccounts = res;
-
+  axios.get("/api/accounts").then(function (response) {
     const fullUser = {
       ...session?.user,
-      accounts: userAccounts,
+      accounts: response.data,
       // budgets: userBudgets,
     };
 
