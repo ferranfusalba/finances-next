@@ -206,7 +206,7 @@ export default function AccountTransactionAdd(props: Props) {
           "Content-Type": "application/json",
         },
       }).then(() => {
-        if (form.getValues().type === "TRANSFER_TO") {
+        if (form.getValues().type === "TRANSFER") {
           startTransition(async () => {
             // TODO: Zustand?
             const fetchBalance = async (accountId: string) => {
@@ -343,17 +343,21 @@ export default function AccountTransactionAdd(props: Props) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="INCOME">INCOME</SelectItem>
-                          <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                          <SelectItem value="TRANSFER_TO">
-                            TRANSFER TO
+                          <SelectItem value="INCOME_N">
+                            INCOME (Not counted as such)
                           </SelectItem>
+                          <SelectItem value="EXPENSE">EXPENSE</SelectItem>
+                          <SelectItem value="EXPENSE_N">
+                            EXPENSE (Not counted as such)
+                          </SelectItem>
+                          <SelectItem value="TRANSFER">TRANSFER TO</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {form.getValues().type === "TRANSFER_TO" && (
+                {form.getValues().type === "TRANSFER" && (
                   <FormField
                     control={form.control}
                     name="typeTransferAccount"
@@ -429,7 +433,7 @@ export default function AccountTransactionAdd(props: Props) {
                           }
                           max={
                             form.getValues().type === "EXPENSE" ||
-                            form.getValues().type === "TRANSFER_TO"
+                            form.getValues().type === "TRANSFER"
                               ? 0
                               : Number.MAX_SAFE_INTEGER
                           }
