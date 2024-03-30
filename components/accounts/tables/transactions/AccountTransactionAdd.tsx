@@ -68,9 +68,7 @@ export default function AccountTransactionAdd(props: Props) {
     type: z.string().min(1, {
       message: "Transaction Type is required.",
     }),
-    typeTransferAccount: z.string().min(1, {
-      message: "Transaction Type is required.",
-    }),
+    typeTransferAccount: z.string(), // TODO: Add validation by conditional "type"
     currency: z.string().min(3, {
       message: "Currency code is required.",
     }),
