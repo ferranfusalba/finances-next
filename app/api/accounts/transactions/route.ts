@@ -1,11 +1,6 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-// export async function GET() {
-//   const accounts = await db.account.findMany();
-//   return NextResponse.json(accounts);
-// }
-
 export async function POST(request: any) {
   const data = await request.json();
 
@@ -36,15 +31,3 @@ export async function POST(request: any) {
 
   return NextResponse.json(newTransaction);
 }
-
-// export function PUT() {
-//   return NextResponse.json({
-//     message: "PUT works!",
-//   });
-// }
-
-// export function DELETE() {
-//   return NextResponse.json({
-//     message: "DELETE works!",
-//   });
-// }
