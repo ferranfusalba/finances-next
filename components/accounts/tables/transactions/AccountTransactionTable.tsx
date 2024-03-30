@@ -71,6 +71,20 @@ export default function AccountTransactionTable({
       header: "Type",
       footer: (info) => info.column.id,
     }),
+    columnHelper.accessor("typeTransferOrigin", {
+      cell: (info) => {
+        return info.getValue();
+      },
+      header: "Transfer Origin Account",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("typeTransferDestination", {
+      cell: (info) => {
+        return info.getValue();
+      },
+      header: "Transfer Destination Account",
+      footer: (info) => info.column.id,
+    }),
     columnHelper.accessor("currency", {
       header: "Currency",
       footer: (info) => info.column.id,
@@ -152,7 +166,8 @@ export default function AccountTransactionTable({
             {transactionId}
             <Button
               variant="destructive"
-              disabled={isPending}
+              // disabled={isPending}
+              disabled={true} // TODO: Finish delete transaction
               onClick={() => handleDeleteTransaction(transactionId)}
             >
               <TrashCan />
