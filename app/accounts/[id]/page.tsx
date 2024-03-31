@@ -1,3 +1,5 @@
+import { auth } from "@/auth";
+
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
@@ -11,7 +13,7 @@ import LayoutAccountBudgetTable from "@/components/layouts/account-budget/Layout
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { db } from "@/lib/db";
-import { cn, currency } from "@/lib/utils";
+import { currency } from "@/lib/utils";
 
 import countries from "@/statics/countries.json";
 
@@ -19,6 +21,7 @@ import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { Currency } from "@/types/Currency";
 
 import { currenciesList } from "@/utils/getCurrenciesList";
+import getUserAccounts from "@/utils/getUserAccounts";
 
 async function loadAccount({ params }: AccountBudgetParamsProps) {
   return await db.account.findUnique({
@@ -39,9 +42,11 @@ async function loadAccountTransactions(id: string) {
 export default async function AccountLayout({
   params,
 }: AccountBudgetParamsProps) {
+  const serverSession = await auth();
   const account = await loadAccount({ params });
   const accountId = account!.id;
   const accountTransactions = await loadAccountTransactions(accountId);
+  const userAccounts = await getUserAccounts(serverSession?.user?.id as string);
 
   const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
     (currency) => currency.code === account?.defaultCurrency
@@ -137,7 +142,7 @@ export default async function AccountLayout({
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
         <ZustandClient></ZustandClient>
-        <AccountTransactionAdd account={account} />
+        <AccountTransactionAdd account={account} userAccounts={userAccounts} />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
         <AccountTransactionTable accountTransactions={accountTransactions} />
