@@ -5,21 +5,12 @@ import { auth } from "@/auth";
 import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 
-import { db } from "@/lib/db";
-
 import getUserId from "@/utils/getUserId";
+import getUserBudgets from "@/utils/getUserBudgets";
 
 export const metadata: Metadata = {
   title: "Budgets | Finances Next",
 };
-
-async function loadUserBudgets(userId: string) {
-  return await db.budget.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
 
 export default async function BudgetsLayout({
   children,
@@ -29,7 +20,7 @@ export default async function BudgetsLayout({
   const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userBudgets = await loadUserBudgets(userId?.id as string);
+  const userBudgets = await getUserBudgets(userId?.id as string);
 
   return (
     <>
