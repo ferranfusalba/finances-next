@@ -4,36 +4,18 @@ import ZustandUserClient from "@/app/ZustandUserClient";
 
 import ClientSession from "@/components/home/ClientSession";
 
-import { db } from "@/lib/db";
-
 import { User } from "@/types/User";
 
 import getUserId from "@/utils/getUserId";
-
-async function loadUserAccounts(userId: string) {
-  return await db.account.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
-
-async function loadUserBudgets(userId: string) {
-  return await db.budget.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
+import getUserAccounts from "@/utils/getUserAccounts";
+import getUserBudgets from "@/utils/getUserBudgets";
 
 export default async function Home() {
   const serverSession = await auth();
 
   const user = await getUserId(serverSession?.user?.email as string);
-  const userAccounts = await loadUserAccounts(
-    serverSession?.user?.id as string
-  );
-  const userBudgets = await loadUserBudgets(serverSession?.user?.id as string);
+  const userAccounts = await getUserAccounts(serverSession?.user?.id as string);
+  const userBudgets = await getUserBudgets(serverSession?.user?.id as string);
 
   if (serverSession) {
     return (

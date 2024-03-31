@@ -5,21 +5,12 @@ import { auth } from "@/auth";
 import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 
-import { db } from "@/lib/db";
-
 import getUserId from "@/utils/getUserId";
+import getUserAccounts from "@/utils/getUserAccounts";
 
 export const metadata: Metadata = {
   title: "Accounts | Finances Next",
 };
-
-async function loadUserAccounts(userId: string) {
-  return await db.account.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-}
 
 export default async function AccountsLayout({
   children,
@@ -29,7 +20,7 @@ export default async function AccountsLayout({
   const session = await auth();
   const userEmail = session?.user?.email as string;
   const userId = await getUserId(userEmail);
-  const userAccounts = await loadUserAccounts(userId?.id as string);
+  const userAccounts = await getUserAccounts(userId?.id as string);
 
   return (
     <>
