@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, IBM_Plex_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 
 import { auth } from "@/auth";
 import "./globals.css";
@@ -12,12 +14,12 @@ import TopNav from "@/components/nav/TopNav/TopNav";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ["latin"] });
-const ibm = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  style: ["italic", "normal"],
-});
+// const inter = Inter({ subsets: ["latin"] });
+// const ibm = IBM_Plex_Sans({
+//   subsets: ["latin"],
+//   weight: ["300", "400", "500", "700"],
+//   style: ["italic", "normal"],
+// });
 
 export const metadata: Metadata = {
   title: "Finances Next",
@@ -39,7 +41,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link
@@ -55,7 +57,7 @@ export default async function RootLayout({
           sizes="<generated>"
         />
       </head>
-      <body className={`${ibm.className} text-slate-100`}>
+      <body className={`text-slate-100`}>
         <SessionProvider session={session}>
           <header className="fixed top-0 w-full z-10">
             <TopNav />
