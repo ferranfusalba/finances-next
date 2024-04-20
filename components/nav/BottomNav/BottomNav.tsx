@@ -8,11 +8,11 @@ import {
 
 import BottomNavSection from "@/components/nav/BottomNav/BottomNavSection";
 
-export type Section = {
+export interface Section {
   path: string;
   name: string;
   icon: React.ReactNode;
-};
+}
 
 const routes: Array<Section> = [
   { path: "/", name: "Home", icon: <Home /> },

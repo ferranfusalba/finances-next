@@ -1,21 +1,13 @@
 import { auth } from "@/auth";
 
-import ZustandUserClient from "@/app/ZustandUserClient";
-
 import ClientSession from "@/components/home/ClientSession";
 
-import { User } from "@/types/User";
-
-import getUserId from "@/utils/getUserId";
-import getUserAccounts from "@/utils/getUserAccounts";
-import getUserBudgets from "@/utils/getUserBudgets";
+import getUser from "@/lib/user";
 
 export default async function Home() {
   const serverSession = await auth();
 
-  const user = await getUserId(serverSession?.user?.email as string);
-  const userAccounts = await getUserAccounts(serverSession?.user?.id as string);
-  const userBudgets = await getUserBudgets(serverSession?.user?.id as string);
+  const user = await getUser(serverSession?.user?.email as string);
 
   if (serverSession) {
     return (
@@ -32,11 +24,6 @@ export default async function Home() {
           />
         </p>
         <ClientSession />
-        <ZustandUserClient
-          user={user as User}
-          userAccounts={userAccounts}
-          userBudgets={userBudgets}
-        ></ZustandUserClient>
         <h3>User info</h3>
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
