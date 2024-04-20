@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
-import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
@@ -12,7 +11,11 @@ import LayoutAccountBudgetActions from "@/components/layouts/account-budget/Layo
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { db } from "@/lib/db";
+import {
+  getAccounts,
+  getAccount,
+  getAccountTransactions,
+} from "@/lib/accounts";
 import { currency } from "@/lib/utils";
 
 import countries from "@/statics/countries.json";
@@ -21,32 +24,17 @@ import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { Currency } from "@/types/Currency";
 
 import { currenciesList } from "@/utils/getCurrenciesList";
-import getUserAccounts from "@/utils/getUserAccounts";
-
-async function loadAccount({ params }: AccountBudgetParamsProps) {
-  return await db.account.findUnique({
-    where: {
-      id: params.id,
-    },
-  });
-}
-
-async function loadAccountTransactions(id: string) {
-  return await db.accountTransaction.findMany({
-    where: {
-      accountId: id,
-    },
-  });
-}
 
 export default async function AccountLayout({
   params,
 }: AccountBudgetParamsProps) {
+  const account = await getAccount({ params });
+  const accountTransactions = await getAccountTransactions(
+    account?.id as string
+  );
+
   const serverSession = await auth();
-  const account = await loadAccount({ params });
-  const accountId = account!.id;
-  const accountTransactions = await loadAccountTransactions(accountId);
-  const userAccounts = await getUserAccounts(serverSession?.user?.id as string);
+  const userAccounts = await getAccounts(serverSession?.user?.id as string);
 
   const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
     (currency) => currency.code === account?.defaultCurrency
@@ -141,7 +129,6 @@ export default async function AccountLayout({
         </div>
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
-        <ZustandClient></ZustandClient>
         <AccountTransactionAdd account={account} userAccounts={userAccounts} />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>

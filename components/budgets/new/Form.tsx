@@ -31,9 +31,9 @@ import { User } from "@/types/User";
 
 import { currenciesList } from "@/utils/getCurrenciesList";
 
-type Props = {
-  userId: User;
-};
+interface Props {
+  user: User;
+}
 
 export default function NewBudgetForm(props: Props) {
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function NewBudgetForm(props: Props) {
     const description = values.description;
     const initialBalance = parseFloat(values.initialBalance);
     const defaultCurrency = values.defaultCurrency;
-    const userId = props.userId.id;
+    const userId = props.user.id;
 
     startTransition(async () => {
       const res = await fetch("/api/budgets/", {
