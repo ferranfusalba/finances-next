@@ -2,20 +2,20 @@ import { auth } from "@/auth";
 
 import NewBudgetForm from "@/components/budgets/new/Form";
 
+import getUser from "@/lib/user";
+
 import { User } from "@/types/User";
 
-import getUserId from "@/utils/getUserId";
-
 export default async function NewBudget() {
-  const session = await auth();
-  const userEmail = session?.user?.email as string;
+  const serverSession = await auth();
 
-  const userId = await getUserId(userEmail);
+  const userEmail = serverSession?.user?.email as string;
+  const user = await getUser(userEmail);
 
   return (
     <div className="pb-20">
       <h2 className="text-center py-6">New Budget</h2>
-      <NewBudgetForm userId={userId as User} />
+      <NewBudgetForm user={user as User} />
     </div>
   );
 }

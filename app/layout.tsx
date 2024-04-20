@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, IBM_Plex_Sans } from "next/font/google";
+// import { Inter, IBM_Plex_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 
 import { auth } from "@/auth";
 import "./globals.css";
-// import Providers from "@/app/Providers";
 
 import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import TopNav from "@/components/nav/TopNav/TopNav";
@@ -38,7 +37,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const serverSession = await auth();
 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
@@ -58,7 +57,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`text-slate-100`}>
-        <SessionProvider session={session}>
+        <SessionProvider session={serverSession}>
           <header className="fixed top-0 w-full z-10">
             <TopNav />
             {/* TODO: Solve this TS error */}

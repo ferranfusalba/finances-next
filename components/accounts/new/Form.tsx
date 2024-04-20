@@ -32,9 +32,9 @@ import { currenciesList } from "@/utils/getCurrenciesList";
 
 import { Currency } from "@/types/Currency";
 
-type Props = {
-  userId: User;
-};
+interface Props {
+  user: User;
+}
 
 export default function NewAccountForm(props: Props) {
   const router = useRouter();
@@ -95,7 +95,7 @@ export default function NewAccountForm(props: Props) {
     const defaultCurrency = values.defaultCurrency;
     const number = values.number;
     const country = values.country;
-    const userId = props.userId.id;
+    const userId = props.user.id;
 
     startTransition(async () => {
       const res = await fetch("/api/accounts/", {

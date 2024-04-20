@@ -8,36 +8,20 @@ import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/Layou
 import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
 import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 
-import { db } from "@/lib/db";
-import { cn, currency } from "@/lib/utils";
+import { getBudget, getBudgetTransactions } from "@/lib/budgets";
+import { currency } from "@/lib/utils";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { Currency } from "@/types/Currency";
 
 import { currenciesList } from "@/utils/getCurrenciesList";
 
-async function loadBudget({ params }: AccountBudgetParamsProps) {
-  return await db.budget.findUnique({
-    where: {
-      id: params.id,
-    },
-  });
-}
-
-async function loadBudgetTransactions(id: string) {
-  return await db.budgetTransaction.findMany({
-    where: {
-      budgetId: id,
-    },
-  });
-}
-
 export default async function BudgetLayout({
   params,
 }: AccountBudgetParamsProps) {
-  const budget = await loadBudget({ params });
-  const budgetId = budget!.id;
-  const budgetTransactions = await loadBudgetTransactions(budgetId);
+  const budget = await getBudget({ params });
+  const budgetTransactions = await getBudgetTransactions(budget?.id as string);
+
   const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
     (currency) => currency.code === budget?.defaultCurrency
   );
