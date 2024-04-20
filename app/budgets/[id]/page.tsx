@@ -1,4 +1,3 @@
-import ZustandClient from "@/components/accounts/tables/transactions/ZustandClient";
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import LevelClient from "@/components/budgets/LevelClient";
 import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
@@ -82,7 +81,6 @@ export default async function BudgetLayout({
         </div>
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
-        <ZustandClient></ZustandClient>
         <BudgetTransactionAdd budget={budget} />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>

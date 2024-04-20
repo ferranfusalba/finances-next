@@ -1,7 +1,5 @@
 import { auth } from "@/auth";
 
-import ZustandUserClient from "@/app/ZustandUserClient";
-
 import ClientSession from "@/components/home/ClientSession";
 
 import { User } from "@/types/User";
@@ -32,11 +30,6 @@ export default async function Home() {
           />
         </p>
         <ClientSession />
-        <ZustandUserClient
-          user={user as User}
-          userAccounts={userAccounts}
-          userBudgets={userBudgets}
-        ></ZustandUserClient>
         <h3>User info</h3>
         <p>user.id: {user?.id}</p>
         <p>user.name: {user?.name}</p>
