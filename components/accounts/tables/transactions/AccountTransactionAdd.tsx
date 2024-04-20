@@ -41,7 +41,7 @@ import { Currency } from "@/types/Currency";
 
 import "@/components/accounts/tables/transactions/AccountTransactionAdd.css";
 
-import { currenciesList } from "@/utils/getCurrenciesList";
+import currencies from "@/statics/currencies.json";
 
 interface Props {
   account: Account | null;
@@ -53,7 +53,7 @@ export default function AccountTransactionAdd(props: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
-  const foreignCurrenciesList = currenciesList.filter(
+  const foreignCurrenciesList = currencies.filter(
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 

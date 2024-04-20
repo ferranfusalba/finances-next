@@ -11,10 +11,10 @@ import LayoutAccountBudgetTable from "@/components/layouts/account-budget/Layout
 import { getBudget, getBudgetTransactions } from "@/lib/budgets";
 import { currency } from "@/lib/utils";
 
+import currencies from "@/statics/currencies.json";
+
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { Currency } from "@/types/Currency";
-
-import { currenciesList } from "@/utils/getCurrenciesList";
 
 export default async function BudgetLayout({
   params,
@@ -22,7 +22,7 @@ export default async function BudgetLayout({
   const budget = await getBudget({ params });
   const budgetTransactions = await getBudgetTransactions(budget?.id as string);
 
-  const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
+  const defaultCurrencyMatch: Currency | undefined = currencies.find(
     (currency) => currency.code === budget?.defaultCurrency
   );
   // TODO: Fix this undefined (fallback object ?)
