@@ -2,18 +2,12 @@ import { auth } from "@/auth";
 
 import ClientSession from "@/components/home/ClientSession";
 
-import { User } from "@/types/User";
-
 import getUserId from "@/utils/getUserId";
-import getUserAccounts from "@/utils/getUserAccounts";
-import getUserBudgets from "@/utils/getUserBudgets";
 
 export default async function Home() {
   const serverSession = await auth();
 
   const user = await getUserId(serverSession?.user?.email as string);
-  const userAccounts = await getUserAccounts(serverSession?.user?.id as string);
-  const userBudgets = await getUserBudgets(serverSession?.user?.id as string);
 
   if (serverSession) {
     return (
