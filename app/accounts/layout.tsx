@@ -5,8 +5,7 @@ import { auth } from "@/auth";
 import Layout01 from "@/components/layouts/Layout01";
 import SectionNavMenu from "@/components/nav/SectionNav/SectionNavMenu";
 
-import getUserId from "@/utils/getUserId";
-import getUserAccounts from "@/utils/getUserAccounts";
+import { getAccounts } from "@/lib/accounts";
 
 export const metadata: Metadata = {
   title: "Accounts | Finances Next",
@@ -17,10 +16,8 @@ export default async function AccountsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  const userEmail = session?.user?.email as string;
-  const userId = await getUserId(userEmail);
-  const userAccounts = await getUserAccounts(userId?.id as string);
+  const serverSession = await auth();
+  const userAccounts = await getAccounts(serverSession?.user.id as string);
 
   return (
     <>

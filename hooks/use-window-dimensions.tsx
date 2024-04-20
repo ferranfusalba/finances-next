@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-type WindowDimentions = {
+interface WindowDimentions {
   width: number | string;
   height: number | string;
-};
+}
 
 const useWindowDimensions = (): WindowDimentions => {
   const [windowDimensions, setWindowDimensions] = useState<WindowDimentions>({
