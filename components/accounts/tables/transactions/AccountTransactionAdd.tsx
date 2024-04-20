@@ -59,7 +59,6 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
-  // TODO: Finish applying Zustand / build a new structure for data consumption avoiding props
   // const userStore = useUserState((state) => state);
   // const userAccounts = userStore.accounts;
   const userAccounts4Transactions = props.userAccounts?.filter(
@@ -213,14 +212,12 @@ export default function AccountTransactionAdd(props: Props) {
       }).then(() => {
         if (form.getValues().type === "TRANSFER") {
           startTransition(async () => {
-            // TODO: Zustand?
             const fetchBalance = async (accountId: string) => {
               const response = await fetch(`/api/accounts/${accountId}`);
               const data = await response.json();
               return data.currentBalance;
             };
 
-            // TODO: Zustand?
             const currentBalanceDestination = await fetchBalance(
               form.getValues().typeTransferDestinationAccount
             );
