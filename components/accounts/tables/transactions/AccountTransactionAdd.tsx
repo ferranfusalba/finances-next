@@ -41,8 +41,6 @@ import { Currency } from "@/types/Currency";
 
 import "@/components/accounts/tables/transactions/AccountTransactionAdd.css";
 
-import { useUserState } from "@/store/userStore";
-
 import { currenciesList } from "@/utils/getCurrenciesList";
 
 interface Props {
@@ -59,8 +57,6 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
-  // const userStore = useUserState((state) => state);
-  // const userAccounts = userStore.accounts;
   const userAccounts4Transactions = props.userAccounts?.filter(
     (account) => account.name !== props.account?.name
   );

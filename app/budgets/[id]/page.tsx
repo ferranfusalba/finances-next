@@ -1,5 +1,4 @@
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
-import LevelClient from "@/components/budgets/LevelClient";
 import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
 import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
 import BackgroundChip from "@/components/chips/BackgroundChip";
@@ -85,8 +84,6 @@ export default async function BudgetLayout({
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
         <BudgetTransactionTable budgetTransactions={budgetTransactions} />
-        <br />
-        <LevelClient />
       </LayoutAccountBudgetTable>
     </Layout02a>
   );
