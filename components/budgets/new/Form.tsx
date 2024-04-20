@@ -26,10 +26,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import currencies from "@/statics/currencies.json";
+
 import { Currency } from "@/types/Currency";
 import { User } from "@/types/User";
-
-import { currenciesList } from "@/utils/getCurrenciesList";
 
 interface Props {
   user: User;
@@ -186,7 +186,7 @@ export default function NewBudgetForm(props: Props) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {currenciesList.map((currency: Currency) => (
+                    {currencies.map((currency: Currency) => (
                       <SelectItem value={currency.code} key={currency.code}>
                         {currency.code} - {currency.name} (
                         {currency.symbol_native})

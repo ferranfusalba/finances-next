@@ -19,11 +19,10 @@ import {
 import { currency } from "@/lib/utils";
 
 import countries from "@/statics/countries.json";
+import currencies from "@/statics/currencies.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { Currency } from "@/types/Currency";
-
-import { currenciesList } from "@/utils/getCurrenciesList";
 
 export default async function AccountLayout({
   params,
@@ -36,7 +35,7 @@ export default async function AccountLayout({
   const serverSession = await auth();
   const userAccounts = await getAccounts(serverSession?.user?.id as string);
 
-  const defaultCurrencyMatch: Currency | undefined = currenciesList.find(
+  const defaultCurrencyMatch: Currency | undefined = currencies.find(
     (currency) => currency.code === account?.defaultCurrency
   );
   // TODO: Fix this undefined (fallback object ?)

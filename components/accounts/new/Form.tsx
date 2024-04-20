@@ -27,8 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import countries from "@/statics/countries.json";
-
-import { currenciesList } from "@/utils/getCurrenciesList";
+import currencies from "@/statics/currencies.json";
 
 import { Currency } from "@/types/Currency";
 
@@ -274,7 +273,7 @@ export default function NewAccountForm(props: Props) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {currenciesList.map((currency: Currency) => (
+                    {currencies.map((currency: Currency) => (
                       <SelectItem value={currency.code} key={currency.code}>
                         {currency.code} - {currency.name} (
                         {currency.symbol_native})
