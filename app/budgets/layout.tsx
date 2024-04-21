@@ -21,8 +21,8 @@ export default async function BudgetsLayout({
 
   return (
     <>
+      {/* @ts-ignore: Async Server Component TypeScript Error */}
       <SectionNavMenu type="budgets" list={userBudgets} allowAdd={true} />
-      {/* TODO: Solve this TS error */}
       <Layout01>{children}</Layout01>
     </>
   );
