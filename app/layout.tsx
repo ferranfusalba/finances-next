@@ -59,8 +59,8 @@ export default async function RootLayout({
       <body className={`text-slate-100`}>
         <SessionProvider session={serverSession}>
           <header className="fixed top-0 w-full z-10">
+            {/* @ts-ignore: Async Server Component TypeScript Error */}
             <TopNav />
-            {/* TODO: Solve this TS error */}
           </header>
           <main className="pt-16">
             <Toaster />
