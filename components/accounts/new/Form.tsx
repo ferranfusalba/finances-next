@@ -36,6 +36,8 @@ interface Props {
 }
 
 export default function NewAccountForm(props: Props) {
+  const defaultCountry = props.user.defaultCountry || "";
+  const defaultCurrency = props.user.defaultCurrency || "";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -75,8 +77,8 @@ export default function NewAccountForm(props: Props) {
       code: "",
       type: "",
       number: "",
-      country: "",
-      defaultCurrency: "",
+      country: defaultCountry,
+      defaultCurrency: defaultCurrency,
       description: "",
       initialBalance: "",
     },
