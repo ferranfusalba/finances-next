@@ -182,7 +182,7 @@
     "emoji-flag": "🇰🇵"
   },
   { "name": "Korea, Republic of", "alpha-2": "KR", "emoji-flag": "🇰🇷" },
-  { "name": "Kosovo", "id": "🇽🇰" },
+  { "name": "Kosovo", "alpha-2": "XK", "emoji-flag": "🇽🇰" },
   { "name": "Kuwait", "alpha-2": "KW", "emoji-flag": "🇰🇼" },
   { "name": "Kyrgyzstan", "alpha-2": "KG", "emoji-flag": "🇰🇬" },
   {
