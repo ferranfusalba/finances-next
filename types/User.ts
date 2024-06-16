@@ -13,4 +13,6 @@ export interface User {
   updatedAt: Date | null;
   accounts: Array<Account>;
   budgets: Array<Budget>;
+  defaultCountry?: string;
+  defaultCurrency?: string;
 }
