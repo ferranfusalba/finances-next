@@ -9,9 +9,11 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
+import BackgroundChip from "@/components/chips/BackgroundChip";
 import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
 
 import countries from "@/statics/countries.json";
+import currencies from "@/statics/currencies.json";
 
 import { Account } from "@/types/Account";
 
@@ -22,9 +24,20 @@ export default function AccountsOverviewTable({
 }: {
   accounts: Array<Account>;
 }) {
+  // TODO: Refactor these three functions by having a key (country, currency) + object (remaining data) structure ?
   const getEmojiFlag = (alpha2Code: string) => {
     const country = countries.find((c) => c["alpha-2"] === alpha2Code);
     return country ? country["emoji-flag"] : "🏳️"; // Return a default flag if not found
+  };
+
+  const getColor0 = (currencyCode: string) => {
+    const currency = currencies.find((c) => c.code === currencyCode);
+    return currency ? currency.color0 : "default-color"; // Return a default color if not found
+  };
+
+  const getColor1 = (currencyCode: string) => {
+    const currency = currencies.find((c) => c.code === currencyCode);
+    return currency ? currency.color1 : "default-color"; // Return a default color if not found
   };
 
   const columns = [
@@ -42,6 +55,13 @@ export default function AccountsOverviewTable({
     }),
     columnHelper.accessor("code", {
       header: () => <span>Code</span>,
+      cell: (info) => {
+        return (
+          <span className="font-mono p-1 bg-slate-100 rounded-md text-stone-900">
+            {info.row.original.code}
+          </span>
+        );
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("active", {
@@ -58,6 +78,19 @@ export default function AccountsOverviewTable({
     }),
     columnHelper.accessor("defaultCurrency", {
       header: () => <span>Currency</span>,
+      cell: (info) => {
+        return (
+          <BackgroundChip
+            data={info.row.original.defaultCurrency as string}
+            backgroundColor={
+              getColor0(info.row.original.defaultCurrency as string) as string
+            }
+            textColor={
+              getColor1(info.row.original.defaultCurrency as string) as string
+            }
+          />
+        );
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("currentBalance", {
@@ -66,6 +99,9 @@ export default function AccountsOverviewTable({
     }),
     columnHelper.accessor("number", {
       header: () => <span>Number</span>,
+      cell: (info) => {
+        return <span className="font-mono">{info.row.original.number}</span>;
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("country", {
@@ -106,8 +142,9 @@ export default function AccountsOverviewTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // TODO: Resolve the pb-24 by correct layouts
   return (
-    <div className="flex flex-col overflow-auto flex-nowrap scroll-touch">
+    <div className="flex flex-col overflow-auto flex-nowrap scroll-touch pb-24">
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (

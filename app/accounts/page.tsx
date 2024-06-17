@@ -9,7 +9,7 @@ export default async function AccountsPage() {
   const userAccounts = await getAccounts(serverSession?.user.id as string);
 
   return (
-    <div className="w-full h-full p-8">
+    <div className="w-full h-full p-4 md:p-8">
       <AccountsOverviewTable accounts={userAccounts} />
     </div>
   );
