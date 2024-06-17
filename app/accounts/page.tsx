@@ -1,7 +1,16 @@
-export default function AccountsPage() {
+import { auth } from "@/auth";
+
+import { getAccounts } from "@/lib/accounts";
+
+import AccountsOverviewTable from "@/components/accounts/tables/overview/AccountsOverviewTable";
+
+export default async function AccountsPage() {
+  const serverSession = await auth();
+  const userAccounts = await getAccounts(serverSession?.user.id as string);
+
   return (
-    <div className="w-full h-full grid justify-center content-center">
-      Select an account
+    <div className="w-full h-full p-8">
+      <AccountsOverviewTable accounts={userAccounts} />
     </div>
   );
 }
