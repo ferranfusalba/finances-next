@@ -23,7 +23,7 @@ export default async function SettingsLayout({
 
   return (
     <>
-      <SectionNavMenu type="settings" list={defaultSettings} allowAdd={false} />
+      <SectionNavMenu type="settings" list={defaultSettings} />
       <Layout01>{children}</Layout01>
     </>
   );
