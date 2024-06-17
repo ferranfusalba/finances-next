@@ -125,13 +125,31 @@ export default function BudgetTransactionAdd(props: Props) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnBudget = props.budget!.currentBalance;
 
+    const dateBuilt = new Date(
+      Number(values.dateYear),
+      Number(values.dateMonth) - 1,
+      Number(values.dateDay),
+      Number(values.timeHour),
+      Number(values.timeMinute),
+      Number(values.timeSecond),
+      0 // TODO: Integrate here timezone
+    );
+
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
     const amountForm = parseFloat(values.amountForm);
+    const foreignCurrency = values.foreignCurrency;
+    const foreignCurrencyAmount = parseFloat(values.foreignCurrencyAmount);
+    const foreignCurrencyExchangeRate = parseFloat(
+      values.foreignCurrencyExchangeRate
+    );
     const category = values.category;
     const subcategory = values.subcategory;
     const tags = values.tags;
+    const dateTime = dateBuilt;
+    const timezone = values.timezone;
+    const location = values.location;
     const notes = values.notes;
     const budgetId = props.budget?.id;
     const balance = balanceOnBudget + amountForm;
@@ -154,9 +172,15 @@ export default function BudgetTransactionAdd(props: Props) {
           type,
           currency,
           amount: amountForm,
+          foreignCurrency,
+          foreignCurrencyAmount,
+          foreignCurrencyExchangeRate,
           category,
           subcategory,
           tags,
+          dateTime,
+          timezone,
+          location,
           notes,
           budgetId,
           balance,

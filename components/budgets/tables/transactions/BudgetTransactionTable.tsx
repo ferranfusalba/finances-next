@@ -26,6 +26,18 @@ const columns = [
     header: () => <span>createdAt</span>,
     footer: (info) => info.column.id,
   }),
+  columnHelper.accessor((row) => row.dateTime, {
+    id: "dateTime",
+    cell: (info) => {
+      return <i>{info.getValue().toLocaleString("ca")}</i>;
+    },
+    header: () => <span>Date & Time</span>,
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("timezone", {
+    header: "Timezone",
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("concept", {
     header: () => <span>Concept</span>,
     footer: (info) => info.column.id,
@@ -61,6 +73,34 @@ const columns = [
     header: "Balance",
     footer: (info) => info.column.id,
   }),
+  columnHelper.accessor("foreignCurrency", {
+    header: "Foreign Currency",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("foreignCurrencyAmount", {
+    cell: (info) => {
+      const number = info.getValue();
+      const foreignCurrency = info.row.original?.foreignCurrency;
+
+      if (foreignCurrency) {
+        return (
+          <>
+            {currency("ca-AD", foreignCurrency as string).format(
+              number as number
+            )}
+          </>
+        );
+      }
+
+      return <></>;
+    },
+    header: "Foreign Currency Amount",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("foreignCurrencyExchangeRate", {
+    header: "Exchange Rate",
+    footer: (info) => info.column.id,
+  }),
   columnHelper.accessor("category", {
     header: "Category",
     footer: (info) => info.column.id,
@@ -71,6 +111,10 @@ const columns = [
   }),
   columnHelper.accessor("tags", {
     header: "Tags",
+    footer: (info) => info.column.id,
+  }),
+  columnHelper.accessor("location", {
+    header: "Location",
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor("notes", {
