@@ -22,7 +22,7 @@ export default async function BudgetsLayout({
   return (
     <>
       {/* @ts-ignore: Async Server Component TypeScript Error */}
-      <SectionNavMenu type="budgets" list={userBudgets} allowAdd={true} />
+      <SectionNavMenu type="budgets" list={userBudgets} allowAdd />
       <Layout01>{children}</Layout01>
     </>
   );

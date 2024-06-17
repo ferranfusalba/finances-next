@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 export default async function SectionNavMenu({
   type,
   list,
-  allowAdd,
+  allowAdd = false,
 }: {
   type: string;
-  allowAdd: boolean;
+  allowAdd?: boolean;
   list: Array<{ id: string; name: string }>;
 }) {
   return (
