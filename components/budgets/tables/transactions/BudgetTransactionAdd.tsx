@@ -20,6 +20,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -37,6 +38,9 @@ import {
 import "@/components/budgets/tables/transactions/BudgetTransactionAdd.css";
 
 import { Budget } from "@/types/Budget";
+import { Currency } from "@/types/Currency";
+
+import currencies from "@/statics/currencies.json";
 
 interface Props {
   budget: Budget | null;
@@ -46,6 +50,10 @@ export default function BudgetTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const currentYear = new Date().getFullYear();
+  const foreignCurrenciesList = currencies.filter(
+    (currency) => currency.code !== props.budget?.defaultCurrency
+  );
 
   const formSchema = z.object({
     concept: z.string().min(1, {
@@ -60,9 +68,32 @@ export default function BudgetTransactionAdd(props: Props) {
     amountForm: z.string().min(1, {
       message: "Amount Type is required.",
     }),
+    foreignCurrency: z.string(),
+    foreignCurrencyAmount: z.string(),
+    foreignCurrencyExchangeRate: z.string(),
     category: z.string(),
     subcategory: z.string(),
     tags: z.string(),
+    dateDay: z.string().min(1, {
+      message: "Required",
+    }),
+    dateMonth: z.string().min(1, {
+      message: "Required",
+    }),
+    dateYear: z.string().min(4, {
+      message: "Required",
+    }),
+    timeHour: z.string().min(1, {
+      message: "Required",
+    }),
+    timeMinute: z.string().min(1, {
+      message: "Required",
+    }),
+    timeSecond: z.string().min(1, {
+      message: "Required",
+    }),
+    timezone: z.string(),
+    location: z.string(),
     notes: z.string(),
   });
 
@@ -73,9 +104,20 @@ export default function BudgetTransactionAdd(props: Props) {
       type: "",
       currency: props.budget?.defaultCurrency as string,
       amountForm: "",
+      foreignCurrency: "",
+      foreignCurrencyAmount: "",
+      foreignCurrencyExchangeRate: "",
       category: "",
       subcategory: "",
       tags: "",
+      dateDay: "",
+      dateMonth: "",
+      dateYear: "",
+      timeHour: "",
+      timeMinute: "",
+      timeSecond: "",
+      timezone: "",
+      location: "",
       notes: "",
     },
   });
@@ -186,7 +228,9 @@ export default function BudgetTransactionAdd(props: Props) {
                         <SelectContent>
                           <SelectItem value="INCOME">INCOME</SelectItem>
                           <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                          <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                          <SelectItem value="TRANSFER" disabled>
+                            TRANSFER
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -221,7 +265,186 @@ export default function BudgetTransactionAdd(props: Props) {
                           type="number"
                           inputMode="decimal"
                           step="0.01"
-                          placeholder="34,50"
+                          min={
+                            form.getValues().type === "INCOME"
+                              ? 0
+                              : Number.MIN_SAFE_INTEGER
+                          }
+                          max={
+                            form.getValues().type === "EXPENSE" ||
+                            form.getValues().type === "TRANSFER"
+                              ? 0
+                              : Number.MAX_SAFE_INTEGER
+                          }
+                          placeholder="+ / -"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Date & Time */}
+                <div className="flex justify-between">
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Day*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateDay"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="00"
+                              max="31"
+                              placeholder="08"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateMonth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Month*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateMonth"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="00"
+                              max="12"
+                              placeholder="02"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="dateYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Year*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="dateYear"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="1970"
+                              max={currentYear}
+                              placeholder={currentYear.toString()}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeHour"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Hour*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeHour"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="00"
+                              max="23"
+                              placeholder="02"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeMinute"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Min.*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeMinute"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="00"
+                              max="59"
+                              placeholder="50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="timeSecond"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sec.*</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="timeSecond"
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              min="00"
+                              max="59"
+                              placeholder="59"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                {/* Timezone */}
+                <FormField
+                  control={form.control}
+                  name="timezone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Timezone</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="timezone"
+                          type="text"
+                          placeholder="UTC+01:00"
                           {...field}
                         />
                       </FormControl>
@@ -281,6 +504,110 @@ export default function BudgetTransactionAdd(props: Props) {
                           id="tags"
                           type="text"
                           placeholder="Digital Subscriptions, HBO Max"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Foreign Currency */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Foreign Currency</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {/* TODO: Add here the common currencies list */}
+                          {/* <SelectGroup>
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="CAD">CAD</SelectItem>
+                            <SelectItem value="CHF">CHF</SelectItem>
+                          </SelectGroup> */}
+                          <SelectGroup>
+                            {/* <SelectLabel>
+                              <hr />
+                            </SelectLabel> */}
+                            {foreignCurrenciesList.map((currency: Currency) => (
+                              <SelectItem
+                                value={currency.code}
+                                key={currency.code}
+                              >
+                                {currency.code} - {currency.name} (
+                                {currency.symbol_native})
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Foreign Currency Amount */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrencyAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Foreign Currency Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="foreignCurrencyAmount"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          placeholder="34,50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Foreign Currency Exchange Rate */}
+                <FormField
+                  control={form.control}
+                  name="foreignCurrencyExchangeRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Foreign Currency Exchange Rate</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="foreignCurrencyExchangeRate"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          placeholder="1.595"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Location */}
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="location"
+                          type="text"
+                          placeholder="Zürich Airport, Kloten, CH"
                           {...field}
                         />
                       </FormControl>
