@@ -1,29 +1,29 @@
 interface Transaction {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  concept: string;
-  type: string;
-  currency: string;
   amount: number;
   balance: number;
   category: string;
-  subcategory?: string | null;
-  tags?: string | null;
-  notes: string;
-}
-
-export interface AccountTransaction extends Transaction {
-  typeTransferOrigin: string | null;
-  typeTransferDestination: string | null;
-  payee: string;
+  concept: string;
+  createdAt: Date;
+  currency: string;
+  dateTime: Date;
   foreignCurrency?: string | null;
   foreignCurrencyAmount?: number | null;
   foreignCurrencyExchangeRate?: number | null;
-  dateTime: Date;
-  timezone?: string | null;
+  id: string;
   location?: string | null;
+  notes: string;
+  subcategory?: string | null;
+  tags?: string | null;
+  timezone?: string | null;
+  type: string;
+  updatedAt: Date;
+}
+
+export interface AccountTransaction extends Transaction {
   accountId: string;
+  payee: string;
+  typeTransferDestination: string | null;
+  typeTransferOrigin: string | null;
 }
 
 export interface BudgetTransaction extends Transaction {

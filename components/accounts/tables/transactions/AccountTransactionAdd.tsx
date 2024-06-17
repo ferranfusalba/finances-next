@@ -110,10 +110,10 @@ export default function AccountTransactionAdd(props: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      payee: "",
+      payee: "", // Not at Budget Transaction Form
       concept: "",
       type: "",
-      typeTransferDestinationAccount: "",
+      typeTransferDestinationAccount: "", // Not at Budget Transaction Form
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
       foreignCurrency: "",
