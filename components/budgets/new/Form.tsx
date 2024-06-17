@@ -36,6 +36,7 @@ interface Props {
 }
 
 export default function NewBudgetForm(props: Props) {
+  const defaultCurrency = props.user.defaultCurrency || "";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -64,7 +65,7 @@ export default function NewBudgetForm(props: Props) {
       name: "",
       code: "",
       type: "",
-      defaultCurrency: "",
+      defaultCurrency: defaultCurrency,
       description: "",
       initialBalance: "",
     },
