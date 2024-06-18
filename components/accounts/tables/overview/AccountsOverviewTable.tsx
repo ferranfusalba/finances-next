@@ -12,8 +12,8 @@ import {
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
 
-import countries from "@/statics/countries.json";
-import currencies from "@/statics/currencies.json";
+import countries_code from "@/statics/countries_code.json";
+import currencies_code from "@/statics/currencies_code.json";
 
 import { Account } from "@/types/Account";
 
@@ -24,20 +24,38 @@ export default function AccountsOverviewTable({
 }: {
   accounts: Array<Account>;
 }) {
-  // TODO: Refactor these three functions by having a key (country, currency) + object (remaining data) structure ?
-  const getEmojiFlag = (alpha2Code: string) => {
-    const country = countries.find((c) => c["alpha-2"] === alpha2Code);
-    return country ? country["emoji-flag"] : "🏳️"; // Return a default flag if not found
+  const countriesCode: {
+    [k: string]: {
+      name: string;
+      "alpha-2": string;
+      "emoji-flag": string;
+    };
+  } = countries_code;
+
+  const currenciesCode: {
+    [k: string]: {
+      symbol: string;
+      name: string;
+      symbol_native: string;
+      decimal_digits: number;
+      rounding: number;
+      code: string;
+      name_plural: string;
+      color0?: string;
+      color1?: string;
+    };
+  } = currencies_code;
+
+  const getCountryFlag = (alpha2Code: string) => {
+    return countriesCode[alpha2Code]["emoji-flag"];
   };
 
-  const getColor0 = (currencyCode: string) => {
-    const currency = currencies.find((c) => c.code === currencyCode);
-    return currency ? currency.color0 : "default-color"; // Return a default color if not found
+  const getCurrencyColor0 = (alpha2Code: string) => {
+    return currenciesCode[alpha2Code]["color0"];
   };
 
-  const getColor1 = (currencyCode: string) => {
-    const currency = currencies.find((c) => c.code === currencyCode);
-    return currency ? currency.color1 : "default-color"; // Return a default color if not found
+  const getCurrencyColor1 = (alpha2Code: string) => {
+    return currenciesCode[alpha2Code]["color1"];
   };
 
   const columns = [
@@ -83,10 +101,14 @@ export default function AccountsOverviewTable({
           <BackgroundChip
             data={info.row.original.defaultCurrency as string}
             backgroundColor={
-              getColor0(info.row.original.defaultCurrency as string) as string
+              getCurrencyColor0(
+                info.row.original.defaultCurrency as string
+              ) as string
             }
             textColor={
-              getColor1(info.row.original.defaultCurrency as string) as string
+              getCurrencyColor1(
+                info.row.original.defaultCurrency as string
+              ) as string
             }
           />
         );
@@ -110,7 +132,7 @@ export default function AccountsOverviewTable({
         return (
           <>
             {info.row.original.country}{" "}
-            {getEmojiFlag(info.row.original.country)}
+            {getCountryFlag(info.row.original.country)}
           </>
         );
       },
