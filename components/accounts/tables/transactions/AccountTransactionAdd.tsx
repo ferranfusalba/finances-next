@@ -35,6 +35,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 
 import { Account } from "@/types/Account";
 import { Currency } from "@/types/Currency";
@@ -61,6 +62,25 @@ export default function AccountTransactionAdd(props: Props) {
     (account) => account.name !== props.account?.name
   );
 
+  // TODO: Review rendering of Type Field & the implications in Amount
+  const handleAmountPlaceholder = () => {
+    switch (form.getValues().type) {
+      case "":
+        return "Select a type first (Income, Expense, Transfer)";
+      case "INCOME":
+      case "INCOME_N":
+        return "+";
+      case "EXPENSE":
+      case "EXPENSE_N":
+        return "-";
+      case "TRANSFER":
+      case "OPENING":
+        return "+ / -";
+      default:
+        return "";
+    }
+  };
+
   const formSchema = z.object({
     payee: z.string().min(1, {
       message: "A Payee is required.",
@@ -78,6 +98,7 @@ export default function AccountTransactionAdd(props: Props) {
     amountForm: z.string().min(1, {
       message: "Amount Type is required.",
     }),
+    foreignCurrencyActive: z.boolean().default(false).optional(), // TODO: Add this new field to remaining form pipeline
     foreignCurrency: z.string(),
     foreignCurrencyAmount: z.string(),
     foreignCurrencyExchangeRate: z.string(),
@@ -116,6 +137,7 @@ export default function AccountTransactionAdd(props: Props) {
       typeTransferDestinationAccount: "", // Not at Budget Transaction Form
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
+      // foreignCurrencyActive: false,
       foreignCurrency: "",
       foreignCurrencyAmount: "",
       foreignCurrencyExchangeRate: "",
@@ -281,9 +303,10 @@ export default function AccountTransactionAdd(props: Props) {
       </DialogTrigger>
       <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>New Transaction</DialogTitle>
           <DialogDescription>
-            Add a transaction to this account:
+            Add a new transaction to {props.account?.bankName}{" "}
+            {props.account?.name}:
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -384,10 +407,18 @@ export default function AccountTransactionAdd(props: Props) {
                                   <SelectItem
                                     value={account.id}
                                     key={account.id}
-                                    disabled={
-                                      props.account?.defaultCurrency !==
-                                      account.defaultCurrency
-                                    }
+                                    // TODO: If an account with a different currency is selected, automatically select the FC one
+                                    // disabled={
+                                    //   props.account?.defaultCurrency !==
+                                    //   account.defaultCurrency
+                                    // }
+                                    style={{
+                                      color:
+                                        props.account?.defaultCurrency !==
+                                        account.defaultCurrency
+                                          ? "goldenrod"
+                                          : "",
+                                    }}
                                   >
                                     {account.bankName} - {account.name} (
                                     {account.defaultCurrency})
@@ -430,6 +461,7 @@ export default function AccountTransactionAdd(props: Props) {
                           type="number"
                           inputMode="decimal"
                           step="0.01"
+                          disabled={form.getValues().type === ""}
                           min={
                             form.getValues().type === "INCOME" ||
                             form.getValues().type === "INCOME_N"
@@ -443,7 +475,7 @@ export default function AccountTransactionAdd(props: Props) {
                               ? 0
                               : Number.MAX_SAFE_INTEGER
                           }
-                          placeholder="+ / -"
+                          placeholder={handleAmountPlaceholder()}
                           {...field}
                         />
                       </FormControl>
@@ -652,7 +684,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="subcategory"
                           type="text"
-                          placeholder="HBO Max"
+                          placeholder="YouTube Premium"
                           {...field}
                         />
                       </FormControl>
@@ -671,7 +703,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="tags"
                           type="text"
-                          placeholder="Digital Subscriptions, HBO Max"
+                          placeholder="Digital Subscriptions, YouTube Premium"
                           {...field}
                         />
                       </FormControl>
@@ -679,91 +711,124 @@ export default function AccountTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
-                {/* Foreign Currency */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* TODO: Add here the common currencies list */}
-                          {/* <SelectGroup>
+                {/* Foreign Currency Fields */}
+                <div className="flex items-center gap-2">
+                  <FormLabel>Foreign Currency</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="foreignCurrencyActive"
+                    render={({ field }) => (
+                      // TODO: Add reset Foreign Currency fields logic
+                      <>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </>
+                    )}
+                  ></FormField>
+                </div>
+
+                <div className="space-y-4 border rounded-lg p-4">
+                  {/* Foreign Currency */}
+                  <FormField
+                    control={form.control}
+                    name="foreignCurrency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foreign Currency</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={!form.getValues().foreignCurrencyActive}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a foreign currency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {/* TODO: Add here the common currencies list */}
+                            {/* <SelectGroup>
                             <SelectItem value="USD">USD</SelectItem>
                             <SelectItem value="CAD">CAD</SelectItem>
                             <SelectItem value="CHF">CHF</SelectItem>
                           </SelectGroup> */}
-                          <SelectGroup>
-                            {/* <SelectLabel>
+                            <SelectGroup>
+                              {/* <SelectLabel>
                               <hr />
                             </SelectLabel> */}
-                            {foreignCurrenciesList.map((currency: Currency) => (
-                              <SelectItem
-                                value={currency.code}
-                                key={currency.code}
-                              >
-                                {currency.code} - {currency.name} (
-                                {currency.symbol_native})
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Foreign Currency Amount */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrencyAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="foreignCurrencyAmount"
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          placeholder="34,50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Foreign Currency Exchange Rate */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrencyExchangeRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency Exchange Rate</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="foreignCurrencyExchangeRate"
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          placeholder="1.595"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              {foreignCurrenciesList.map(
+                                (currency: Currency) => (
+                                  <SelectItem
+                                    value={currency.code}
+                                    key={currency.code}
+                                  >
+                                    {currency.code} - {currency.name} (
+                                    {currency.symbol_native})
+                                  </SelectItem>
+                                )
+                              )}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Foreign Currency Amount */}
+                  <FormField
+                    control={form.control}
+                    name="foreignCurrencyAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foreign Currency Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="foreignCurrencyAmount"
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            placeholder={
+                              form.getValues().foreignCurrency === ""
+                                ? "Select a foreign currency first"
+                                : "34,50"
+                            }
+                            disabled={form.getValues().foreignCurrency === ""}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Foreign Currency Exchange Rate */}
+                  <FormField
+                    control={form.control}
+                    name="foreignCurrencyExchangeRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foreign Currency Exchange Rate</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="foreignCurrencyExchangeRate"
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            placeholder={
+                              form.getValues().foreignCurrency === ""
+                                ? "Select a foreign currency first"
+                                : "1.595"
+                            }
+                            disabled={form.getValues().foreignCurrency === ""}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 {/* Location */}
                 <FormField
                   control={form.control}

@@ -508,7 +508,7 @@ export default function BudgetTransactionAdd(props: Props) {
                         <Input
                           id="subcategory"
                           type="text"
-                          placeholder="HBO Max"
+                          placeholder="YouTube Premium"
                           {...field}
                         />
                       </FormControl>
@@ -527,7 +527,7 @@ export default function BudgetTransactionAdd(props: Props) {
                         <Input
                           id="tags"
                           type="text"
-                          placeholder="Digital Subscriptions, HBO Max"
+                          placeholder="Digital Subscriptions, YouTube Premium"
                           {...field}
                         />
                       </FormControl>
