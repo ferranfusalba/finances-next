@@ -12,8 +12,8 @@ import {
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
 
-import countries_code from "@/statics/countries_code.json";
-import currencies_code from "@/statics/currencies_code.json";
+import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import { getCountryFlag } from "@/lib/utils/country";
 
 import { Account } from "@/types/Account";
 
@@ -24,40 +24,6 @@ export default function AccountsOverviewTable({
 }: {
   accounts: Array<Account>;
 }) {
-  const countriesCode: {
-    [k: string]: {
-      name: string;
-      "alpha-2": string;
-      "emoji-flag": string;
-    };
-  } = countries_code;
-
-  const currenciesCode: {
-    [k: string]: {
-      symbol: string;
-      name: string;
-      symbol_native: string;
-      decimal_digits: number;
-      rounding: number;
-      code: string;
-      name_plural: string;
-      color0?: string;
-      color1?: string;
-    };
-  } = currencies_code;
-
-  const getCountryFlag = (alpha2Code: string) => {
-    return countriesCode[alpha2Code]["emoji-flag"];
-  };
-
-  const getCurrencyColor0 = (alpha2Code: string) => {
-    return currenciesCode[alpha2Code]["color0"];
-  };
-
-  const getCurrencyColor1 = (alpha2Code: string) => {
-    return currenciesCode[alpha2Code]["color1"];
-  };
-
   const columns = [
     columnHelper.accessor("order", {
       header: () => <span>Order</span>,
