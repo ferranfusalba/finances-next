@@ -53,7 +53,7 @@ export default function AccountTransactionTable({
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("timezone", {
-      header: "Timezone",
+      header: "Timezone (offset)",
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("payee", {
