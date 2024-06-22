@@ -43,8 +43,10 @@ import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
 import { Account } from "@/types/Account";
 import { Currency } from "@/types/Currency";
+import { Timezone } from "@/types/Timezone";
 
 import currencies from "@/statics/currencies.json";
+import timezones from "@/statics/timezones.json";
 
 interface Props {
   account: Account | null;
@@ -172,6 +174,9 @@ export default function AccountTransactionAdd(props: Props) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
 
+    const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
+    const timezoneToOffsetString = values.timezone.split("|")[0];
+
     const dateBuilt = new Date(
       Number(values.dateYear),
       Number(values.dateMonth) - 1,
@@ -179,7 +184,7 @@ export default function AccountTransactionAdd(props: Props) {
       Number(values.timeHour),
       Number(values.timeMinute),
       Number(values.timeSecond),
-      0 // TODO: Integrate here timezone
+      timezoneToOffset
     );
 
     const payee = values.payee;
@@ -196,7 +201,7 @@ export default function AccountTransactionAdd(props: Props) {
     const subcategory = values.subcategory;
     const tags = values.tags;
     const dateTime = dateBuilt;
-    const timezone = values.timezone;
+    const timezone = timezoneToOffsetString;
     const location = values.location;
     const notes = values.notes;
     const accountId = props.account?.id;
@@ -661,15 +666,33 @@ export default function AccountTransactionAdd(props: Props) {
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Timezone</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="timezone"
-                          type="text"
-                          placeholder="UTC+01:00"
-                          {...field}
-                        />
-                      </FormControl>
+                      <FormLabel>Timezone*</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a timezone" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            {timezones.map((timezone: Timezone) => (
+                              <SelectItem
+                                value={
+                                  timezone.offset.toString() +
+                                  "|" +
+                                  timezone.text
+                                }
+                                key={timezone.id}
+                              >
+                                {timezone.text} - {timezone.value}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
