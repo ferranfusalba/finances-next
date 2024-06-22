@@ -60,6 +60,17 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
+  // TODO: Temporary solution to unselect a FC - try reset function
+  foreignCurrenciesList.splice(0, 0, {
+    symbol: "N/A",
+    name: "N/A",
+    symbol_native: "N/A",
+    decimal_digits: 0,
+    rounding: 0,
+    code: "N/A",
+    name_plural: "N/A",
+  });
+
   const userAccounts4Transactions = props.userAccounts?.filter(
     (account) => account.name !== props.account?.name
   );
@@ -726,7 +737,7 @@ export default function AccountTransactionAdd(props: Props) {
                 {/* Foreign Currency Fields */}
                 <div className="flex items-center gap-2">
                   <FormLabel>Foreign Currency</FormLabel>
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="foreignCurrencyActive"
                     render={({ field }) => (
@@ -738,7 +749,7 @@ export default function AccountTransactionAdd(props: Props) {
                         />
                       </>
                     )}
-                  ></FormField>
+                  ></FormField> */}
                 </div>
 
                 <div className="space-y-4 border rounded-lg p-4">
@@ -748,11 +759,11 @@ export default function AccountTransactionAdd(props: Props) {
                     name="foreignCurrency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Foreign Currency</FormLabel>
+                        <FormLabel>Currency</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          disabled={!form.getValues().foreignCurrencyActive}
+                          // disabled={!form.getValues().foreignCurrencyActive}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -794,7 +805,7 @@ export default function AccountTransactionAdd(props: Props) {
                     name="foreignCurrencyAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Foreign Currency Amount</FormLabel>
+                        <FormLabel>Amount</FormLabel>
                         <FormControl>
                           <Input
                             id="foreignCurrencyAmount"
@@ -802,11 +813,15 @@ export default function AccountTransactionAdd(props: Props) {
                             inputMode="decimal"
                             step="0.01"
                             placeholder={
-                              form.getValues().foreignCurrency === ""
+                              form.getValues().foreignCurrency === "" ||
+                              form.getValues().foreignCurrency === "N/A"
                                 ? "Select a foreign currency first"
                                 : "34,50"
                             }
-                            disabled={form.getValues().foreignCurrency === ""}
+                            disabled={
+                              form.getValues().foreignCurrency === "" ||
+                              form.getValues().foreignCurrency === "N/A"
+                            }
                             {...field}
                           />
                         </FormControl>
@@ -820,7 +835,7 @@ export default function AccountTransactionAdd(props: Props) {
                     name="foreignCurrencyExchangeRate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Foreign Currency Exchange Rate</FormLabel>
+                        <FormLabel>Exchange Rate</FormLabel>
                         <FormControl>
                           <Input
                             id="foreignCurrencyExchangeRate"
@@ -828,11 +843,15 @@ export default function AccountTransactionAdd(props: Props) {
                             inputMode="decimal"
                             step="0.01"
                             placeholder={
-                              form.getValues().foreignCurrency === ""
+                              form.getValues().foreignCurrency === "" ||
+                              form.getValues().foreignCurrency === "N/A"
                                 ? "Select a foreign currency first"
                                 : "1.595"
                             }
-                            disabled={form.getValues().foreignCurrency === ""}
+                            disabled={
+                              form.getValues().foreignCurrency === "" ||
+                              form.getValues().foreignCurrency === "N/A"
+                            }
                             {...field}
                           />
                         </FormControl>
