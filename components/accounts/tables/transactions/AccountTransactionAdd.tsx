@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import "@/components/accounts/tables/transactions/AccountTransactionAdd.css";
+import BackgroundChip from "@/components/chips/BackgroundChip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,10 +39,10 @@ import {
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 
+import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+
 import { Account } from "@/types/Account";
 import { Currency } from "@/types/Currency";
-
-import "@/components/accounts/tables/transactions/AccountTransactionAdd.css";
 
 import currencies from "@/statics/currencies.json";
 
@@ -412,16 +414,26 @@ export default function AccountTransactionAdd(props: Props) {
                                     //   props.account?.defaultCurrency !==
                                     //   account.defaultCurrency
                                     // }
-                                    style={{
-                                      color:
-                                        props.account?.defaultCurrency !==
-                                        account.defaultCurrency
-                                          ? "goldenrod"
-                                          : "",
-                                    }}
                                   >
-                                    {account.bankName} - {account.name} (
-                                    {account.defaultCurrency})
+                                    {account.bankName} - {account.name}{" "}
+                                    {props.account?.defaultCurrency !==
+                                    account.defaultCurrency ? (
+                                      <BackgroundChip
+                                        data={account.defaultCurrency as string}
+                                        backgroundColor={
+                                          getCurrencyColor0(
+                                            account.defaultCurrency as string
+                                          ) as string
+                                        }
+                                        textColor={
+                                          getCurrencyColor1(
+                                            account.defaultCurrency as string
+                                          ) as string
+                                        }
+                                      />
+                                    ) : (
+                                      ""
+                                    )}
                                   </SelectItem>
                                 )
                               )}
