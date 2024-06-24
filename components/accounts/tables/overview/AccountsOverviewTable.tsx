@@ -12,6 +12,7 @@ import {
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
 
+import { currency } from "@/lib/utils";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import { getCountryFlag } from "@/lib/utils/country";
 
@@ -83,6 +84,14 @@ export default function AccountsOverviewTable({
     }),
     columnHelper.accessor("currentBalance", {
       header: () => <span>Balance</span>,
+      cell: (info) => {
+        const number = info.getValue();
+        const defaultCurrency = info.row.original?.defaultCurrency;
+
+        return (
+          <>{currency("ca-AD", defaultCurrency as string).format(number)}</>
+        );
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("number", {
