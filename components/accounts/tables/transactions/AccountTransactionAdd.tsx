@@ -62,6 +62,24 @@ export default function AccountTransactionAdd(props: Props) {
     (currency) => currency.code !== props.account?.defaultCurrency
   );
 
+  // TODO: Temporary solution for user's timezone detection
+  function getCurrentTimezoneOffsetInHours() {
+    const now = new Date();
+    const timezoneOffset = now.getTimezoneOffset();
+    return -timezoneOffset / 60;
+  }
+
+  const currentOffset = getCurrentTimezoneOffsetInHours();
+
+  const matchingTimezone = timezones.find((tz) => tz.offset === currentOffset);
+
+  const matchingTimezoneValue = () => {
+    if (matchingTimezone) {
+      const result = `${matchingTimezone.offset}|${matchingTimezone.text}`;
+      return result;
+    }
+  };
+
   // TODO: Temporary solution to unselect a FC - try reset function
   foreignCurrenciesList.splice(0, 0, {
     symbol: "N/A",
@@ -167,7 +185,7 @@ export default function AccountTransactionAdd(props: Props) {
       timeHour: "",
       timeMinute: "",
       timeSecond: "",
-      timezone: "",
+      timezone: matchingTimezoneValue(),
       location: "",
       notes: "",
     },
@@ -321,17 +339,18 @@ export default function AccountTransactionAdd(props: Props) {
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
+      <DialogContent className="max-[1000px]:max-h-margins-y-mobile sm:max-w-[1000px] overflow-y-auto h-5/6 md:h-max modal-content">
         <DialogHeader>
           <DialogTitle>New Transaction</DialogTitle>
           <DialogDescription>
-            Add a new transaction to {props.account?.bankName}{" "}
+            Add a new transaction to {props.account?.bankName}
+            {" · "}
             {props.account?.name}:
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-flow-row md:grid-flow-col gap-4 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
               <div className="space-y-4">
                 {/* Payee */}
                 <FormField
