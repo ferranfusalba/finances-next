@@ -11,3 +11,7 @@ const countriesCode: {
 export const getCountryFlag = (alpha2Code: string) => {
   return countriesCode[alpha2Code]["emoji-flag"];
 };
+
+export const getCountryName = (alpha2Code: string) => {
+  return countriesCode[alpha2Code]["name"];
+};
