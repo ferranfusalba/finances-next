@@ -138,7 +138,9 @@ export default function AccountTransactionAdd(props: Props) {
     timeSecond: z.string().min(1, {
       message: "Required",
     }),
-    timezone: z.string(),
+    timezone: z.string().min(1, {
+      message: "Timezone is required",
+    }),
     location: z.string(),
     notes: z.string(),
   });

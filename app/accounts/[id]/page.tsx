@@ -17,12 +17,12 @@ import {
   getAccountTransactions,
 } from "@/lib/accounts";
 import { currency } from "@/lib/utils";
+import { getCountryFlag, getCountryName } from "@/lib/utils/country";
+import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
 import countries from "@/statics/countries.json";
-import currencies from "@/statics/currencies.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-import { Currency } from "@/types/Currency";
 
 export default async function AccountLayout({
   params,
@@ -34,35 +34,6 @@ export default async function AccountLayout({
 
   const serverSession = await auth();
   const userAccounts = await getAccounts(serverSession?.user?.id as string);
-
-  const defaultCurrencyMatch: Currency | undefined = currencies.find(
-    (currency) => currency.code === account?.defaultCurrency
-  );
-  // TODO: Fix this undefined (fallback object ?)
-  const color0 = defaultCurrencyMatch ? defaultCurrencyMatch.color0 : "";
-  const color1 = defaultCurrencyMatch ? defaultCurrencyMatch.color1 : "";
-
-  function getCountryEmojiFlag(alpha2Code: string) {
-    const country = countries.filter(
-      (country) => country["alpha-2"] === alpha2Code
-    )[0];
-    if (country) {
-      return country["emoji-flag"] || "No emoji flag available";
-    } else {
-      return "Country not found";
-    }
-  }
-
-  function getCountryName(alpha2Code: string) {
-    const country = countries.filter(
-      (country) => country["alpha-2"] === alpha2Code
-    )[0];
-    if (country) {
-      return country["name"] || "No country name available";
-    } else {
-      return "Country not found";
-    }
-  }
 
   function getCountryFullName(alpha2Code: string) {
     const country = countries.filter(
@@ -98,7 +69,7 @@ export default async function AccountLayout({
           </div>
           <div>
             <span>
-              {getCountryEmojiFlag(account?.country as string)}
+              {getCountryFlag(account?.country as string)}
               {"  "}
               {account?.country} - {getCountryName(account?.country as string)}{" "}
               {getCountryFullName(account?.country as string)}
@@ -109,8 +80,12 @@ export default async function AccountLayout({
           <div>
             <BackgroundChip
               data={account?.defaultCurrency as string}
-              backgroundColor={color0 as string}
-              textColor={color1 as string}
+              backgroundColor={
+                getCurrencyColor0(account?.defaultCurrency as string) as string
+              }
+              textColor={
+                getCurrencyColor1(account?.defaultCurrency as string) as string
+              }
             />
             <span> </span>
             <span>{account?.type}</span>
@@ -119,7 +94,9 @@ export default async function AccountLayout({
               data={currency("ca-AD", account!.defaultCurrency).format(
                 account?.currentBalance as number
               )}
-              borderColor={color0 as string}
+              borderColor={
+                getCurrencyColor0(account?.defaultCurrency as string) as string
+              }
             />
           </div>
         </div>
