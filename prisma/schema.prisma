@@ -31,6 +31,8 @@ model User {
   budgets         Budget[]
   defaultCountry  String?       @default("")
   defaultCurrency String?       @default("")
+  defaultTimezone String?       @default("")
+  defaultLocale   String?       @default("")
 }
 
 model UserAccount {
