@@ -15,4 +15,6 @@ export interface User {
   budgets: Array<Budget>;
   defaultCountry?: string;
   defaultCurrency?: string;
+  defaultTimezone?: string;
+  defaultLocale?: string;
 }
