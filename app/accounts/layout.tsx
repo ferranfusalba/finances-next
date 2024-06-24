@@ -19,10 +19,23 @@ export default async function AccountsLayout({
   const serverSession = await auth();
   const userAccounts = await getAccounts(serverSession?.user.id as string);
 
+  // Temporary sort by order until order reassignation by drag&drop is applied
+  const userAccountsSortOrder = userAccounts.sort(function (a, b) {
+    if (a.order > b.order) {
+      return 1;
+    }
+
+    if (a.order < b.order) {
+      return -1;
+    }
+
+    return 0;
+  });
+
   return (
     <>
       {/* @ts-ignore: Async Server Component TypeScript Error */}
-      <SectionNavMenu type="accounts" list={userAccounts} allowAdd />
+      <SectionNavMenu type="accounts" list={userAccountsSortOrder} allowAdd />
       <Layout01>{children}</Layout01>
     </>
   );
