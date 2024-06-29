@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -191,15 +191,27 @@ export default function AccountTransactionAdd(props: Props) {
 
   const handleResetFC = () => form.resetField("foreignCurrency");
 
+  // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
+  const selectedTransferAccount = form.watch("typeTransferDestinationAccount");
+  const selectedTransferAccountId = selectedTransferAccount.split("|")[0];
+  const selectedTransferAccountCurrency = selectedTransferAccount.split("|")[1];
+
+  useEffect(() => {
+    if (
+      selectedTransferAccount &&
+      selectedTransferAccountCurrency !== form.getValues().currency
+    ) {
+      form.setValue("foreignCurrency", selectedTransferAccountCurrency);
+    } else {
+      form.setValue("foreignCurrency", "");
+    }
+  });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
 
     const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
     const timezoneToOffsetString = values.timezone.split("|")[0];
-
-    // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-    const typeTransferDestinationAccountId =
-      values.typeTransferDestinationAccount.split("|")[0];
 
     const dateBuilt = new Date(
       Number(values.dateYear),
@@ -249,7 +261,7 @@ export default function AccountTransactionAdd(props: Props) {
           concept,
           type,
           typeTransferOrigin: accountId,
-          typeTransferDestination: typeTransferDestinationAccountId,
+          typeTransferDestination: selectedTransferAccountId,
           currency,
           amount: amountForm,
           foreignCurrency,
@@ -278,10 +290,10 @@ export default function AccountTransactionAdd(props: Props) {
             };
 
             const currentBalanceDestination = await fetchBalance(
-              typeTransferDestinationAccountId
+              selectedTransferAccountId
             );
 
-            await fetch(`/api/accounts/${typeTransferDestinationAccountId}`, {
+            await fetch(`/api/accounts/${selectedTransferAccountId}`, {
               method: "PUT",
               body: JSON.stringify({
                 currentBalance: currentBalanceDestination + -amountForm,
@@ -298,7 +310,7 @@ export default function AccountTransactionAdd(props: Props) {
                 concept,
                 type,
                 typeTransferOrigin: accountId,
-                typeTransferDestination: typeTransferDestinationAccountId,
+                typeTransferDestination: selectedTransferAccountId,
                 currency,
                 amount: -amountForm,
                 foreignCurrency,
@@ -311,7 +323,7 @@ export default function AccountTransactionAdd(props: Props) {
                 timezone,
                 location,
                 notes,
-                accountId: typeTransferDestinationAccountId,
+                accountId: selectedTransferAccountId,
                 balance: currentBalanceDestination + -amountForm,
               }),
               headers: {
@@ -445,11 +457,6 @@ export default function AccountTransactionAdd(props: Props) {
                                       account.id + "|" + account.defaultCurrency
                                     }
                                     key={account.id}
-                                    // TODO: If an account with a different currency is selected, automatically select the FC one
-                                    // disabled={
-                                    //   props.account?.defaultCurrency !==
-                                    //   account.defaultCurrency
-                                    // }
                                   >
                                     {account.bankName} - {account.name}{" "}
                                     {props.account?.defaultCurrency !==
