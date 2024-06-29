@@ -103,58 +103,72 @@ export default function AccountTransactionAdd(props: Props) {
     }
   };
 
-  const formSchema = z.object({
-    payee: z.string().min(1, {
-      message: "A Payee is required.",
-    }),
-    concept: z.string().min(1, {
-      message: "Concept Type is required.",
-    }),
-    type: z.string().min(1, {
-      message: "Transaction Type is required.",
-    }),
-    typeTransferDestinationAccount: z.string(), // TODO: Add validation by conditional "type"
-    // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-    // typeTransferDestinationAccount: z.object({
-    //   id: z.string(),
-    //   currency: z.string(),
-    // }),
-    currency: z.string().min(3, {
-      message: "Currency code is required.",
-    }),
-    amountForm: z.string().min(1, {
-      message: "Amount Type is required.",
-    }),
-    foreignCurrency: z.string(),
-    foreignCurrencyAmount: z.string(),
-    foreignCurrencyExchangeRate: z.string(),
-    category: z.string(),
-    subcategory: z.string(),
-    tags: z.string(),
-    dateDay: z.string().min(1, {
-      message: "Required",
-    }),
-    dateMonth: z.string().min(1, {
-      message: "Required",
-    }),
-    dateYear: z.string().min(4, {
-      message: "Required",
-    }),
-    timeHour: z.string().min(1, {
-      message: "Required",
-    }),
-    timeMinute: z.string().min(1, {
-      message: "Required",
-    }),
-    timeSecond: z.string().min(1, {
-      message: "Required",
-    }),
-    timezone: z.string().min(1, {
-      message: "Timezone is required",
-    }),
-    location: z.string(),
-    notes: z.string(),
-  });
+  const formSchema = z
+    .object({
+      payee: z.string().min(1, {
+        message: "Payee is required.",
+      }),
+      concept: z.string().min(1, {
+        message: "Concept Type is required.",
+      }),
+      type: z.string().min(1, {
+        message: "Transaction Type is required.",
+      }),
+      typeTransferDestinationAccount: z.string(), // TODO: Add validation by conditional "type"
+      // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
+      // typeTransferDestinationAccount: z.object({
+      //   id: z.string(),
+      //   currency: z.string(),
+      // }),
+      currency: z.string().min(3, {
+        message: "Currency code is required.",
+      }),
+      amountForm: z.string().min(1, {
+        message: "Amount Type is required.",
+      }),
+      foreignCurrency: z.string(),
+      foreignCurrencyAmount: z.string(),
+      foreignCurrencyExchangeRate: z.string(),
+      category: z.string(),
+      subcategory: z.string(),
+      tags: z.string(),
+      dateDay: z.string().min(1, {
+        message: "Required",
+      }),
+      dateMonth: z.string().min(1, {
+        message: "Required",
+      }),
+      dateYear: z.string().min(4, {
+        message: "Required",
+      }),
+      timeHour: z.string().min(1, {
+        message: "Required",
+      }),
+      timeMinute: z.string().min(1, {
+        message: "Required",
+      }),
+      timeSecond: z.string().min(1, {
+        message: "Required",
+      }),
+      timezone: z.string().min(1, {
+        message: "Timezone is required",
+      }),
+      location: z.string(),
+      notes: z.string(),
+    })
+    .refine(
+      (data) => {
+        if (data.foreignCurrency && !data.foreignCurrencyAmount) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message:
+          "Foreign Currency Amount is required when Foreign Currency is provided.",
+        path: ["foreignCurrencyAmount"],
+      }
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: "onChange", // TODO: Review this
@@ -202,9 +216,11 @@ export default function AccountTransactionAdd(props: Props) {
       selectedTransferAccountCurrency !== form.getValues().currency
     ) {
       form.setValue("foreignCurrency", selectedTransferAccountCurrency);
-    } else {
-      form.setValue("foreignCurrency", "");
     }
+    // TODO: Review behavior on selecting foreignCurrency
+    // else {
+    //   form.setValue("foreignCurrency", "");
+    // }
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -849,7 +865,10 @@ export default function AccountTransactionAdd(props: Props) {
                     name="foreignCurrencyAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Amount</FormLabel>
+                        <FormLabel>
+                          Amount
+                          {form.getValues().foreignCurrency !== "" ? "*" : ""}
+                        </FormLabel>
                         <FormControl>
                           <Input
                             id="foreignCurrencyAmount"
