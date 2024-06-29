@@ -94,8 +94,8 @@ export default function AccountTransactionAdd(props: Props) {
         return "+";
       case "EXPENSE":
       case "EXPENSE_N":
-        return "-";
       case "TRANSFER":
+        return "-";
       case "OPENING":
         return "+ / -";
       default:
@@ -312,6 +312,7 @@ export default function AccountTransactionAdd(props: Props) {
           "Content-Type": "application/json",
         },
       }).then(() => {
+        // TODO: Fix transfer currency values if they're FC (origin & destination accounts)
         if (form.getValues().type === "TRANSFER") {
           startTransition(async () => {
             const fetchBalance = async (accountId: string) => {
@@ -547,17 +548,17 @@ export default function AccountTransactionAdd(props: Props) {
                           type="number"
                           inputMode="decimal"
                           step="0.01"
-                          disabled={form.getValues().type === ""}
+                          disabled={selectedType === ""}
                           min={
-                            form.getValues().type === "INCOME" ||
-                            form.getValues().type === "INCOME_N"
+                            selectedType === "INCOME" ||
+                            selectedType === "INCOME_N"
                               ? 0
                               : Number.MIN_SAFE_INTEGER
                           }
                           max={
-                            form.getValues().type === "EXPENSE" ||
-                            form.getValues().type === "EXPENSE_N" ||
-                            form.getValues().type === "TRANSFER"
+                            selectedType === "EXPENSE" ||
+                            selectedType === "EXPENSE_N" ||
+                            selectedType === "TRANSFER"
                               ? 0
                               : Number.MAX_SAFE_INTEGER
                           }
