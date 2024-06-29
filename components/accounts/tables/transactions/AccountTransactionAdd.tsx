@@ -741,7 +741,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="subcategory"
                           type="text"
-                          placeholder="Cookies"
+                          placeholder="Cookies, Swiss Chocolate"
                           {...field}
                         />
                       </FormControl>
@@ -816,14 +816,17 @@ export default function AccountTransactionAdd(props: Props) {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-
+                        <Button
+                          variant="destructive"
+                          onClick={handleResetFC}
+                          disabled={field.value === ""}
+                        >
+                          Reset Field
+                        </Button>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button variant="destructive" onClick={handleResetFC}>
-                    Reset Field
-                  </Button>
                   {/* Foreign Currency Amount */}
                   <FormField
                     control={form.control}
