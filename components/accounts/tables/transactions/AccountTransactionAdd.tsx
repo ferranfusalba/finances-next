@@ -80,17 +80,6 @@ export default function AccountTransactionAdd(props: Props) {
     }
   };
 
-  // TODO: Temporary solution to unselect a FC - try reset function
-  foreignCurrenciesList.splice(0, 0, {
-    symbol: "N/A",
-    name: "N/A",
-    symbol_native: "N/A",
-    decimal_digits: 0,
-    rounding: 0,
-    code: "N/A",
-    name_plural: "N/A",
-  });
-
   const userAccounts4Transactions = props.userAccounts?.filter(
     (account) => account.name !== props.account?.name
   );
@@ -131,7 +120,6 @@ export default function AccountTransactionAdd(props: Props) {
     amountForm: z.string().min(1, {
       message: "Amount Type is required.",
     }),
-    foreignCurrencyActive: z.boolean().default(false).optional(), // TODO: Add this new field to remaining form pipeline
     foreignCurrency: z.string(),
     foreignCurrencyAmount: z.string(),
     foreignCurrencyExchangeRate: z.string(),
@@ -164,6 +152,7 @@ export default function AccountTransactionAdd(props: Props) {
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       payee: "", // Not at Budget Transaction Form
@@ -172,7 +161,6 @@ export default function AccountTransactionAdd(props: Props) {
       typeTransferDestinationAccount: "", // Not at Budget Transaction Form
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
-      // foreignCurrencyActive: false,
       foreignCurrency: "",
       foreignCurrencyAmount: "",
       foreignCurrencyExchangeRate: "",
@@ -190,6 +178,8 @@ export default function AccountTransactionAdd(props: Props) {
       notes: "",
     },
   });
+
+  const handleResetFC = () => form.resetField("foreignCurrency");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
@@ -732,7 +722,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="category"
                           type="text"
-                          placeholder="Digital Subscriptions"
+                          placeholder="Groceries"
                           {...field}
                         />
                       </FormControl>
@@ -751,7 +741,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="subcategory"
                           type="text"
-                          placeholder="YouTube Premium"
+                          placeholder="Cookies"
                           {...field}
                         />
                       </FormControl>
@@ -770,7 +760,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="tags"
                           type="text"
-                          placeholder="Digital Subscriptions, YouTube Premium"
+                          placeholder="Duty Free, Gifts"
                           {...field}
                         />
                       </FormControl>
@@ -781,19 +771,6 @@ export default function AccountTransactionAdd(props: Props) {
                 {/* Foreign Currency Fields */}
                 <div className="flex items-center gap-2">
                   <FormLabel>Foreign Currency</FormLabel>
-                  {/* <FormField
-                    control={form.control}
-                    name="foreignCurrencyActive"
-                    render={({ field }) => (
-                      // TODO: Add reset Foreign Currency fields logic
-                      <>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </>
-                    )}
-                  ></FormField> */}
                 </div>
 
                 <div className="space-y-4 border rounded-lg p-4">
@@ -807,7 +784,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          // disabled={!form.getValues().foreignCurrencyActive}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -839,10 +816,14 @@ export default function AccountTransactionAdd(props: Props) {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
+
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  <Button variant="destructive" onClick={handleResetFC}>
+                    Reset Field
+                  </Button>
                   {/* Foreign Currency Amount */}
                   <FormField
                     control={form.control}
@@ -857,15 +838,11 @@ export default function AccountTransactionAdd(props: Props) {
                             inputMode="decimal"
                             step="0.01"
                             placeholder={
-                              form.getValues().foreignCurrency === "" ||
-                              form.getValues().foreignCurrency === "N/A"
+                              form.getValues().foreignCurrency === ""
                                 ? "Select a foreign currency first"
                                 : "34,50"
                             }
-                            disabled={
-                              form.getValues().foreignCurrency === "" ||
-                              form.getValues().foreignCurrency === "N/A"
-                            }
+                            disabled={form.getValues().foreignCurrency === ""}
                             {...field}
                           />
                         </FormControl>
@@ -887,15 +864,11 @@ export default function AccountTransactionAdd(props: Props) {
                             inputMode="decimal"
                             step="0.01"
                             placeholder={
-                              form.getValues().foreignCurrency === "" ||
-                              form.getValues().foreignCurrency === "N/A"
+                              form.getValues().foreignCurrency === ""
                                 ? "Select a foreign currency first"
                                 : "1.595"
                             }
-                            disabled={
-                              form.getValues().foreignCurrency === "" ||
-                              form.getValues().foreignCurrency === "N/A"
-                            }
+                            disabled={form.getValues().foreignCurrency === ""}
                             {...field}
                           />
                         </FormControl>
@@ -915,7 +888,7 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="location"
                           type="text"
-                          placeholder="Zürich Airport, Kloten, CH"
+                          placeholder="Zürich Flughafen, Kloten, CH"
                           {...field}
                         />
                       </FormControl>
