@@ -168,6 +168,19 @@ export default function AccountTransactionAdd(props: Props) {
           "Foreign Currency Amount is required when Foreign Currency is provided.",
         path: ["foreignCurrencyAmount"],
       }
+    )
+    .refine(
+      (data) => {
+        if (data.type === "TRANSFER" && !data.typeTransferDestinationAccount) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message:
+          "Transfer to Destination Account is required when Transaction Type is TRANSFER.",
+        path: ["typeTransferDestinationAccount"],
+      }
     );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -204,6 +217,8 @@ export default function AccountTransactionAdd(props: Props) {
   });
 
   const handleResetFC = () => form.resetField("foreignCurrency");
+
+  const selectedType = form.watch("type");
 
   // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
   const selectedTransferAccount = form.watch("typeTransferDestinationAccount");
@@ -440,7 +455,7 @@ export default function AccountTransactionAdd(props: Props) {
                           <SelectItem value="EXPENSE_N">
                             EXPENSE (Not counted as such)
                           </SelectItem>
-                          <SelectItem value="TRANSFER">TRANSFER TO</SelectItem>
+                          <SelectItem value="TRANSFER">TRANSFER</SelectItem>
                           <SelectItem value="OPENING">OPENING</SelectItem>
                         </SelectContent>
                       </Select>
@@ -448,7 +463,7 @@ export default function AccountTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
-                {form.getValues().type === "TRANSFER" && (
+                {selectedType === "TRANSFER" && (
                   <FormField
                     control={form.control}
                     name="typeTransferDestinationAccount"
