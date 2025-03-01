@@ -37,7 +37,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
 
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
@@ -220,6 +219,12 @@ export default function AccountTransactionAdd(props: Props) {
 
   const selectedType = form.watch("type");
 
+  // If TRANSFER & is FC destination Account
+  const accountOriginAmount = form.watch("amountForm");
+  const accountOriginCurrency = form.watch("currency");
+  const accountDestinationAmount = form.watch("foreignCurrencyAmount");
+  const accountDestinationCurrency = form.watch("foreignCurrency");
+
   // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
   const selectedTransferAccount = form.watch("typeTransferDestinationAccount");
   const selectedTransferAccountId = selectedTransferAccount.split("|")[0];
@@ -228,7 +233,7 @@ export default function AccountTransactionAdd(props: Props) {
   useEffect(() => {
     if (
       selectedTransferAccount &&
-      selectedTransferAccountCurrency !== form.getValues().currency
+      selectedTransferAccountCurrency !== accountOriginCurrency
     ) {
       form.setValue("foreignCurrency", selectedTransferAccountCurrency);
     }
@@ -236,7 +241,13 @@ export default function AccountTransactionAdd(props: Props) {
     // else {
     //   form.setValue("foreignCurrency", "");
     // }
-  });
+  }, [
+    // TODO: Review behavior w/ empty dependency array
+    selectedTransferAccount,
+    selectedTransferAccountCurrency,
+    accountOriginCurrency,
+    form,
+  ]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
@@ -313,7 +324,7 @@ export default function AccountTransactionAdd(props: Props) {
         },
       }).then(() => {
         // TODO: Fix transfer currency values if they're FC (origin & destination accounts)
-        if (form.getValues().type === "TRANSFER") {
+        if (selectedType === "TRANSFER") {
           startTransition(async () => {
             const fetchBalance = async (accountId: string) => {
               const response = await fetch(`/api/accounts/${accountId}`);
