@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
-// import { Inter, IBM_Plex_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 
 import { auth } from "@/auth";
 import "./globals.css";
@@ -11,14 +9,7 @@ import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import TopNav from "@/components/nav/TopNav/TopNav";
 
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-
-// const inter = Inter({ subsets: ["latin"] });
-// const ibm = IBM_Plex_Sans({
-//   subsets: ["latin"],
-//   weight: ["300", "400", "500", "700"],
-//   style: ["italic", "normal"],
-// });
+// import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Finances Next",
@@ -32,6 +23,39 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+const ibmPlexSans = localFont({
+  src: "../public/fonts/IBM_Plex_Sans/IBMPlexSans-VariableFont_wdth,wght.ttf",
+  weight: "400",
+  style: "normal",
+  variable: "--font-ibm-plex-sans",
+});
+
+const ibmPlexMono = localFont({
+  src: [
+    {
+      path: "../public/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/IBM_Plex_Mono/IBMPlexMono-Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/IBM_Plex_Mono/IBMPlexMono-BoldItalic.ttf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-ibm-plex-mono",
+});
+
 export default async function RootLayout({
   children,
 }: {
@@ -40,7 +64,10 @@ export default async function RootLayout({
   const serverSession = await auth();
 
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+    >
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link
@@ -56,7 +83,7 @@ export default async function RootLayout({
           sizes="<generated>"
         />
       </head>
-      <body className={`text-slate-100`}>
+      <body className={`bg-slate-950 text-slate-100`}>
         <SessionProvider session={serverSession}>
           <header className="fixed top-0 w-full z-10">
             {/* @ts-ignore: Async Server Component TypeScript Error */}
@@ -64,14 +91,14 @@ export default async function RootLayout({
           </header>
           <main className="pt-16">
             <Toaster />
-            <ThemeProvider
+            {/* <ThemeProvider
               attribute="class"
               defaultTheme="dark"
               enableSystem
               disableTransitionOnChange
-            >
-              {children}
-            </ThemeProvider>
+            > */}
+            {children}
+            {/* </ThemeProvider> */}
           </main>
           <footer className="fixed bottom-0 w-full h-auto">
             <BottomNav />

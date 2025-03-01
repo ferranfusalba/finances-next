@@ -201,9 +201,9 @@ export default function BudgetTransactionAdd(props: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add Transaction</Button>
+        <Button variant="secondary">Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
+      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content bg-slate-950">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>
@@ -661,7 +661,7 @@ export default function BudgetTransactionAdd(props: Props) {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={isPending}>
+              <Button variant="secondary" type="submit" disabled={isPending}>
                 Save
               </Button>
             </DialogFooter>
