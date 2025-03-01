@@ -53,10 +53,6 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      fontFamily: {
-        sans: ["var(--font-geist-sans)"],
-        mono: ["var(--font-geist-mono)"],
-      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -90,6 +86,10 @@ const config = {
       },
       maxHeight: {
         "margins-y-mobile": "calc(100vh - 150px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-ibm-plex-sans)"],
+        mono: ["var(--font-ibm-plex-mono)"],
       },
     },
   },
