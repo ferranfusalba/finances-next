@@ -277,9 +277,9 @@ export default function AccountTransactionAdd(props: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary">Add Transaction</Button>
+        <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content bg-slate-950">
+      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>

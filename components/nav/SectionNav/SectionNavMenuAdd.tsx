@@ -16,9 +16,15 @@ export default function SectionNavMenuAdd({ type }: { type: string }) {
       <Link href={`/${type}/new`}>
         <li
           className={cn(
-            "border-2 border-white flex justify-center items-center mr-2.5 w-11 h-11",
-            { "bg-neutral-50 text-sky-900": newAccountSelected },
-            { "bg-neutral-50 text-pink-900": newBudgetSelected }
+            "border-2 border-white flex justify-center items-center mr-2.5 w-11 h-11 text-white",
+            {
+              "bg-black border-black text-white dark:bg-white dark:border-white dark:text-sky-900":
+                newAccountSelected,
+            },
+            {
+              "bg-black border-black text-white dark:bg-white dark:border-white dark:text-pink-900":
+                newBudgetSelected,
+            }
           )}
         >
           <AddAlt />
