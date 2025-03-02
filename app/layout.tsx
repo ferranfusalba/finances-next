@@ -9,7 +9,7 @@ import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import TopNav from "@/components/nav/TopNav/TopNav";
 
 import { Toaster } from "@/components/ui/sonner";
-// import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Finances Next",
@@ -66,6 +66,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >
       <head>
@@ -83,26 +84,26 @@ export default async function RootLayout({
           sizes="<generated>"
         />
       </head>
-      <body className={`bg-slate-950 text-slate-100`}>
+      <body>
         <SessionProvider session={serverSession}>
-          <header className="fixed top-0 w-full z-10">
-            {/* @ts-ignore: Async Server Component TypeScript Error */}
-            <TopNav />
-          </header>
-          <main className="pt-16">
-            <Toaster />
-            {/* <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            > */}
-            {children}
-            {/* </ThemeProvider> */}
-          </main>
-          <footer className="fixed bottom-0 w-full h-auto">
-            <BottomNav />
-          </footer>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="fixed top-0 w-full z-10">
+              {/* @ts-ignore: Async Server Component TypeScript Error */}
+              <TopNav />
+            </header>
+            <main className="pt-16">
+              <Toaster />
+              {children}
+            </main>
+            <footer className="fixed bottom-0 w-full h-auto">
+              <BottomNav />
+            </footer>
+          </ThemeProvider>
         </SessionProvider>
       </body>
     </html>
