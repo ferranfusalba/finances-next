@@ -34,7 +34,6 @@ export default async function AccountsLayout({
 
   return (
     <>
-      {/* @ts-ignore: Async Server Component TypeScript Error */}
       <SectionNavMenu type="accounts" list={userAccountsSortOrder} allowAdd />
       <Layout01>{children}</Layout01>
     </>
