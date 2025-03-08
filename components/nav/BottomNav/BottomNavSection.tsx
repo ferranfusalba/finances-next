@@ -19,7 +19,10 @@ export default function BottomNavSection({ section }: { section: Section }) {
       <li
         className={cn(
           "flex items-center justify-center gap-2 md:px-6 flex-col md:flex-row h-full",
-          { "bg-white text-stone-900": isActive || isHomeActive }
+          {
+            "bg-black text-white dark:bg-white dark:text-black":
+              isActive || isHomeActive,
+          }
         )}
       >
         <div className="self-center">{section.icon}</div>
