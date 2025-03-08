@@ -17,6 +17,7 @@ import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import { getCountryFlag } from "@/lib/utils/country";
 
 import { Account } from "@/types/Account";
+import Link from "next/link";
 
 const columnHelper = createColumnHelper<Account>();
 
@@ -36,6 +37,16 @@ export default function AccountsOverviewTable({
     }),
     columnHelper.accessor("name", {
       header: () => <span>Name</span>,
+      cell: (info) => {
+        return (
+          <Link
+            href={`/accounts/${info.row.original.id}`}
+            className="underline"
+          >
+            {info.row.original.name}
+          </Link>
+        );
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("code", {
