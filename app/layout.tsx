@@ -100,9 +100,11 @@ export default async function RootLayout({
               <Toaster />
               {children}
             </main>
-            <footer className="fixed bottom-0 w-full h-auto">
-              <BottomNav />
-            </footer>
+            {serverSession?.user && (
+              <footer className="fixed bottom-0 w-full h-auto">
+                <BottomNav />
+              </footer>
+            )}
           </ThemeProvider>
         </SessionProvider>
       </body>
