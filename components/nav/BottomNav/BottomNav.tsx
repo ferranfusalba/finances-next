@@ -28,7 +28,7 @@ const routes: Array<Section> = [
 
 export default function BottomNav() {
   return (
-    <nav className="h-16 md:h-12 items-center text-white bg-zinc-950 border-t border-t-gray-400 shadow-gray-400">
+    <nav className="h-16 md:h-12 items-center bg-white dark:bg-black border-t border-t-gray-400 shadow-gray-400">
       <ul className="grid grid-cols-5 md:flex w-full h-full">
         {routes.map((route) => {
           return <BottomNavSection key={route.path} section={route} />;

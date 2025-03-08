@@ -661,7 +661,7 @@ export default function BudgetTransactionAdd(props: Props) {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={isPending}>
+              <Button variant="secondary" type="submit" disabled={isPending}>
                 Save
               </Button>
             </DialogFooter>
