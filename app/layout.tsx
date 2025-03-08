@@ -93,7 +93,6 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <header className="fixed top-0 w-full z-10">
-              {/* @ts-ignore: Async Server Component TypeScript Error */}
               <TopNav />
             </header>
             <main className="pt-16">

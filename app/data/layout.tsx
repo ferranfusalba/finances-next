@@ -49,7 +49,6 @@ export default async function DataLayout({
 
   return (
     <>
-      {/* @ts-ignore: Async Server Component TypeScript Error */}
       <SectionNavMenu type="data" list={defaultData} />
       <Layout01>{children}</Layout01>
     </>
