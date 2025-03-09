@@ -31,6 +31,10 @@ export default async function Home() {
         {/* <p>user.password: {user?.password}</p> */}
         <p>user.createdAt: {user?.createdAt?.toString()}</p>
         <p>user.updatedAt: {user?.updatedAt?.toString()}</p>
+        <p>user.defaultCountry: {user?.defaultCountry}</p>
+        <p>user.defaultCurrency: {user?.defaultCurrency}</p>
+        <p>user.defaultTimezone: {user?.defaultTimezone}</p>
+        <p>user.defaultLocale: {user?.defaultLocale}</p>
       </>
     );
   }

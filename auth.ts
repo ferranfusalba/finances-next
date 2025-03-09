@@ -37,6 +37,8 @@ export const {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.isOAuth = token.isOAuth as boolean;
+        session.user.defaultCountry = (token.defaultCountry as string) ?? "";
+        session.user.defaultCurrency = (token.defaultCurrency as string) ?? "";
       }
 
       return session;
@@ -54,6 +56,8 @@ export const {
       token.name = existingUser.name;
       token.email = existingUser.email;
       token.role = existingUser.role;
+      token.defaultCountry = existingUser.defaultCountry ?? "";
+      token.defaultCurrency = existingUser.defaultCurrency ?? "";
 
       return token;
     },

@@ -8,6 +8,8 @@ export const SettingsSchema = z
     email: z.optional(z.string().email()),
     password: z.optional(z.string().min(6)),
     newPassword: z.optional(z.string().min(6)),
+    defaultCountry: z.string(),
+    defaultCurrency: z.string(),
   })
   .refine(
     (data) => {

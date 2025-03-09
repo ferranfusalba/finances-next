@@ -37,6 +37,12 @@ import { UserRole } from "@prisma/client";
 import { SettingsSchema } from "@/schemas";
 import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeToggle";
 
+import countries from "@/statics/countries.json";
+import currencies from "@/statics/currencies.json";
+
+import { Currency } from "@/types/Currency";
+import { Country } from "@/types/Country";
+
 const UserPage = () => {
   const user = useCurrentUser();
 
@@ -53,6 +59,8 @@ const UserPage = () => {
       name: user?.name || undefined,
       email: user?.email || undefined,
       role: user?.role || undefined,
+      defaultCountry: user?.defaultCountry || undefined,
+      defaultCurrency: user?.defaultCurrency || undefined,
     },
   });
 
@@ -187,7 +195,80 @@ const UserPage = () => {
                     </FormItem>
                   )}
                 ></FormField>
-                <ModeToggle />
+                <FormField
+                  control={form.control}
+                  name="defaultCountry"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <Select
+                          disabled={isPending}
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a country"></SelectValue>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {countries.map((country: Country) => (
+                              <SelectItem
+                                value={country["alpha-2"]}
+                                key={country["alpha-2"]}
+                              >
+                                {country["alpha-2"]} {country["emoji-flag"]}{" "}
+                                {"  "}
+                                {country.name}
+                                {"  "}
+                                {country["full-name"] &&
+                                  "(" + country["full-name"] + ")"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage></FormMessage>
+                      </FormItem>
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="defaultCurrency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Currency</FormLabel>
+                      <Select
+                        disabled={isPending}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a currency"></SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {currencies.map((currency: Currency) => (
+                            <SelectItem
+                              value={currency.code}
+                              key={currency.code}
+                            >
+                              {currency.code} - {currency.name} (
+                              {currency.symbol_native})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage></FormMessage>
+                    </FormItem>
+                  )}
+                ></FormField>
+                <div className="flex flex-col gap-2">
+                  <FormLabel>Theme</FormLabel>
+                  <ModeToggle />
+                </div>
               </div>
               <FormError message={error}></FormError>
               <FormSuccess message={success}></FormSuccess>
