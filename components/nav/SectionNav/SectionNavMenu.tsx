@@ -20,7 +20,8 @@ export default async function SectionNavMenu({
           { "bg-sky-900": type === "accounts" },
           { "bg-pink-900": type === "budgets" },
           { "bg-lime-900": type === "data" },
-          { "bg-stone-900": type === "settings" }
+          { "bg-stone-900": type === "settings" },
+          { "bg-fuchsia-900": type === "playground" }
         )}
       >
         {allowAdd && (
