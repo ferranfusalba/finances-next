@@ -133,7 +133,7 @@ model Account {
   defaultCurrency String               @default("")
   initialBalance  Float
   currentBalance  Float                @default(0)
-  number          String               @default("")
+  number          String?
   country         String               @default("")
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
@@ -142,7 +142,6 @@ model Account {
   transactions    AccountTransaction[]
 
   @@unique([userId, code])
-  @@unique([userId, number])
 }
 
 model Budget {

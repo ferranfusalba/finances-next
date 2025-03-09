@@ -54,9 +54,7 @@ export default function NewAccountForm(props: Props) {
     type: z.string().min(1, {
       message: "Account Type is required.",
     }),
-    number: z.string().min(1, {
-      message: "Account Number is required.",
-    }),
+    number: z.string(),
     country: z.string().min(1, {
       message: "Country is required.",
     }),

@@ -12,7 +12,7 @@ export interface Account {
   defaultCurrency: string | null;
   initialBalance: number | null;
   currentBalance: number;
-  number: string;
+  number: string | null;
   country: string;
   createdAt: Date;
   updatedAt: Date;
