@@ -17,5 +17,6 @@ export interface User {
   defaultCurrency?: string | null;
   defaultTimezone?: string | null;
   defaultLocale?: string | null;
+  theme?: string | null;
   isOAuth: boolean | null;
 }

@@ -33,6 +33,7 @@ model User {
   defaultCurrency String?       @default("")
   defaultTimezone String?       @default("")
   defaultLocale   String?       @default("")
+  theme           String?       @default("")
 }
 
 model UserAccount {

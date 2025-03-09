@@ -30,6 +30,7 @@ import countries from "@/statics/countries.json";
 import currencies from "@/statics/currencies.json";
 
 import { Currency } from "@/types/Currency";
+import { Country } from "@/types/Country";
 
 interface Props {
   user: User;
@@ -239,7 +240,7 @@ export default function NewAccountForm(props: Props) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {countries.map((country: any) => (
+                    {countries.map((country: Country) => (
                       <SelectItem
                         value={country["alpha-2"]}
                         key={country["alpha-2"]}
