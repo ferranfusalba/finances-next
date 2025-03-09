@@ -19,6 +19,7 @@ export default function SectionNavMenuListItem({
   const budgetSelected = "/budgets/" + item.id === pathname;
   const dataSelected = "/data/" + item.id === pathname;
   const settingsSelected = "/settings/" + item.id === pathname;
+  const playgroundSelected = "/playground/" + item.id === pathname;
 
   return (
     <>
@@ -41,6 +42,10 @@ export default function SectionNavMenuListItem({
           {
             "bg-black border-black text-white dark:bg-white dark:border-white dark:text-stone-900":
               settingsSelected,
+          },
+          {
+            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-fuchsia-900":
+              playgroundSelected,
           }
         )}
       >

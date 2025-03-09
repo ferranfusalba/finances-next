@@ -35,6 +35,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 
 import { SettingsSchema } from "@/schemas";
+import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeToggle";
 
 const UserPage = () => {
   const user = useCurrentUser();
@@ -186,6 +187,7 @@ const UserPage = () => {
                     </FormItem>
                   )}
                 ></FormField>
+                <ModeToggle />
               </div>
               <FormError message={error}></FormError>
               <FormSuccess message={success}></FormSuccess>

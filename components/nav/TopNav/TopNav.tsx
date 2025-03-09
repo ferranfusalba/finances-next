@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { currentUser } from "@/lib/auth";
-import { ModeToggle } from "./components/ModeToggle/ModeToggle";
 import { UserDropdownMenu } from "./components/UserDropdownMenu/UserDropdownMenu";
 
 const TopNav = async () => {
@@ -21,7 +20,6 @@ const TopNav = async () => {
             <p className="invisible md:visible">
               {user?.name} - {user?.email}
             </p>
-            <ModeToggle />
             <UserDropdownMenu user={user} />
           </>
         ) : (

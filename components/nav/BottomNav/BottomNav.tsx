@@ -23,7 +23,6 @@ const routes: Array<Section> = [
   },
   { path: "/budgets", name: "Budgets", icon: <TableBuilt /> },
   { path: "/data", name: "Data", icon: <ChartLineData /> },
-  { path: "/settings", name: "Settings", icon: <Settings /> },
 ];
 
 export default function BottomNav() {

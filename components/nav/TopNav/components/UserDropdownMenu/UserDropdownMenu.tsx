@@ -15,13 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import LogoutButtonClient from "@/components/nav/TopNav/components/UserDropdownMenu/LogoutButtonClient";
 import { User } from "@/types/User";
+import Link from "next/link";
 
 interface UserDropdownMenuProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
+  user: User;
 }
 
 export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
@@ -35,22 +32,25 @@ export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
-        <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
+        <DropdownMenuLabel className="font-mono font-normal">
+          {user?.email}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Billing
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <Link href="/billing">
+            <DropdownMenuItem disabled>Billing</DropdownMenuItem>
+          </Link>
+          <Link href="/settings">
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>GitHub</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
-        <DropdownMenuItem disabled>API</DropdownMenuItem>
+        <DropdownMenuItem disabled>Support</DropdownMenuItem>
+        {user.role === "ADMIN" && (
+          <Link href="/playground">
+            <DropdownMenuItem>Playground</DropdownMenuItem>
+          </Link>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogoutButtonClient />
