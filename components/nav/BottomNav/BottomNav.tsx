@@ -1,10 +1,4 @@
-import {
-  Home,
-  TableBuilt,
-  Currency,
-  ChartLineData,
-  Settings,
-} from "@carbon/icons-react";
+import { TableBuilt, Currency, ChartLineData } from "@carbon/icons-react";
 
 import BottomNavSection from "@/components/nav/BottomNav/BottomNavSection";
 
@@ -15,7 +9,6 @@ export interface Section {
 }
 
 const routes: Array<Section> = [
-  { path: "/", name: "Home", icon: <Home /> },
   {
     path: "/accounts",
     name: "Accounts",
@@ -28,7 +21,7 @@ const routes: Array<Section> = [
 export default function BottomNav() {
   return (
     <nav className="h-16 md:h-12 items-center bg-white dark:bg-black border-t border-t-gray-400 shadow-gray-400">
-      <ul className="grid grid-cols-5 md:flex w-full h-full">
+      <ul className="grid grid-cols-3 md:flex w-full h-full">
         {routes.map((route) => {
           return <BottomNavSection key={route.path} section={route} />;
         })}
