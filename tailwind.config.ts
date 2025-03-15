@@ -76,8 +76,8 @@ const config = {
         "10rem": "10rem",
       },
       height: {
-        "full-main": "calc(100vh - 112px)", // 112 = 64 TopNav + 48 TabBar
-        "full-main-mobile": "calc(100vh - 136px)", // 136 = 72 TopNav + 64 TabBar (mobile)
+        "screen-main-desktop": "calc(100vh - 7rem)", // 112px = 64 header + 48 footer
+        "screen-main-mobile": "calc(100vh - 8rem)", // 128px = 64 header + 64 footer (mobile)
       },
       maxHeight: {
         "margins-y-mobile": "calc(100vh - 150px)",
