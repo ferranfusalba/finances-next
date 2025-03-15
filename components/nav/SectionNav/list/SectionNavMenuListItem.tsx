@@ -10,7 +10,7 @@ export default function SectionNavMenuListItem({
   index,
   type,
 }: {
-  item: { id: string; name: string; bankName?: string };
+  item: { id: string; name: string; bankName?: string; active?: boolean };
   index: number;
   type: string;
 }) {
@@ -26,25 +26,28 @@ export default function SectionNavMenuListItem({
       <li
         key={index}
         className={cn(
-          "border-2 border-white text-white flex justify-center items-center mx-2.5 px-4 h-11",
+          "border-2 flex justify-center items-center mx-2.5 px-4 h-11",
+          item.active === false
+            ? "text-slate-400 border-slate-400"
+            : "text-white border-white",
           {
-            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-sky-900":
+            "bg-black border-black dark:bg-white dark:border-white dark:text-sky-900":
               accountSelected,
           },
           {
-            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-pink-900":
+            "bg-black border-black dark:bg-white dark:border-white dark:text-pink-900":
               budgetSelected,
           },
           {
-            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-lime-900":
+            "bg-black border-black dark:bg-white dark:border-white dark:text-lime-900":
               dataSelected,
           },
           {
-            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-stone-900":
+            "bg-black border-black dark:bg-white dark:border-white dark:text-stone-900":
               settingsSelected,
           },
           {
-            "bg-black border-black text-white dark:bg-white dark:border-white dark:text-fuchsia-900":
+            "bg-black border-black dark:bg-white dark:border-white dark:text-fuchsia-900":
               playgroundSelected,
           }
         )}
