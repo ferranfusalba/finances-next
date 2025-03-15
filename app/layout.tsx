@@ -95,7 +95,7 @@ export default async function RootLayout({
             <header className="fixed top-0 w-full z-10">
               <TopNav />
             </header>
-            <main className="pt-16 h-screen">
+            <main className="pt-16 pb-16 md:pb-12 h-screen">
               <Toaster />
               {children}
             </main>

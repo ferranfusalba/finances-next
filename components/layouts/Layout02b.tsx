@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Layout02b({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full w-full flex justify-center items-center pb-20 md:pb-12">
+    <div className="layout-02b pb-20 w-full flex flex-col justify-start items-start">
       {children}
     </div>
   );
