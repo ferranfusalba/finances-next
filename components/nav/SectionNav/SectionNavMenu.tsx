@@ -10,7 +10,7 @@ export default async function SectionNavMenu({
 }: {
   type: string;
   allowAdd?: boolean;
-  list: Array<{ id: string; name: string }>;
+  list: Array<{ id: string; name: string; active?: boolean }>;
 }) {
   return (
     <>

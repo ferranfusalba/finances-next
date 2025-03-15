@@ -197,7 +197,7 @@ export default function AccountTransactionTable({
 
   // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "dateTime", desc: true },
+    { id: "dateTime", desc: false },
   ]);
 
   const table = useReactTable({

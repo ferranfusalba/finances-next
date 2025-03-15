@@ -4,7 +4,7 @@ export default function SectionNavMenuList({
   list,
   type,
 }: {
-  list: Array<{ id: string; name: string }>;
+  list: Array<{ id: string; name: string; active?: boolean }>;
   type: string;
 }) {
   return (
