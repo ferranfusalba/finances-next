@@ -103,7 +103,29 @@ export default function AccountsOverviewTable({
           <>{currency("ca-AD", defaultCurrency as string).format(number)}</>
         );
       },
-      footer: (info) => info.column.id,
+      footer: (info) => {
+        const balancesByCurrency = info.table.options.data.reduce(
+          (acc, item) => {
+            const { defaultCurrency, currentBalance } = item;
+            acc[defaultCurrency as string] =
+              (acc[defaultCurrency as string] || 0) + currentBalance;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
+
+        return (
+          <ul>
+            {Object.entries(balancesByCurrency).map(
+              ([accountCurrency, total]) => (
+                <li key={accountCurrency}>
+                  {currency("ca-AD", accountCurrency).format(total)}
+                </li>
+              )
+            )}
+          </ul>
+        );
+      },
     }),
     columnHelper.accessor("number", {
       header: () => <span>Number</span>,
