@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,6 +37,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
 
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
@@ -50,11 +51,19 @@ import timezones from "@/statics/timezones.json";
 interface Props {
   account: Account | null;
   userAccounts: Array<Account>;
+  userTransactionPayees: Array<{
+    id: string | null;
+    userId: string | null;
+    name: string | null;
+  }>;
+  userId: string;
 }
 
 export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [newPayee, setNewPayee] = useState("");
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
   const foreignCurrenciesList = currencies.filter(
@@ -296,6 +305,18 @@ export default function AccountTransactionAdd(props: Props) {
         },
       });
 
+      const payeeToSubmit =
+        values.payee === "__new__" ? newPayee : values.payee;
+
+      await fetch("/api/user/transaction-payees/", {
+        method: "POST",
+        body: JSON.stringify({
+          name: payeeToSubmit,
+          userId: props.userId,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+
       await fetch("/api/accounts/transactions/", {
         method: "POST",
         body: JSON.stringify({
@@ -408,20 +429,91 @@ export default function AccountTransactionAdd(props: Props) {
                 <FormField
                   control={form.control}
                   name="payee"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payee*</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="payee"
-                          type="text"
-                          placeholder="ZRH Duty Free"
-                          {...field}
+                  render={() => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Payee*</FormLabel>
+                        <Controller
+                          control={form.control}
+                          name="payee"
+                          render={({ field: controllerField }) => (
+                            <>
+                              <Select
+                                onValueChange={(value) => {
+                                  if (value === "__new__") {
+                                    setIsAddingNew(true);
+                                    setNewPayee("");
+                                    controllerField.onChange("");
+                                  } else {
+                                    setIsAddingNew(false);
+                                    setNewPayee("");
+                                    controllerField.onChange(value);
+                                  }
+                                }}
+                                value={
+                                  isAddingNew
+                                    ? "__new__"
+                                    : controllerField.value || ""
+                                }
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a payee" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="__new__">
+                                    Add a new payee
+                                  </SelectItem>
+                                  <Separator className="my-2 px-2" />
+                                  {props.userTransactionPayees
+                                    ?.map((payee) => (
+                                      <SelectItem
+                                        key={payee.id}
+                                        value={payee.name as string}
+                                      >
+                                        {payee.name}
+                                      </SelectItem>
+                                    ))
+                                    .sort(function (a, b) {
+                                      if (a.props.value > b.props.value) {
+                                        return 1;
+                                      }
+
+                                      if (a.props.value < b.props.value) {
+                                        return -1;
+                                      }
+
+                                      return 0;
+                                    })}
+                                </SelectContent>
+                              </Select>
+
+                              {isAddingNew && (
+                                <div className="mt-2">
+                                  <FormLabel htmlFor="new-payee">
+                                    New Payee
+                                  </FormLabel>
+                                  <Input
+                                    id="new-payee"
+                                    type="text"
+                                    placeholder="ZRH Duty Free"
+                                    value={newPayee}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      setNewPayee(value);
+                                      controllerField.onChange(value);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          )}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                        <FormMessage aria-live="polite" />
+                      </FormItem>
+                    );
+                  }}
                 />
                 {/* Concept */}
                 <FormField

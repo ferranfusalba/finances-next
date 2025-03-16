@@ -7,3 +7,11 @@ export default async function getUser(userEmail: string) {
     },
   });
 }
+
+export async function getUserTransactionPayees(id: string) {
+  return await db.userTransactionPayee.findMany({
+    where: {
+      userId: id,
+    },
+  });
+}

@@ -23,6 +23,7 @@ import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import countries from "@/statics/countries.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import { getUserTransactionPayees } from "@/lib/user";
 
 export default async function AccountLayout({
   params,
@@ -34,6 +35,9 @@ export default async function AccountLayout({
 
   const serverSession = await auth();
   const userAccounts = await getAccounts(serverSession?.user?.id as string);
+  const userTransactionPayees = await getUserTransactionPayees(
+    serverSession?.user.id as string
+  );
 
   function getCountryFullName(alpha2Code: string) {
     const country = countries.filter(
@@ -105,7 +109,12 @@ export default async function AccountLayout({
         </div>
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>
-        <AccountTransactionAdd account={account} userAccounts={userAccounts} />
+        <AccountTransactionAdd
+          account={account}
+          userAccounts={userAccounts}
+          userTransactionPayees={userTransactionPayees}
+          userId={serverSession?.user?.id as string}
+        />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
         <AccountTransactionTable accountTransactions={accountTransactions} />
