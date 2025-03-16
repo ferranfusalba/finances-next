@@ -47,6 +47,7 @@ import { Timezone } from "@/types/Timezone";
 
 import currencies from "@/statics/currencies.json";
 import timezones from "@/statics/timezones.json";
+import { cn } from "@/lib/utils";
 
 interface Props {
   account: Account | null;
@@ -431,7 +432,11 @@ export default function AccountTransactionAdd(props: Props) {
                   name="payee"
                   render={() => {
                     return (
-                      <FormItem>
+                      <FormItem
+                        className={cn("", {
+                          "border rounded-lg p-4": isAddingNew,
+                        })}
+                      >
                         <FormLabel>Payee*</FormLabel>
                         <Controller
                           control={form.control}
@@ -499,6 +504,7 @@ export default function AccountTransactionAdd(props: Props) {
                                     type="text"
                                     placeholder="ZRH Duty Free"
                                     value={newPayee}
+                                    className="mt-2"
                                     onChange={(e) => {
                                       const value = e.target.value;
                                       setNewPayee(value);

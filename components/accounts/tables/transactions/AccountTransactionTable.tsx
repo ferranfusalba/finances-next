@@ -13,8 +13,6 @@ import { TrashCan } from "@carbon/icons-react";
 
 import { Button } from "@/components/ui/button";
 
-import "@/components/accounts/tables/transactions/AccountTransactionTable.css";
-
 import { currency } from "@/lib/utils";
 
 import { AccountTransaction } from "@/types/Transaction";
@@ -216,9 +214,12 @@ export default function AccountTransactionTable({
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className="bg-slate-400">
               {headerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th
+                  key={header.id}
+                  className="text-start px-2 border-r border-r-slate-900"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -232,9 +233,12 @@ export default function AccountTransactionTable({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.id}
+              className="bg-slate-900 border-b border-b-slate-400"
+            >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td key={cell.id} className="px-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -243,9 +247,9 @@ export default function AccountTransactionTable({
         </tbody>
         <tfoot>
           {table.getFooterGroups().map((footerGroup) => (
-            <tr key={footerGroup.id}>
+            <tr key={footerGroup.id} className="bg-slate-400 text-slate-600">
               {footerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th key={header.id} className="px-2">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
