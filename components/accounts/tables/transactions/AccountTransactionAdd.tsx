@@ -57,6 +57,17 @@ interface Props {
     userId: string | null;
     name: string | null;
   }>;
+  userTransactionCategories: Array<{
+    id: string | null;
+    userId: string | null;
+    name: string | null;
+    subcategories: Array<{
+      categoryId: string | null;
+      id: string | null;
+      name: string | null;
+      userId: string | null;
+    }>;
+  }>;
   userId: string;
 }
 
@@ -64,7 +75,9 @@ export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [newPayee, setNewPayee] = useState("");
-  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [isAddingNewPayee, setIsAddingNewPayee] = useState(false);
+  const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
   const foreignCurrenciesList = currencies.filter(
@@ -308,11 +321,22 @@ export default function AccountTransactionAdd(props: Props) {
 
       const payeeToSubmit =
         values.payee === "__new__" ? newPayee : values.payee;
+      const categoryToSubmit =
+        values.category === "__new__" ? newCategory : values.category;
 
       await fetch("/api/user/transaction-payees/", {
         method: "POST",
         body: JSON.stringify({
           name: payeeToSubmit,
+          userId: props.userId,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      await fetch("/api/user/transaction-categories/", {
+        method: "POST",
+        body: JSON.stringify({
+          name: categoryToSubmit,
           userId: props.userId,
         }),
         headers: { "Content-Type": "application/json" },
@@ -433,8 +457,8 @@ export default function AccountTransactionAdd(props: Props) {
                   render={() => {
                     return (
                       <FormItem
-                        className={cn("", {
-                          "border rounded-lg p-4": isAddingNew,
+                        className={cn({
+                          "border rounded-lg p-4": isAddingNewPayee,
                         })}
                       >
                         <FormLabel>Payee*</FormLabel>
@@ -446,17 +470,17 @@ export default function AccountTransactionAdd(props: Props) {
                               <Select
                                 onValueChange={(value) => {
                                   if (value === "__new__") {
-                                    setIsAddingNew(true);
+                                    setIsAddingNewPayee(true);
                                     setNewPayee("");
                                     controllerField.onChange("");
                                   } else {
-                                    setIsAddingNew(false);
+                                    setIsAddingNewPayee(false);
                                     setNewPayee("");
                                     controllerField.onChange(value);
                                   }
                                 }}
                                 value={
-                                  isAddingNew
+                                  isAddingNewPayee
                                     ? "__new__"
                                     : controllerField.value || ""
                                 }
@@ -494,7 +518,7 @@ export default function AccountTransactionAdd(props: Props) {
                                 </SelectContent>
                               </Select>
 
-                              {isAddingNew && (
+                              {isAddingNewPayee && (
                                 <div className="mt-2">
                                   <FormLabel htmlFor="new-payee">
                                     New Payee
@@ -869,7 +893,7 @@ export default function AccountTransactionAdd(props: Props) {
 
               <div className="space-y-4">
                 {/* Category */}
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
@@ -886,6 +910,100 @@ export default function AccountTransactionAdd(props: Props) {
                       <FormMessage />
                     </FormItem>
                   )}
+                /> */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={() => {
+                    return (
+                      <FormItem
+                        className={cn({
+                          "border rounded-lg p-4": isAddingNewCategory,
+                        })}
+                      >
+                        <FormLabel>Category*</FormLabel>
+                        <Controller
+                          control={form.control}
+                          name="category"
+                          render={({ field: controllerField }) => (
+                            <>
+                              <Select
+                                onValueChange={(value) => {
+                                  if (value === "__new__") {
+                                    setIsAddingNewCategory(true);
+                                    setNewCategory("");
+                                    controllerField.onChange("");
+                                  } else {
+                                    setIsAddingNewCategory(false);
+                                    setNewCategory("");
+                                    controllerField.onChange(value);
+                                  }
+                                }}
+                                value={
+                                  isAddingNewCategory
+                                    ? "__new__"
+                                    : controllerField.value || ""
+                                }
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="__new__">
+                                    Add a new category
+                                  </SelectItem>
+                                  <Separator className="my-2 px-2" />
+                                  {props.userTransactionCategories
+                                    ?.map((category) => (
+                                      <SelectItem
+                                        key={category.id}
+                                        value={category.name as string}
+                                      >
+                                        {category.name}
+                                      </SelectItem>
+                                    ))
+                                    .sort(function (a, b) {
+                                      if (a.props.value > b.props.value) {
+                                        return 1;
+                                      }
+
+                                      if (a.props.value < b.props.value) {
+                                        return -1;
+                                      }
+
+                                      return 0;
+                                    })}
+                                </SelectContent>
+                              </Select>
+
+                              {isAddingNewCategory && (
+                                <div className="mt-2">
+                                  <FormLabel htmlFor="new-category">
+                                    New Category
+                                  </FormLabel>
+                                  <Input
+                                    id="new-category"
+                                    type="text"
+                                    placeholder="Groceries"
+                                    value={newCategory}
+                                    className="mt-2"
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      setNewCategory(value);
+                                      controllerField.onChange(value);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          )}
+                        />
+                        <FormMessage aria-live="polite" />
+                      </FormItem>
+                    );
+                  }}
                 />
                 {/* Subcategory */}
                 <FormField

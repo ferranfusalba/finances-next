@@ -17,24 +17,25 @@ enum UserRole {
 }
 
 model User {
-  id                   String                 @id @default(cuid())
-  name                 String?
-  email                String?                @unique
-  emailVerified        DateTime?
-  image                String?
-  password             String?
-  role                 UserRole               @default(USER)
-  userAccounts         UserAccount[]
-  userTransactionPayee UserTransactionPayee[]
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  accounts             Account[]
-  budgets              Budget[]
-  defaultCountry       String?                @default("")
-  defaultCurrency      String?                @default("")
-  defaultTimezone      String?                @default("")
-  defaultLocale        String?                @default("")
-  theme                String?                @default("")
+  id                        String                    @id @default(cuid())
+  name                      String?
+  email                     String?                   @unique
+  emailVerified             DateTime?
+  image                     String?
+  password                  String?
+  role                      UserRole                  @default(USER)
+  userAccounts              UserAccount[]
+  userTransactionPayee      UserTransactionPayee[]
+  userTransactionCategories UserTransactionCategory[]
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  accounts                  Account[]
+  budgets                   Budget[]
+  defaultCountry            String?                   @default("")
+  defaultCurrency           String?                   @default("")
+  defaultTimezone           String?                   @default("")
+  defaultLocale             String?                   @default("")
+  theme                     String?                   @default("")
 }
 
 model UserAccount {
@@ -63,7 +64,28 @@ model UserTransactionPayee {
 
   User User? @relation(fields: [userId], references: [id])
 
-  @@unique([name])
+  @@unique([userId, name])
+}
+
+model UserTransactionCategory {
+  id     String  @id @default(cuid())
+  userId String?
+  name   String
+
+  User          User?                        @relation(fields: [userId], references: [id])
+  subcategories UserTransactionSubcategory[]
+
+  @@unique([userId, name])
+}
+
+model UserTransactionSubcategory {
+  id         String                  @id @default(cuid())
+  userId     String?
+  name       String
+  category   UserTransactionCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@unique([categoryId, name])
 }
 
 model VerificationToken {

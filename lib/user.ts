@@ -15,3 +15,14 @@ export async function getUserTransactionPayees(id: string) {
     },
   });
 }
+
+export async function getUserTransactionCategories(id: string) {
+  return await db.userTransactionCategory.findMany({
+    where: {
+      userId: id,
+    },
+    include: {
+      subcategories: true,
+    },
+  });
+}

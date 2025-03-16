@@ -23,7 +23,10 @@ import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import countries from "@/statics/countries.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-import { getUserTransactionPayees } from "@/lib/user";
+import {
+  getUserTransactionCategories,
+  getUserTransactionPayees,
+} from "@/lib/user";
 
 export default async function AccountLayout({
   params,
@@ -36,6 +39,9 @@ export default async function AccountLayout({
   const serverSession = await auth();
   const userAccounts = await getAccounts(serverSession?.user?.id as string);
   const userTransactionPayees = await getUserTransactionPayees(
+    serverSession?.user.id as string
+  );
+  const userTransactionCategories = await getUserTransactionCategories(
     serverSession?.user.id as string
   );
 
@@ -113,6 +119,7 @@ export default async function AccountLayout({
           account={account}
           userAccounts={userAccounts}
           userTransactionPayees={userTransactionPayees}
+          userTransactionCategories={userTransactionCategories}
           userId={serverSession?.user?.id as string}
         />
       </LayoutAccountBudgetActions>
