@@ -218,7 +218,7 @@ export default function AccountTransactionTable({
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="text-start px-2 border-r border-r-slate-900"
+                  className="text-start px-2 border-r border-r-slate-900 font-bold"
                 >
                   {header.isPlaceholder
                     ? null
@@ -249,7 +249,7 @@ export default function AccountTransactionTable({
           {table.getFooterGroups().map((footerGroup) => (
             <tr key={footerGroup.id} className="bg-slate-400 text-slate-600">
               {footerGroup.headers.map((header) => (
-                <th key={header.id} className="px-2">
+                <th key={header.id} className="px-2 font-bold">
                   {header.isPlaceholder
                     ? null
                     : flexRender(

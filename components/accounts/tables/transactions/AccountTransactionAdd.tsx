@@ -74,10 +74,14 @@ interface Props {
 export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
   const [newPayee, setNewPayee] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [newSubcategory, setNewSubcategory] = useState("");
   const [isAddingNewPayee, setIsAddingNewPayee] = useState(false);
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
+  const [isAddingNewSubcategory, setIsAddingNewSubcategory] = useState(false);
+
   const [isPending, startTransition] = useTransition();
   const currentYear = new Date().getFullYear();
   const foreignCurrenciesList = currencies.filter(
@@ -271,6 +275,13 @@ export default function AccountTransactionAdd(props: Props) {
     accountOriginCurrency,
     form,
   ]);
+
+  // Extract the category value from form.watch
+  const category = form.watch("category");
+
+  useEffect(() => {
+    form.setValue("subcategory", ""); // Reset subcategory when category changes
+  }, [category, form]); // Watch for changes in category
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const balanceOnAccount = props.account!.currentBalance;
@@ -893,24 +904,6 @@ export default function AccountTransactionAdd(props: Props) {
 
               <div className="space-y-4">
                 {/* Category */}
-                {/* <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="category"
-                          type="text"
-                          placeholder="Groceries"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                 <FormField
                   control={form.control}
                   name="category"
@@ -1009,20 +1002,98 @@ export default function AccountTransactionAdd(props: Props) {
                 <FormField
                   control={form.control}
                   name="subcategory"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subcategory</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="subcategory"
-                          type="text"
-                          placeholder="Cookies, Swiss Chocolate"
-                          {...field}
+                  render={() => {
+                    return (
+                      <FormItem
+                        className={cn({
+                          "border rounded-lg p-4": isAddingNewSubcategory,
+                        })}
+                      >
+                        <FormLabel>Subcategory</FormLabel>
+                        <Controller
+                          control={form.control}
+                          name="subcategory"
+                          render={({ field: controllerField }) => {
+                            return (
+                              <>
+                                <Select
+                                  onValueChange={(value) => {
+                                    if (value === "__new__") {
+                                      setIsAddingNewSubcategory(true);
+                                      setNewSubcategory("");
+                                      controllerField.onChange("");
+                                    } else {
+                                      setIsAddingNewSubcategory(false);
+                                      setNewSubcategory("");
+                                      controllerField.onChange(value);
+                                    }
+                                  }}
+                                  value={
+                                    isAddingNewSubcategory
+                                      ? "__new__"
+                                      : controllerField.value || ""
+                                  }
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select a subcategory" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="__new__">
+                                      Add a new subcategory
+                                    </SelectItem>
+                                    <Separator className="my-2 px-2" />
+                                    {props.userTransactionCategories
+                                      ?.find(
+                                        (category) =>
+                                          // TODO: Ideally move this to id instead of name, or apply an object (label+value) structure
+                                          category.name ===
+                                          form.getValues().category
+                                      )
+                                      ?.subcategories?.sort((a, b) =>
+                                        (a.name as string).localeCompare(
+                                          b.name as string
+                                        )
+                                      )
+                                      ?.map((sub) => (
+                                        <SelectItem
+                                          key={sub.id}
+                                          value={sub.name as string}
+                                        >
+                                          {sub.name}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                </Select>
+
+                                {isAddingNewSubcategory && (
+                                  <div className="mt-2">
+                                    <FormLabel htmlFor="new-subcategory">
+                                      New Subcategory
+                                    </FormLabel>
+                                    <Input
+                                      id="new-subcategory"
+                                      type="text"
+                                      placeholder="Cookies, Swiss Chocolate"
+                                      value={newSubcategory}
+                                      className="mt-2"
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        setNewSubcategory(value);
+                                        controllerField.onChange(value);
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </>
+                            );
+                          }}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                        <FormMessage aria-live="polite" />
+                      </FormItem>
+                    );
+                  }}
                 />
                 {/* Tags */}
                 <FormField
