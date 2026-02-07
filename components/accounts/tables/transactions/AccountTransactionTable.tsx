@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   createColumnHelper,
@@ -12,6 +12,13 @@ import {
 import { TrashCan } from "@carbon/icons-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { currency } from "@/lib/utils";
 
@@ -21,25 +28,34 @@ const columnHelper = createColumnHelper<AccountTransaction>();
 
 export default function AccountTransactionTable({
   accountTransactions,
+  initialBalance,
 }: {
   accountTransactions: Array<AccountTransaction>;
+  initialBalance: number;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
 
-  // TODO: Finish delete transaction
   const handleDeleteTransaction = async (transactionId: string) => {
-    const params = {
-      id: transactionId,
-    };
-
     startTransition(async () => {
-      await fetch(`/api/accounts/transactions/${params.id}`, {
+      await fetch(`/api/accounts/transactions/${transactionId}`, {
         method: "DELETE",
       });
+      setDeleteDialogOpen(null);
       router.refresh();
     });
   };
+
+  const balanceByTransactionId = useMemo(() => {
+    const map = new Map<string, number>();
+    let running = initialBalance;
+    for (const t of accountTransactions) {
+      running += t.amount;
+      map.set(t.id, running);
+    }
+    return map;
+  }, [accountTransactions, initialBalance]);
 
   const columns = [
     columnHelper.accessor((row) => row.dateTime, {
@@ -103,15 +119,17 @@ export default function AccountTransactionTable({
       header: "Amount",
       footer: (info) => info.column.id,
     }),
-    columnHelper.accessor("balance", {
+    columnHelper.display({
+      id: "balance",
       cell: (info) => {
-        const number = info.getValue();
+        const transactionId = info.row.original?.id;
         const defaultCurrency = info.row.original?.currency;
+        const bal = balanceByTransactionId.get(transactionId) ?? 0;
 
-        return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
+        return <>{currency("ca-AD", defaultCurrency).format(bal)}</>;
       },
       header: "Balance",
-      footer: (info) => info.column.id,
+      footer: () => "balance",
     }),
     columnHelper.accessor("foreignCurrency", {
       header: "Foreign Currency",
@@ -168,14 +186,30 @@ export default function AccountTransactionTable({
         return (
           <div style={{ display: "flex" }}>
             {transactionId}
-            <Button
-              variant="destructive"
-              // disabled={isPending}
-              disabled={true} // TODO: Finish delete transaction
-              onClick={() => handleDeleteTransaction(transactionId)}
+            <Dialog
+              open={deleteDialogOpen === transactionId}
+              onOpenChange={(open) =>
+                setDeleteDialogOpen(open ? transactionId : null)
+              }
             >
-              <TrashCan />
-            </Button>
+              <DialogTrigger asChild>
+                <Button variant="destructive">
+                  <TrashCan />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Transaction</DialogTitle>
+                </DialogHeader>
+                <Button
+                  variant="destructive"
+                  disabled={isPending}
+                  onClick={() => handleDeleteTransaction(transactionId)}
+                >
+                  Confirm
+                </Button>
+              </DialogContent>
+            </Dialog>
           </div>
         );
       },

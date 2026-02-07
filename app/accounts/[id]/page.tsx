@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
+import AccountTransactionDownload from "@/components/accounts/tables/transactions/AccountTransactionDownload";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
@@ -122,9 +123,17 @@ export default async function AccountLayout({
           userTransactionCategories={userTransactionCategories}
           userId={serverSession?.user?.id as string}
         />
+        <AccountTransactionDownload
+          accountTransactions={accountTransactions}
+          accountName={account?.name as string}
+          initialBalance={account?.initialBalance as number}
+        />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
-        <AccountTransactionTable accountTransactions={accountTransactions} />
+        <AccountTransactionTable
+          accountTransactions={accountTransactions}
+          initialBalance={account?.initialBalance as number}
+        />
       </LayoutAccountBudgetTable>
     </Layout02a>
   );

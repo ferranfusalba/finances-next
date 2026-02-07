@@ -23,5 +23,8 @@ export async function getAccountTransactions(id: string) {
     where: {
       accountId: id,
     },
+    orderBy: {
+      dateTime: "asc",
+    },
   });
 }

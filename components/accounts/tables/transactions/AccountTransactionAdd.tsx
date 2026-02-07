@@ -317,13 +317,12 @@ export default function AccountTransactionAdd(props: Props) {
     const location = values.location;
     const notes = values.notes;
     const accountId = props.account?.id;
-    const balance = balanceOnAccount + amountForm;
 
     startTransition(async () => {
       await fetch(`/api/accounts/${accountId}`, {
         method: "PUT",
         body: JSON.stringify({
-          currentBalance: balance,
+          currentBalance: balanceOnAccount + amountForm,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -374,7 +373,6 @@ export default function AccountTransactionAdd(props: Props) {
           location,
           notes,
           accountId,
-          balance,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -424,7 +422,6 @@ export default function AccountTransactionAdd(props: Props) {
                 location,
                 notes,
                 accountId: selectedTransferAccountId,
-                balance: currentBalanceDestination + -amountForm,
               }),
               headers: {
                 "Content-Type": "application/json",

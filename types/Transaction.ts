@@ -1,6 +1,5 @@
 interface Transaction {
   amount: number;
-  balance: number;
   category: string;
   concept: string;
   createdAt: Date;
@@ -27,5 +26,6 @@ export interface AccountTransaction extends Transaction {
 }
 
 export interface BudgetTransaction extends Transaction {
+  balance: number;
   budgetId: string;
 }
