@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -244,16 +244,16 @@ export default function AccountTransactionAdd(props: Props) {
 
   const handleResetFC = () => form.resetField("foreignCurrency");
 
-  const selectedType = form.watch("type");
+  const selectedType = useWatch({ control: form.control, name: "type" });
 
   // If TRANSFER & is FC destination Account
-  const accountOriginAmount = form.watch("amountForm");
-  const accountOriginCurrency = form.watch("currency");
-  const accountDestinationAmount = form.watch("foreignCurrencyAmount");
-  const accountDestinationCurrency = form.watch("foreignCurrency");
+  const accountOriginAmount = useWatch({ control: form.control, name: "amountForm" });
+  const accountOriginCurrency = useWatch({ control: form.control, name: "currency" });
+  const accountDestinationAmount = useWatch({ control: form.control, name: "foreignCurrencyAmount" });
+  const accountDestinationCurrency = useWatch({ control: form.control, name: "foreignCurrency" });
 
   // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-  const selectedTransferAccount = form.watch("typeTransferDestinationAccount");
+  const selectedTransferAccount = useWatch({ control: form.control, name: "typeTransferDestinationAccount" });
   const selectedTransferAccountId = selectedTransferAccount.split("|")[0];
   const selectedTransferAccountCurrency = selectedTransferAccount.split("|")[1];
 
@@ -276,8 +276,7 @@ export default function AccountTransactionAdd(props: Props) {
     form,
   ]);
 
-  // Extract the category value from form.watch
-  const category = form.watch("category");
+  const category = useWatch({ control: form.control, name: "category" });
 
   useEffect(() => {
     form.setValue("subcategory", ""); // Reset subcategory when category changes
