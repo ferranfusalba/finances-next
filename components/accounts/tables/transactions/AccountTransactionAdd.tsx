@@ -284,8 +284,6 @@ export default function AccountTransactionAdd(props: Props) {
   }, [category, form]); // Watch for changes in category
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const balanceOnAccount = props.account!.currentBalance;
-
     const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
     const timezoneToOffsetString = values.timezone.split("|")[0];
 
@@ -319,16 +317,6 @@ export default function AccountTransactionAdd(props: Props) {
     const accountId = props.account?.id;
 
     startTransition(async () => {
-      await fetch(`/api/accounts/${accountId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          currentBalance: balanceOnAccount + amountForm,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
       const payeeToSubmit =
         values.payee === "__new__" ? newPayee : values.payee;
       const categoryToSubmit =
@@ -352,6 +340,7 @@ export default function AccountTransactionAdd(props: Props) {
         headers: { "Content-Type": "application/json" },
       });
 
+      // Server handles balance recomputation and transfer mirror transaction
       await fetch("/api/accounts/transactions/", {
         method: "POST",
         body: JSON.stringify({
@@ -377,66 +366,14 @@ export default function AccountTransactionAdd(props: Props) {
         headers: {
           "Content-Type": "application/json",
         },
-      }).then(() => {
-        // TODO: Fix transfer currency values if they're FC (origin & destination accounts)
-        if (selectedType === "TRANSFER") {
-          startTransition(async () => {
-            const fetchBalance = async (accountId: string) => {
-              const response = await fetch(`/api/accounts/${accountId}`);
-              const data = await response.json();
-              return data.currentBalance;
-            };
-
-            const currentBalanceDestination = await fetchBalance(
-              selectedTransferAccountId
-            );
-
-            await fetch(`/api/accounts/${selectedTransferAccountId}`, {
-              method: "PUT",
-              body: JSON.stringify({
-                currentBalance: currentBalanceDestination + -amountForm,
-              }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-
-            await fetch("/api/accounts/transactions/", {
-              method: "POST",
-              body: JSON.stringify({
-                payee,
-                concept,
-                type,
-                typeTransferOrigin: accountId,
-                typeTransferDestination: selectedTransferAccountId,
-                currency,
-                amount: -amountForm,
-                foreignCurrency,
-                foreignCurrencyAmount,
-                foreignCurrencyExchangeRate,
-                category,
-                subcategory,
-                tags,
-                dateTime,
-                timezone,
-                location,
-                notes,
-                accountId: selectedTransferAccountId,
-              }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          });
-        }
-
-        setOpen(false);
-        toast(`Transaction for ${concept} has been added`, {
-          description: `${amountForm + " " + currency}`,
-        });
-
-        router.refresh();
       });
+
+      setOpen(false);
+      toast(`Transaction for ${concept} has been added`, {
+        description: `${amountForm + " " + currency}`,
+      });
+
+      router.refresh();
     });
   };
 
