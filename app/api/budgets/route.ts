@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 
@@ -7,7 +7,7 @@ export async function GET() {
   return NextResponse.json(budgets);
 }
 
-export async function POST(request: any) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   const newBudget = await db.budget.create({

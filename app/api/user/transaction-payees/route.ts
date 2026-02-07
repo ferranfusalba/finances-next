@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: any) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   const newTransactionPayee = await db.userTransactionPayee.create({

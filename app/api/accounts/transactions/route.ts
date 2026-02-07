@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
-export async function GET(request: any, { params }: AccountBudgetParamsProps) {
+export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
   const account = await db.accountTransaction.findUnique({
     where: {
       id: params.id,
@@ -14,7 +14,7 @@ export async function GET(request: any, { params }: AccountBudgetParamsProps) {
   return NextResponse.json(account);
 }
 
-export async function POST(request: any) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
 
   const newTransaction = await db.accountTransaction.create({
@@ -29,7 +29,6 @@ export async function POST(request: any) {
       typeTransferDestination: data.typeTransferDestination,
       currency: data.currency,
       amount: data.amount,
-      balance: data.balance,
       foreignCurrency: data.foreignCurrency,
       foreignCurrencyAmount: data.foreignCurrencyAmount,
       foreignCurrencyExchangeRate: data.foreignCurrencyExchangeRate,
@@ -47,19 +46,3 @@ export async function POST(request: any) {
   return NextResponse.json(newTransaction);
 }
 
-export async function DELETE(
-  request: any,
-  { params }: AccountBudgetParamsProps
-) {
-  try {
-    const transactionDeleted = await db.accountTransaction.delete({
-      where: {
-        id: params.id,
-      },
-    });
-
-    return NextResponse.json(transactionDeleted);
-  } catch (error: any) {
-    return NextResponse.json(error.message);
-  }
-}
