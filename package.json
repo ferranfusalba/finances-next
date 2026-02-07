@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,7 @@
     "@carbon/icons-react": "^11.52.0",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.1.0",
-    "@radix-ui/react-avatar": "^1.1.2",
+    "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
     "@radix-ui/react-icons": "^1.3.2",
@@ -22,7 +22,7 @@
     "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-select": "^2.1.4",
     "@radix-ui/react-separator": "^1.1.1",
-    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.1.2",
     "@react-spring/web": "^9.7.5",
     "@tanstack/react-table": "^8.20.6",

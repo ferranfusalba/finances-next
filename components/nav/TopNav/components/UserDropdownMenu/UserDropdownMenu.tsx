@@ -52,6 +52,10 @@ export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
           </Link>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuLabel className="font-mono font-normal text-muted-foreground">
+          v{process.env.APP_VERSION}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogoutButtonClient />
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
