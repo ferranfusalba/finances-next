@@ -22,11 +22,6 @@ export async function DELETE(
       where: { id: params.id },
     });
 
-    const account = await db.account.findUnique({
-      where: { id: transaction.accountId },
-      select: { initialBalance: true },
-    });
-
     const remaining = await db.accountTransaction.aggregate({
       where: { accountId: transaction.accountId },
       _sum: { amount: true },
@@ -35,7 +30,7 @@ export async function DELETE(
     await db.account.update({
       where: { id: transaction.accountId },
       data: {
-        currentBalance: (account?.initialBalance ?? 0) + (remaining._sum.amount ?? 0),
+        currentBalance: remaining._sum.amount ?? 0,
       },
     });
 

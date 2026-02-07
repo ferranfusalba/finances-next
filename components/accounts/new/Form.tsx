@@ -63,9 +63,6 @@ export default function NewAccountForm(props: Props) {
       message: "Currency is required.",
     }),
     description: z.string(),
-    initialBalance: z.string().min(1, {
-      message: "Initial Balance is required.",
-    }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -79,7 +76,6 @@ export default function NewAccountForm(props: Props) {
       country: defaultCountry,
       defaultCurrency: defaultCurrency,
       description: "",
-      initialBalance: "",
     },
   });
 
@@ -90,8 +86,7 @@ export default function NewAccountForm(props: Props) {
     const active = true;
     const type = values.type;
     const description = values.description;
-    const initialBalance = parseFloat(values.initialBalance);
-    const currentBalance = initialBalance; // TODO: Add this field to the form & update this field handling
+    const currentBalance = 0;
     const defaultCurrency = values.defaultCurrency;
     const number = values.number;
     const country = values.country;
@@ -107,7 +102,6 @@ export default function NewAccountForm(props: Props) {
           active,
           type,
           description,
-          initialBalance,
           currentBalance,
           defaultCurrency,
           number,
@@ -302,26 +296,6 @@ export default function NewAccountForm(props: Props) {
                   />
                 </FormControl>
                 <FormDescription>Optional field</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Initial Balance */}
-          <FormField
-            control={form.control}
-            name="initialBalance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Initial Balance</FormLabel>
-                <FormControl>
-                  <Input
-                    id="initialBalance"
-                    type="number"
-                    step="0.01"
-                    placeholder="0"
-                    {...field}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

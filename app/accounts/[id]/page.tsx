@@ -126,13 +126,11 @@ export default async function AccountLayout({
         <AccountTransactionDownload
           accountTransactions={accountTransactions}
           accountName={account?.name as string}
-          initialBalance={account?.initialBalance as number}
         />
       </LayoutAccountBudgetActions>
       <LayoutAccountBudgetTable>
         <AccountTransactionTable
           accountTransactions={accountTransactions}
-          initialBalance={account?.initialBalance as number}
         />
       </LayoutAccountBudgetTable>
     </Layout02a>

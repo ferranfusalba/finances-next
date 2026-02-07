@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
       description: data.description,
       defaultCurrency: data.defaultCurrency,
       id: data.id,
-      initialBalance: data.initialBalance,
       currentBalance: data.currentBalance,
       number: data.number,
       country: data.country,

@@ -28,10 +28,8 @@ const columnHelper = createColumnHelper<AccountTransaction>();
 
 export default function AccountTransactionTable({
   accountTransactions,
-  initialBalance,
 }: {
   accountTransactions: Array<AccountTransaction>;
-  initialBalance: number;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -49,13 +47,13 @@ export default function AccountTransactionTable({
 
   const balanceByTransactionId = useMemo(() => {
     const map = new Map<string, number>();
-    let running = initialBalance;
+    let running = 0;
     for (const t of accountTransactions) {
       running += t.amount;
       map.set(t.id, running);
     }
     return map;
-  }, [accountTransactions, initialBalance]);
+  }, [accountTransactions]);
 
   const columns = [
     columnHelper.accessor((row) => row.dateTime, {

@@ -66,15 +66,13 @@ function transactionToRow(t: AccountTransaction, balance: number): string {
 export default function AccountTransactionDownload({
   accountTransactions,
   accountName,
-  initialBalance,
 }: {
   accountTransactions: Array<AccountTransaction>;
   accountName: string;
-  initialBalance: number;
 }) {
   const handleDownload = () => {
     const headerRow = CSV_HEADERS.join(",");
-    let running = initialBalance;
+    let running = 0;
     const dataRows = accountTransactions.map((t) => {
       running += t.amount;
       return transactionToRow(t, running);

@@ -10,7 +10,6 @@ export interface Account {
   type: string | null;
   description: string | null;
   defaultCurrency: string | null;
-  initialBalance: number | null;
   currentBalance: number;
   number: string | null;
   country: string;

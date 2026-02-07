@@ -164,7 +164,6 @@ model Account {
   type            String
   description     String?
   defaultCurrency String               @default("")
-  initialBalance  Float
   currentBalance  Float                @default(0)
   number          String?
   country         String               @default("")
