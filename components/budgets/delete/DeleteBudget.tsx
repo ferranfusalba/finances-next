@@ -13,16 +13,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-
-export default function DeleteBudget({ params }: AccountBudgetParamsProps) {
+export default function DeleteBudget({ id }: { id: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleOnClick = async () => {
     startTransition(async () => {
-      await fetch(`/api/budgets/${params.id}`, {
+      await fetch(`/api/budgets/${id}`, {
         method: "DELETE",
       });
       router.push("/budgets/");

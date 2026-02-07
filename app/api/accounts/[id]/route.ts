@@ -5,9 +5,10 @@ import { db } from "@/lib/db";
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
 export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const { id } = await params;
   const account = await db.account.findUnique({
     where: {
-      id: params.id,
+      id,
     },
   });
 
@@ -15,31 +16,33 @@ export async function GET(_request: NextRequest, { params }: AccountBudgetParams
 }
 
 export async function PUT(request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const { id } = await params;
   const data = await request.json();
   await db.account.update({
     where: {
-      id: params.id,
+      id,
     },
     data: data,
   });
 
-  return NextResponse.json("Updating Account " + params.id);
+  return NextResponse.json("Updating Account " + id);
 }
 
 export async function DELETE(
   _request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const { id } = await params;
   try {
     await db.accountTransaction.deleteMany({
       where: {
-        accountId: params.id,
+        accountId: id,
       },
     });
 
     const accountDeleted = await db.account.delete({
       where: {
-        id: params.id,
+        id,
       },
     });
 

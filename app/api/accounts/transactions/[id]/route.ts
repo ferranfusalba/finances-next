@@ -8,9 +8,10 @@ export async function DELETE(
   _request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const { id } = await params;
   try {
     const transaction = await db.accountTransaction.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { accountId: true, amount: true },
     });
 
@@ -19,7 +20,7 @@ export async function DELETE(
     }
 
     await db.accountTransaction.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     const remaining = await db.accountTransaction.aggregate({
@@ -34,7 +35,7 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ deleted: params.id });
+    return NextResponse.json({ deleted: id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(message, { status: 500 });

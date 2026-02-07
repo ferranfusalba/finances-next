@@ -4,8 +4,8 @@ export interface Data {
 }
 
 export interface DataParamsProps {
-  params: {
+  params: Promise<{
     id: string;
     name: string;
-  };
+  }>;
 }

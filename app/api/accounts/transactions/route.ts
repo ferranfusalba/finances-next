@@ -2,18 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-
-export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
-  const account = await db.accountTransaction.findUnique({
-    where: {
-      id: params.id,
-    },
-  });
-
-  return NextResponse.json(account);
-}
-
 async function recomputeBalance(accountId: string) {
   const result = await db.accountTransaction.aggregate({
     where: { accountId },

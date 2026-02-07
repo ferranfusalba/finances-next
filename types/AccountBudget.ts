@@ -1,5 +1,5 @@
 export interface AccountBudgetParamsProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }

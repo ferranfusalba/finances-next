@@ -32,7 +32,8 @@ import {
 export default async function AccountLayout({
   params,
 }: AccountBudgetParamsProps) {
-  const account = await getAccount({ params });
+  const { id } = await params;
+  const account = await getAccount(id);
   const accountTransactions = await getAccountTransactions(
     account?.id as string
   );
@@ -112,7 +113,7 @@ export default async function AccountLayout({
           </div>
         </div>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
-          <DeleteAccount params={params} />
+          <DeleteAccount id={id} />
         </div>
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>

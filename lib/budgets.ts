@@ -1,7 +1,5 @@
 import { db } from "@/lib/db";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-
 export async function getBudgets(userId: string) {
   return await db.budget.findMany({
     where: {
@@ -10,10 +8,10 @@ export async function getBudgets(userId: string) {
   });
 }
 
-export async function getBudget({ params }: AccountBudgetParamsProps) {
+export async function getBudget(id: string) {
   return await db.budget.findUnique({
     where: {
-      id: params.id,
+      id,
     },
   });
 }

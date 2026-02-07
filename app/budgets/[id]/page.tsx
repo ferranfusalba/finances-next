@@ -19,7 +19,8 @@ import { Currency } from "@/types/Currency";
 export default async function BudgetLayout({
   params,
 }: AccountBudgetParamsProps) {
-  const budget = await getBudget({ params });
+  const { id } = await params;
+  const budget = await getBudget(id);
   const budgetTransactions = await getBudgetTransactions(budget?.id as string);
 
   const defaultCurrencyMatch: Currency | undefined = currencies.find(
@@ -60,7 +61,7 @@ export default async function BudgetLayout({
           </div>
         </div>
         <div className="col-span-2 md:col-span-1 grid justify-center content-center">
-          <DeleteBudget params={params} />
+          <DeleteBudget id={id} />
         </div>
       </LayoutAccountBudgetHeader>
       <LayoutAccountBudgetActions>

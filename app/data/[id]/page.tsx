@@ -1,5 +1,6 @@
 import { DataParamsProps } from "@/types/Data";
 
-export default function DataLayout({ params }: DataParamsProps) {
-  return <>Data {params.id}</>;
+export default async function DataLayout({ params }: DataParamsProps) {
+  const { id } = await params;
+  return <>Data {id}</>;
 }
