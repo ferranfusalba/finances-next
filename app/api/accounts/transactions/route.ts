@@ -17,49 +17,54 @@ async function recomputeBalance(accountId: string) {
 export async function POST(request: NextRequest) {
   const data = await request.json();
 
-  const transactionData = {
-    id: data.id,
-    createdAt: data.createdAt,
-    updatedAt: data.updatedAt,
-    payee: data.payee,
-    concept: data.concept,
-    type: data.type,
-    typeTransferOrigin: data.typeTransferOrigin,
-    typeTransferDestination: data.typeTransferDestination,
-    currency: data.currency,
-    amount: data.amount,
-    foreignCurrency: data.foreignCurrency,
-    foreignCurrencyAmount: data.foreignCurrencyAmount,
-    foreignCurrencyExchangeRate: data.foreignCurrencyExchangeRate,
-    category: data.category,
-    subcategory: data.subcategory,
-    tags: data.tags,
-    dateTime: data.dateTime,
-    timezone: data.timezone,
-    location: data.location,
-    notes: data.notes,
-    accountId: data.accountId,
-  };
+  try {
+    const transactionData = {
+      id: data.id,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      payee: data.payee,
+      concept: data.concept,
+      type: data.type,
+      typeTransferOrigin: data.typeTransferOrigin,
+      typeTransferDestination: data.typeTransferDestination,
+      currency: data.currency,
+      amount: data.amount,
+      foreignCurrency: data.foreignCurrency,
+      foreignCurrencyAmount: data.foreignCurrencyAmount,
+      foreignCurrencyExchangeRate: data.foreignCurrencyExchangeRate,
+      category: data.category,
+      subcategory: data.subcategory,
+      tags: data.tags,
+      dateTime: data.dateTime,
+      timezone: data.timezone,
+      location: data.location,
+      notes: data.notes,
+      accountId: data.accountId,
+    };
 
-  const newTransaction = await db.accountTransaction.create({
-    data: transactionData,
-  });
-
-  await recomputeBalance(data.accountId);
-
-  // For transfers, create the mirror transaction on the destination account
-  if (data.type === "TRANSFER" && data.typeTransferDestination) {
-    await db.accountTransaction.create({
-      data: {
-        ...transactionData,
-        amount: -data.amount,
-        accountId: data.typeTransferDestination,
-      },
+    const newTransaction = await db.accountTransaction.create({
+      data: transactionData,
     });
 
-    await recomputeBalance(data.typeTransferDestination);
-  }
+    await recomputeBalance(data.accountId);
 
-  return NextResponse.json(newTransaction);
+    // For transfers, create the mirror transaction on the destination account
+    if (data.type === "TRANSFER" && data.typeTransferDestination) {
+      await db.accountTransaction.create({
+        data: {
+          ...transactionData,
+          amount: -data.amount,
+          accountId: data.typeTransferDestination,
+        },
+      });
+
+      await recomputeBalance(data.typeTransferDestination);
+    }
+
+    return NextResponse.json(newTransaction);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
