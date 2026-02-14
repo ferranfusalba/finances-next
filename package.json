@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,6 +16,9 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@carbon/icons-react": "^11.74.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.1.0",
     "@radix-ui/react-avatar": "^1.1.11",

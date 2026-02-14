@@ -5,6 +5,9 @@ export async function getBudgets(userId: string) {
     where: {
       userId: userId,
     },
+    orderBy: {
+      order: "asc",
+    },
   });
 }
 

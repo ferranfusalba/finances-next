@@ -5,6 +5,9 @@ export async function getAccounts(userId: string) {
     where: {
       userId: userId,
     },
+    orderBy: {
+      order: "asc",
+    },
   });
 }
 
