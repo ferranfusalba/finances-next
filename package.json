@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -45,12 +45,13 @@
     "resend": "^4.0.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7",
+    "tw-animate-css": "^1.4.0",
     "uuid": "^11.0.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -65,13 +66,12 @@
     "@vitejs/plugin-react": "^5.1.3",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "4.0.18",
-    "autoprefixer": "^10.4.20",
     "eslint": "^10.0.0",
     "eslint-config-next": "^16.1.6",
     "jsdom": "^28.0.0",
     "postcss": "^8.4.49",
     "prisma": "^6.1.0",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.7.3",
     "vitest": "^4.0.18"
   }
