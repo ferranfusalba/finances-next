@@ -19,5 +19,8 @@ import { JWT } from "next-auth/jwt";
 declare module "next-auth/jwt" {
   interface JWT {
     role?: "ADMIN" | "USER";
+    isOAuth?: boolean;
+    defaultCountry?: string;
+    defaultCurrency?: string;
   }
 }

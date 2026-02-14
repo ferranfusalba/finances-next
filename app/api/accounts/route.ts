@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
 
 import { currentUser } from "@/lib/auth";
+import { CreateAccountSchema } from "@/schemas";
 
 export async function GET() {
   const user = await currentUser();
@@ -13,11 +15,26 @@ export async function GET() {
       userId: user?.id,
     },
   });
-  return NextResponse.json(accounts);
+  return NextResponse.json(
+    accounts.map((a) => ({
+      ...a,
+      currentBalance: toNumber(a.currentBalance),
+    }))
+  );
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
+  const body = await request.json();
+  const parsed = CreateAccountSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
 
   try {
     const newAccount = await db.account.create({
@@ -25,16 +42,13 @@ export async function POST(request: NextRequest) {
         active: data.active,
         bankName: data.bankName,
         code: data.code,
-        createdAt: data.createdAt,
         description: data.description,
         defaultCurrency: data.defaultCurrency,
-        id: data.id,
         currentBalance: data.currentBalance,
         number: data.number,
         country: data.country,
         name: data.name,
         type: data.type,
-        updatedAt: data.updatedAt,
         userId: data.userId,
       },
     });

@@ -2,8 +2,14 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/db", () => ({
   db: {
+    budget: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
     budgetTransaction: {
       create: vi.fn(),
+      aggregate: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
@@ -12,15 +18,14 @@ import { db } from "@/lib/db";
 import { POST } from "./route";
 
 const baseTransaction = {
-  id: "btxn-1",
   concept: "Office supplies",
   type: "EXPENSE",
   currency: "USD",
   amount: -30,
-  balance: 970,
   budgetId: "bgt-1",
   dateTime: "2024-01-15T10:00:00Z",
   timezone: "UTC",
+  notes: "",
 };
 
 describe("POST /api/budgets/transactions", () => {
@@ -28,12 +33,22 @@ describe("POST /api/budgets/transactions", () => {
     vi.clearAllMocks();
   });
 
-  it("creates a budget transaction", async () => {
+  it("creates a budget transaction and recomputes balance server-side", async () => {
     vi.mocked(db.budgetTransaction.create).mockResolvedValue({
       ...baseTransaction,
+      id: "btxn-1",
+      balance: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     } as never);
+    vi.mocked(db.budget.findUnique).mockResolvedValue({
+      initialBalance: 1000,
+    } as never);
+    vi.mocked(db.budgetTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -30 },
+    } as never);
+    vi.mocked(db.budget.update).mockResolvedValue({} as never);
+    vi.mocked(db.budgetTransaction.update).mockResolvedValue({} as never);
 
     const request = new Request(
       "http://localhost/api/budgets/transactions",
@@ -47,12 +62,23 @@ describe("POST /api/budgets/transactions", () => {
     const json = await response.json();
 
     expect(json.id).toBe("btxn-1");
-    expect(json.amount).toBe(-30);
     expect(db.budgetTransaction.create).toHaveBeenCalledOnce();
-
-    const createArg = vi.mocked(db.budgetTransaction.create).mock.calls[0][0];
-    expect(createArg.data.budgetId).toBe("bgt-1");
-    expect(createArg.data.balance).toBe(970);
+    expect(db.budget.findUnique).toHaveBeenCalledWith({
+      where: { id: "bgt-1" },
+      select: { initialBalance: true },
+    });
+    expect(db.budgetTransaction.aggregate).toHaveBeenCalledWith({
+      where: { budgetId: "bgt-1" },
+      _sum: { amount: true },
+    });
+    expect(db.budget.update).toHaveBeenCalledWith({
+      where: { id: "bgt-1" },
+      data: { currentBalance: 970 },
+    });
+    expect(db.budgetTransaction.update).toHaveBeenCalledWith({
+      where: { id: "btxn-1" },
+      data: { balance: 970 },
+    });
   });
 
   it("returns 500 when create fails", async () => {

@@ -2,28 +2,43 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
+import { CreateBudgetSchema } from "@/schemas";
 
 export async function GET() {
   const budgets = await db.budget.findMany();
-  return NextResponse.json(budgets);
+  return NextResponse.json(
+    budgets.map((b) => ({
+      ...b,
+      initialBalance: toNumber(b.initialBalance),
+      currentBalance: toNumber(b.currentBalance),
+    }))
+  );
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
+  const body = await request.json();
+  const parsed = CreateBudgetSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
 
   try {
     const newBudget = await db.budget.create({
       data: {
         active: data.active,
         code: data.code,
-        createdAt: data.createdAt,
         description: data.description,
         defaultCurrency: data.defaultCurrency,
-        id: data.id,
         initialBalance: data.initialBalance,
         name: data.name,
         type: data.type,
-        updatedAt: data.updatedAt,
         userId: data.userId,
       },
     });

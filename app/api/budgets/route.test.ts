@@ -86,6 +86,8 @@ describe("POST /api/budgets", () => {
       body: JSON.stringify({
         name: "Duplicate",
         code: "MKT",
+        type: "MONTHLY",
+        initialBalance: 0,
         userId: "user-1",
         active: true,
       }),

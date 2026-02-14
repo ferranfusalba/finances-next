@@ -123,8 +123,6 @@ export default function BudgetTransactionAdd(props: Props) {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const balanceOnBudget = props.budget!.currentBalance;
-
     const dateBuilt = new Date(
       Number(values.dateYear),
       Number(values.dateMonth) - 1,
@@ -152,19 +150,9 @@ export default function BudgetTransactionAdd(props: Props) {
     const location = values.location;
     const notes = values.notes;
     const budgetId = props.budget?.id;
-    const balance = balanceOnBudget + amountForm;
 
     startTransition(async () => {
-      await fetch(`/api/budgets/${budgetId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          currentBalance: balance,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      // Server handles balance recomputation
       await fetch("/api/budgets/transactions/", {
         method: "POST",
         body: JSON.stringify({
@@ -183,7 +171,6 @@ export default function BudgetTransactionAdd(props: Props) {
           location,
           notes,
           budgetId,
-          balance,
         }),
         headers: {
           "Content-Type": "application/json",

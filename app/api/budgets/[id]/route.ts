@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import { UpdateBudgetSchema } from "@/schemas";
 
 export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
   const { id } = await params;
@@ -13,19 +15,35 @@ export async function GET(_request: NextRequest, { params }: AccountBudgetParams
     },
   });
 
-  return NextResponse.json(budget);
+  if (!budget) {
+    return NextResponse.json({ error: "Budget not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    ...budget,
+    initialBalance: toNumber(budget.initialBalance),
+    currentBalance: toNumber(budget.currentBalance),
+  });
 }
 
 export async function PUT(request: NextRequest, { params }: AccountBudgetParamsProps) {
   const { id } = await params;
-  const data = await request.json();
+  const body = await request.json();
+  const parsed = UpdateBudgetSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
 
   try {
     await db.budget.update({
       where: {
         id,
       },
-      data: data,
+      data: parsed.data,
     });
 
     return NextResponse.json("Updating Budget " + id);

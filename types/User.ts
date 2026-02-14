@@ -8,9 +8,9 @@ export interface User {
   emailVerified?: Date | null;
   image?: string | null;
   password?: string | null;
-  role: "ADMIN" | "ROLE" | string | null;
-  createdAt?: Date | null;
-  updatedAt?: Date | null;
+  role: "ADMIN" | "USER";
+  createdAt: Date;
+  updatedAt: Date;
   accounts?: Array<Account> | null;
   budgets?: Array<Budget> | null;
   defaultCountry?: string | null;
@@ -18,5 +18,4 @@ export interface User {
   defaultTimezone?: string | null;
   defaultLocale?: string | null;
   theme?: string | null;
-  isOAuth: boolean | null;
 }

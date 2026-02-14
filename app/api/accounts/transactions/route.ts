@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { CreateAccountTransactionSchema } from "@/schemas";
 
 async function recomputeBalance(accountId: string) {
   const result = await db.accountTransaction.aggregate({
@@ -15,13 +16,20 @@ async function recomputeBalance(accountId: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
+  const body = await request.json();
+  const parsed = CreateAccountTransactionSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
 
   try {
     const transactionData = {
-      id: data.id,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
       payee: data.payee,
       concept: data.concept,
       type: data.type,

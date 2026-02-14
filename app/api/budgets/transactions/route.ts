@@ -1,21 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
+import { CreateBudgetTransactionSchema } from "@/schemas";
+
+async function recomputeBalance(budgetId: string) {
+  const budget = await db.budget.findUnique({
+    where: { id: budgetId },
+    select: { initialBalance: true },
+  });
+
+  const result = await db.budgetTransaction.aggregate({
+    where: { budgetId },
+    _sum: { amount: true },
+  });
+
+  const newBalance = toNumber(budget?.initialBalance) + toNumber(result._sum.amount);
+
+  await db.budget.update({
+    where: { id: budgetId },
+    data: { currentBalance: newBalance },
+  });
+
+  return newBalance;
+}
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
+  const body = await request.json();
+  const parsed = CreateBudgetTransactionSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
 
   try {
     const newTransaction = await db.budgetTransaction.create({
       data: {
-        id: data.id,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
         concept: data.concept,
         type: data.type,
         currency: data.currency,
         amount: data.amount,
-        balance: data.balance,
+        balance: 0,
         foreignCurrency: data.foreignCurrency,
         foreignCurrencyAmount: data.foreignCurrencyAmount,
         foreignCurrencyExchangeRate: data.foreignCurrencyExchangeRate,
@@ -28,6 +58,14 @@ export async function POST(request: NextRequest) {
         notes: data.notes,
         budgetId: data.budgetId,
       },
+    });
+
+    // Recompute budget balance and update transaction's running balance
+    const newBalance = await recomputeBalance(data.budgetId);
+
+    await db.budgetTransaction.update({
+      where: { id: newTransaction.id },
+      data: { balance: newBalance },
     });
 
     return NextResponse.json(newTransaction);

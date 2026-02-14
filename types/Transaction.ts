@@ -21,8 +21,8 @@ interface Transaction {
 export interface AccountTransaction extends Transaction {
   accountId: string;
   payee: string;
-  typeTransferDestination: string | null;
-  typeTransferOrigin: string | null;
+  typeTransferDestination?: string | null;
+  typeTransferOrigin?: string | null;
 }
 
 export interface BudgetTransaction extends Transaction {

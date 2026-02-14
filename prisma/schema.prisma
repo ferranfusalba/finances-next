@@ -31,11 +31,11 @@ model User {
   updatedAt                 DateTime                  @updatedAt
   accounts                  Account[]
   budgets                   Budget[]
-  defaultCountry            String?                   @default("")
-  defaultCurrency           String?                   @default("")
-  defaultTimezone           String?                   @default("")
-  defaultLocale             String?                   @default("")
-  theme                     String?                   @default("")
+  defaultCountry            String                    @default("")
+  defaultCurrency           String                    @default("")
+  defaultTimezone           String                    @default("")
+  defaultLocale             String                    @default("")
+  theme                     String                    @default("")
 }
 
 model UserAccount {
@@ -116,10 +116,10 @@ model AccountTransaction {
   typeTransferOrigin          String?  @default("")
   typeTransferDestination     String?  @default("")
   currency                    String
-  amount                      Float
+  amount                      Decimal
   foreignCurrency             String?  @default("")
-  foreignCurrencyAmount       Float?   @default(0.00)
-  foreignCurrencyExchangeRate Float?   @default(0.00)
+  foreignCurrencyAmount       Decimal? @default(0.00)
+  foreignCurrencyExchangeRate Decimal? @default(0.00)
   category                    String   @default("")
   subcategory                 String?  @default("")
   tags                        String?  @default("")
@@ -138,11 +138,11 @@ model BudgetTransaction {
   concept                     String
   type                        String
   currency                    String
-  amount                      Float
-  balance                     Float
+  amount                      Decimal
+  balance                     Decimal
   foreignCurrency             String?  @default("")
-  foreignCurrencyAmount       Float?   @default(0.00)
-  foreignCurrencyExchangeRate Float?   @default(0.00)
+  foreignCurrencyAmount       Decimal? @default(0.00)
+  foreignCurrencyExchangeRate Decimal? @default(0.00)
   category                    String   @default("")
   subcategory                 String?  @default("")
   tags                        String?  @default("")
@@ -164,7 +164,7 @@ model Account {
   type            String
   description     String?
   defaultCurrency String               @default("")
-  currentBalance  Float                @default(0)
+  currentBalance  Decimal              @default(0)
   number          String?
   country         String               @default("")
   createdAt       DateTime             @default(now())
@@ -185,8 +185,8 @@ model Budget {
   type            String
   description     String?
   defaultCurrency String              @default("")
-  initialBalance  Float
-  currentBalance  Float               @default(0)
+  initialBalance  Decimal
+  currentBalance  Decimal             @default(0)
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   User            User?               @relation(fields: [userId], references: [id])

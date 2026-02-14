@@ -104,6 +104,7 @@ describe("POST /api/accounts", () => {
       body: JSON.stringify({
         name: "Duplicate",
         code: "CHK",
+        type: "CHECKING",
         userId: "user-1",
         active: true,
       }),

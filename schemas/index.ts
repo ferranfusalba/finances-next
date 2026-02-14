@@ -74,3 +74,95 @@ export const RegisterSchema = z.object({
     message: "Name is required",
   }),
 });
+
+// --- API Route Schemas ---
+
+export const CreateAccountSchema = z.object({
+  name: z.string().min(1),
+  code: z.string().min(1),
+  bankName: z.string().default(""),
+  active: z.boolean(),
+  type: z.string().min(1),
+  description: z.string().nullable().optional(),
+  defaultCurrency: z.string().default(""),
+  currentBalance: z.number().default(0),
+  number: z.string().nullable().optional(),
+  country: z.string().default(""),
+  userId: z.string().optional(),
+});
+
+export const UpdateAccountSchema = z.object({
+  name: z.string().min(1).optional(),
+  code: z.string().min(1).optional(),
+  bankName: z.string().optional(),
+  active: z.boolean().optional(),
+  type: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
+  defaultCurrency: z.string().optional(),
+  currentBalance: z.number().optional(),
+  number: z.string().nullable().optional(),
+  country: z.string().optional(),
+  order: z.number().optional(),
+});
+
+export const CreateBudgetSchema = z.object({
+  name: z.string().min(1),
+  code: z.string().min(1),
+  active: z.boolean(),
+  type: z.string().min(1),
+  description: z.string().nullable().optional(),
+  defaultCurrency: z.string().default(""),
+  initialBalance: z.number(),
+  userId: z.string().optional(),
+});
+
+export const UpdateBudgetSchema = z.object({
+  name: z.string().min(1).optional(),
+  code: z.string().min(1).optional(),
+  active: z.boolean().optional(),
+  type: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
+  defaultCurrency: z.string().optional(),
+  initialBalance: z.number().optional(),
+  currentBalance: z.number().optional(),
+  order: z.number().optional(),
+});
+
+export const CreateAccountTransactionSchema = z.object({
+  payee: z.string().default(""),
+  concept: z.string().min(1),
+  type: z.string().min(1),
+  typeTransferOrigin: z.string().nullable().optional(),
+  typeTransferDestination: z.string().nullable().optional(),
+  currency: z.string().min(1),
+  amount: z.number(),
+  foreignCurrency: z.string().nullable().optional(),
+  foreignCurrencyAmount: z.number().nullable().optional(),
+  foreignCurrencyExchangeRate: z.number().nullable().optional(),
+  category: z.string().default(""),
+  subcategory: z.string().nullable().optional(),
+  tags: z.string().nullable().optional(),
+  dateTime: z.string().or(z.date()),
+  timezone: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  notes: z.string(),
+  accountId: z.string().min(1),
+});
+
+export const CreateBudgetTransactionSchema = z.object({
+  concept: z.string().min(1),
+  type: z.string().min(1),
+  currency: z.string().min(1),
+  amount: z.number(),
+  foreignCurrency: z.string().nullable().optional(),
+  foreignCurrencyAmount: z.number().nullable().optional(),
+  foreignCurrencyExchangeRate: z.number().nullable().optional(),
+  category: z.string().default(""),
+  subcategory: z.string().nullable().optional(),
+  tags: z.string().nullable().optional(),
+  dateTime: z.string().or(z.date()),
+  timezone: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  notes: z.string(),
+  budgetId: z.string().min(1),
+});

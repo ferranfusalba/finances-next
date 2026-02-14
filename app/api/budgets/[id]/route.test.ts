@@ -25,7 +25,7 @@ describe("GET /api/budgets/[id]", () => {
   });
 
   it("returns the budget by ID", async () => {
-    const budget = { id: "bgt-1", name: "Marketing", code: "MKT" };
+    const budget = { id: "bgt-1", name: "Marketing", code: "MKT", initialBalance: 1000, currentBalance: 500 };
     vi.mocked(db.budget.findUnique).mockResolvedValue(budget as never);
 
     const response = await GET(new Request("http://localhost") as never, makeParams("bgt-1"));

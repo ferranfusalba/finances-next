@@ -23,7 +23,6 @@ function makeRequest(body: Record<string, unknown>) {
 }
 
 const baseTransaction = {
-  id: "txn-1",
   payee: "Store",
   concept: "Groceries",
   type: "EXPENSE",
@@ -32,6 +31,7 @@ const baseTransaction = {
   accountId: "acc-1",
   dateTime: "2024-01-15T10:00:00Z",
   timezone: "UTC",
+  notes: "",
 };
 
 describe("POST /api/accounts/transactions", () => {
@@ -41,6 +41,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("creates a transaction and recomputes balance", async () => {
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
       ...baseTransaction,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -67,6 +68,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("sets currentBalance to 0 when aggregate sum is null", async () => {
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
       ...baseTransaction,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -119,6 +121,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("does not create mirror transaction for non-transfer types", async () => {
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
       ...baseTransaction,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -140,7 +143,7 @@ describe("POST /api/accounts/transactions", () => {
       new Error("DB write failed")
     );
 
-    const response = await POST(makeRequest(baseTransaction));
+    const response = await POST(makeRequest({ ...baseTransaction }));
     const json = await response.json();
 
     expect(response.status).toBe(500);

@@ -25,7 +25,7 @@ describe("GET /api/accounts/[id]", () => {
   });
 
   it("returns the account by ID", async () => {
-    const account = { id: "acc-1", name: "Checking", code: "CHK" };
+    const account = { id: "acc-1", name: "Checking", code: "CHK", currentBalance: 150.50 };
     vi.mocked(db.account.findUnique).mockResolvedValue(account as never);
 
     const response = await GET(new Request("http://localhost") as never, makeParams("acc-1"));
@@ -35,13 +35,14 @@ describe("GET /api/accounts/[id]", () => {
     expect(db.account.findUnique).toHaveBeenCalledWith({ where: { id: "acc-1" } });
   });
 
-  it("returns null when account not found", async () => {
+  it("returns 404 when account not found", async () => {
     vi.mocked(db.account.findUnique).mockResolvedValue(null as never);
 
     const response = await GET(new Request("http://localhost") as never, makeParams("nonexistent"));
     const json = await response.json();
 
-    expect(json).toBeNull();
+    expect(response.status).toBe(404);
+    expect(json.error).toBe("Account not found");
   });
 });
 

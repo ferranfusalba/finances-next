@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
 
 export async function getBudgets(userId: string) {
-  return await db.budget.findMany({
+  const budgets = await db.budget.findMany({
     where: {
       userId: userId,
     },
@@ -9,20 +10,38 @@ export async function getBudgets(userId: string) {
       order: "asc",
     },
   });
+  return budgets.map((b) => ({
+    ...b,
+    initialBalance: toNumber(b.initialBalance),
+    currentBalance: toNumber(b.currentBalance),
+  }));
 }
 
 export async function getBudget(id: string) {
-  return await db.budget.findUnique({
+  const budget = await db.budget.findUnique({
     where: {
       id,
     },
   });
+  if (!budget) return null;
+  return {
+    ...budget,
+    initialBalance: toNumber(budget.initialBalance),
+    currentBalance: toNumber(budget.currentBalance),
+  };
 }
 
 export async function getBudgetTransactions(id: string) {
-  return await db.budgetTransaction.findMany({
+  const transactions = await db.budgetTransaction.findMany({
     where: {
       budgetId: id,
     },
   });
+  return transactions.map((t) => ({
+    ...t,
+    amount: toNumber(t.amount),
+    balance: toNumber(t.balance),
+    foreignCurrencyAmount: toNumber(t.foreignCurrencyAmount),
+    foreignCurrencyExchangeRate: toNumber(t.foreignCurrencyExchangeRate),
+  }));
 }

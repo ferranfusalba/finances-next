@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
+import { toNumber } from "@/lib/utils";
 
 export async function getAccounts(userId: string) {
-  return await db.account.findMany({
+  const accounts = await db.account.findMany({
     where: {
       userId: userId,
     },
@@ -9,18 +10,27 @@ export async function getAccounts(userId: string) {
       order: "asc",
     },
   });
+  return accounts.map((a) => ({
+    ...a,
+    currentBalance: toNumber(a.currentBalance),
+  }));
 }
 
 export async function getAccount(id: string) {
-  return await db.account.findUnique({
+  const account = await db.account.findUnique({
     where: {
       id,
     },
   });
+  if (!account) return null;
+  return {
+    ...account,
+    currentBalance: toNumber(account.currentBalance),
+  };
 }
 
 export async function getAccountTransactions(id: string) {
-  return await db.accountTransaction.findMany({
+  const transactions = await db.accountTransaction.findMany({
     where: {
       accountId: id,
     },
@@ -28,4 +38,10 @@ export async function getAccountTransactions(id: string) {
       dateTime: "asc",
     },
   });
+  return transactions.map((t) => ({
+    ...t,
+    amount: toNumber(t.amount),
+    foreignCurrencyAmount: toNumber(t.foreignCurrencyAmount),
+    foreignCurrencyExchangeRate: toNumber(t.foreignCurrencyExchangeRate),
+  }));
 }

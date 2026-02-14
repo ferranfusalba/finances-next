@@ -5,11 +5,11 @@ export interface Budget {
   order: number;
   name: string;
   code: string;
-  active: boolean | null;
-  type: string | null;
+  active: boolean;
+  type: string;
   description: string | null;
-  defaultCurrency: string | null;
-  initialBalance: number | null;
+  defaultCurrency: string;
+  initialBalance: number;
   currentBalance: number;
   createdAt: Date;
   updatedAt: Date;

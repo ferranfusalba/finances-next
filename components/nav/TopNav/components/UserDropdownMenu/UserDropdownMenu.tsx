@@ -14,11 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LogoutButtonClient from "@/components/nav/TopNav/components/UserDropdownMenu/LogoutButtonClient";
-import { User } from "@/types/User";
+import { ExtendedUser } from "@/next-auth";
 import Link from "next/link";
 
 interface UserDropdownMenuProps {
-  user: User;
+  user: ExtendedUser;
 }
 
 export function UserDropdownMenu({ user }: UserDropdownMenuProps) {

@@ -6,10 +6,10 @@ export interface Account {
   name: string;
   code: string;
   bankName: string;
-  active: boolean | null;
-  type: string | null;
+  active: boolean;
+  type: string;
   description: string | null;
-  defaultCurrency: string | null;
+  defaultCurrency: string;
   currentBalance: number;
   number: string | null;
   country: string;
