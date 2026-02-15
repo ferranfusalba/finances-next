@@ -8,8 +8,10 @@ export const SettingsSchema = z
     email: z.optional(z.string().email()),
     password: z.optional(z.string().min(6)),
     newPassword: z.optional(z.string().min(6)),
-    defaultCountry: z.string(),
-    defaultCurrency: z.string(),
+    userCountry: z.string(),
+    userCurrency: z.string(),
+    userTimezone: z.string(),
+    userLocale: z.string(),
   })
   .refine(
     (data) => {
@@ -130,7 +132,7 @@ export const UpdateBudgetSchema = z.object({
 
 export const CreateAccountTransactionSchema = z.object({
   payee: z.string().default(""),
-  concept: z.string().min(1),
+  concept: z.string().default(""),
   type: z.string().min(1),
   typeTransferOrigin: z.string().nullable().optional(),
   typeTransferDestination: z.string().nullable().optional(),
@@ -146,11 +148,17 @@ export const CreateAccountTransactionSchema = z.object({
   timezone: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   notes: z.string(),
+  taxLines: z.array(z.object({
+    rate: z.number(),
+    amount: z.number(),
+    inclusive: z.boolean(),
+    taxAmount: z.number(),
+  })).nullable().optional(),
   accountId: z.string().min(1),
 });
 
 export const CreateBudgetTransactionSchema = z.object({
-  concept: z.string().min(1),
+  concept: z.string().default(""),
   type: z.string().min(1),
   currency: z.string().min(1),
   amount: z.number(),

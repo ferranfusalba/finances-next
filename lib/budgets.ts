@@ -36,6 +36,9 @@ export async function getBudgetTransactions(id: string) {
     where: {
       budgetId: id,
     },
+    orderBy: {
+      dateTime: "asc",
+    },
   });
   return transactions.map((t) => ({
     ...t,

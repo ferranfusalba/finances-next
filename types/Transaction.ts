@@ -1,3 +1,12 @@
+export interface TaxLine {
+  id: string;
+  rate: number;
+  amount: number;
+  inclusive: boolean;
+  taxAmount: number;
+  accountTransactionId: string;
+}
+
 interface Transaction {
   amount: number;
   category: string;
@@ -21,6 +30,7 @@ interface Transaction {
 export interface AccountTransaction extends Transaction {
   accountId: string;
   payee: string;
+  taxLines?: TaxLine[] | null;
   typeTransferDestination?: string | null;
   typeTransferOrigin?: string | null;
 }

@@ -37,11 +37,20 @@ export async function getAccountTransactions(id: string) {
     orderBy: {
       dateTime: "asc",
     },
+    include: {
+      taxLines: true,
+    },
   });
   return transactions.map((t) => ({
     ...t,
     amount: toNumber(t.amount),
     foreignCurrencyAmount: toNumber(t.foreignCurrencyAmount),
     foreignCurrencyExchangeRate: toNumber(t.foreignCurrencyExchangeRate),
+    taxLines: t.taxLines.map((tl) => ({
+      ...tl,
+      rate: toNumber(tl.rate),
+      amount: toNumber(tl.amount),
+      taxAmount: toNumber(tl.taxAmount),
+    })),
   }));
 }

@@ -38,8 +38,10 @@ export const {
         session.user.name = token.name ?? null;
         session.user.email = token.email ?? "";
         session.user.isOAuth = token.isOAuth ?? false;
-        session.user.defaultCountry = token.defaultCountry ?? "";
-        session.user.defaultCurrency = token.defaultCurrency ?? "";
+        session.user.userCountry = token.userCountry ?? "";
+        session.user.userCurrency = token.userCurrency ?? "";
+        session.user.userTimezone = token.userTimezone ?? "";
+        session.user.userLocale = token.userLocale || "en-US";
       }
 
       return session;
@@ -57,8 +59,10 @@ export const {
       token.name = existingUser.name;
       token.email = existingUser.email;
       token.role = existingUser.role;
-      token.defaultCountry = existingUser.defaultCountry ?? "";
-      token.defaultCurrency = existingUser.defaultCurrency ?? "";
+      token.userCountry = existingUser.userCountry ?? "";
+      token.userCurrency = existingUser.userCurrency ?? "";
+      token.userTimezone = existingUser.userTimezone ?? "";
+      token.userLocale = existingUser.userLocale || "en-US";
 
       return token;
     },

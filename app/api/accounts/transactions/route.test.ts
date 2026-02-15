@@ -39,6 +39,15 @@ describe("POST /api/accounts/transactions", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 400 when body fails validation", async () => {
+    const response = await POST(makeRequest({ amount: "not-a-number" }));
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+    expect(db.accountTransaction.create).not.toHaveBeenCalled();
+  });
+
   it("creates a transaction and recomputes balance", async () => {
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
@@ -136,6 +145,54 @@ describe("POST /api/accounts/transactions", () => {
     expect(db.accountTransaction.create).toHaveBeenCalledOnce();
     expect(db.accountTransaction.aggregate).toHaveBeenCalledOnce();
     expect(db.account.update).toHaveBeenCalledOnce();
+  });
+
+  it("passes taxLines as nested create to the database", async () => {
+    const taxLines = [
+      { rate: 21, amount: 50, inclusive: true, taxAmount: 8.68 },
+      { rate: 10, amount: 30, inclusive: false, taxAmount: 3 },
+    ];
+
+    vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
+      ...baseTransaction,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -50 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await POST(makeRequest({ ...baseTransaction, taxLines }));
+
+    const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+    expect(createCall.data.taxLines).toEqual({
+      create: taxLines.map(line => ({
+        rate: line.rate,
+        amount: line.amount,
+        inclusive: line.inclusive,
+        taxAmount: line.taxAmount,
+      })),
+    });
+  });
+
+  it("does not include taxLines when none provided", async () => {
+    vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
+      ...baseTransaction,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -50 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await POST(makeRequest(baseTransaction));
+
+    const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+    expect(createCall.data.taxLines).toBeUndefined();
   });
 
   it("returns 500 when create fails", async () => {

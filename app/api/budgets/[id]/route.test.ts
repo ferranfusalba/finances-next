@@ -34,6 +34,16 @@ describe("GET /api/budgets/[id]", () => {
     expect(json).toEqual(budget);
     expect(db.budget.findUnique).toHaveBeenCalledWith({ where: { id: "bgt-1" } });
   });
+
+  it("returns 404 when budget not found", async () => {
+    vi.mocked(db.budget.findUnique).mockResolvedValue(null as never);
+
+    const response = await GET(new Request("http://localhost") as never, makeParams("nonexistent"));
+    const json = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(json.error).toBe("Budget not found");
+  });
 });
 
 describe("PUT /api/budgets/[id]", () => {
@@ -58,6 +68,20 @@ describe("PUT /api/budgets/[id]", () => {
       where: { id: "bgt-1" },
       data: updateData,
     });
+  });
+
+  it("returns 400 when body fails validation", async () => {
+    const request = new Request("http://localhost", {
+      method: "PUT",
+      body: JSON.stringify({ name: "", code: "" }),
+    });
+
+    const response = await PUT(request as never, makeParams("bgt-1"));
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+    expect(db.budget.update).not.toHaveBeenCalled();
   });
 
   it("returns 409 when update causes duplicate code", async () => {

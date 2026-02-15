@@ -82,8 +82,10 @@ function SortableRow({
 
 export default function AccountsOverviewTable({
   accounts,
+  userLocale,
 }: {
   accounts: Array<Account>;
+  userLocale: string;
 }) {
   const router = useRouter();
   const [data, setData] = useState(accounts);
@@ -143,12 +145,12 @@ export default function AccountsOverviewTable({
             data={info.row.original.defaultCurrency as string}
             backgroundColor={
               getCurrencyColor0(
-                info.row.original.defaultCurrency as string
+                info.row.original.defaultCurrency as string,
               ) as string
             }
             textColor={
               getCurrencyColor1(
-                info.row.original.defaultCurrency as string
+                info.row.original.defaultCurrency as string,
               ) as string
             }
           />
@@ -163,7 +165,7 @@ export default function AccountsOverviewTable({
         const defaultCurrency = info.row.original?.defaultCurrency;
 
         return (
-          <>{currency("ca-AD", defaultCurrency as string).format(number)}</>
+          <>{currency(userLocale, defaultCurrency as string).format(number)}</>
         );
       },
       footer: (info) => {
@@ -174,7 +176,7 @@ export default function AccountsOverviewTable({
               (acc[defaultCurrency as string] || 0) + currentBalance;
             return acc;
           },
-          {} as Record<string, number>
+          {} as Record<string, number>,
         );
 
         return (
@@ -182,9 +184,9 @@ export default function AccountsOverviewTable({
             {Object.entries(balancesByCurrency).map(
               ([accountCurrency, total]) => (
                 <li key={accountCurrency}>
-                  {currency("ca-AD", accountCurrency).format(total)}
+                  {currency(userLocale, accountCurrency).format(total)}
                 </li>
-              )
+              ),
             )}
           </ul>
         );
@@ -225,7 +227,7 @@ export default function AccountsOverviewTable({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -236,10 +238,12 @@ export default function AccountsOverviewTable({
     const oldIndex = data.findIndex((item) => item.id === active.id);
     const newIndex = data.findIndex((item) => item.id === over.id);
 
-    const reordered = arrayMove(data, oldIndex, newIndex).map((item, index) => ({
-      ...item,
-      order: index + 1,
-    }));
+    const reordered = arrayMove(data, oldIndex, newIndex).map(
+      (item, index) => ({
+        ...item,
+        order: index + 1,
+      }),
+    );
     setData(reordered);
 
     const reorderPayload = reordered.map((item, index) => ({
@@ -256,7 +260,6 @@ export default function AccountsOverviewTable({
     router.refresh();
   }
 
-  // TODO: Resolve the pb-24 by correct layouts
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch pb-24">
       <DndContext
@@ -279,7 +282,7 @@ export default function AccountsOverviewTable({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </th>
                 ))}
@@ -297,7 +300,7 @@ export default function AccountsOverviewTable({
                     <td key={cell.id} className="p-2">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </td>
                   ))}
@@ -315,7 +318,7 @@ export default function AccountsOverviewTable({
                       ? null
                       : flexRender(
                           header.column.columnDef.footer,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </th>
                 ))}

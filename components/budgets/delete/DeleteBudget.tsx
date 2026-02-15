@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { TrashCan } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
 
@@ -20,11 +21,20 @@ export default function DeleteBudget({ id }: { id: string }) {
 
   const handleOnClick = async () => {
     startTransition(async () => {
-      await fetch(`/api/budgets/${id}`, {
+      const res = await fetch(`/api/budgets/${id}`, {
         method: "DELETE",
       });
-      router.push("/budgets/");
-      router.refresh();
+
+      if (res.ok) {
+        toast("Budget deleted successfully");
+        router.push("/budgets/");
+        router.refresh();
+      } else {
+        const json = await res.json();
+        toast("Failed to delete budget", {
+          description: json.error ?? "Unknown error",
+        });
+      }
     });
   };
 

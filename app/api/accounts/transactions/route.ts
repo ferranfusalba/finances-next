@@ -48,6 +48,16 @@ export async function POST(request: NextRequest) {
       location: data.location,
       notes: data.notes,
       accountId: data.accountId,
+      ...(data.taxLines?.length ? {
+        taxLines: {
+          create: data.taxLines.map(line => ({
+            rate: line.rate,
+            amount: line.amount,
+            inclusive: line.inclusive,
+            taxAmount: line.taxAmount,
+          })),
+        },
+      } : {}),
     };
 
     const newTransaction = await db.accountTransaction.create({
@@ -58,11 +68,22 @@ export async function POST(request: NextRequest) {
 
     // For transfers, create the mirror transaction on the destination account
     if (data.type === "TRANSFER" && data.typeTransferDestination) {
+      const { taxLines: _taxLines, ...transferData } = transactionData;
       await db.accountTransaction.create({
         data: {
-          ...transactionData,
+          ...transferData,
           amount: -data.amount,
           accountId: data.typeTransferDestination,
+          ...(data.taxLines?.length ? {
+            taxLines: {
+              create: data.taxLines.map(line => ({
+                rate: line.rate,
+                amount: line.amount,
+                inclusive: line.inclusive,
+                taxAmount: line.taxAmount,
+              })),
+            },
+          } : {}),
         },
       });
 

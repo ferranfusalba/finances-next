@@ -24,6 +24,7 @@ const CSV_HEADERS = [
   "Subcategory",
   "Tags",
   "Location",
+  "Sales Tax",
   "Notes",
   "Transaction ID",
 ];
@@ -56,6 +57,7 @@ function transactionToRow(t: AccountTransaction, balance: number): string {
     t.subcategory,
     t.tags,
     t.location,
+    t.taxLines ? JSON.stringify(t.taxLines) : "",
     t.notes,
     t.id,
   ]

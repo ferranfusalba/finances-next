@@ -91,6 +91,19 @@ describe("POST /api/accounts", () => {
     expect(db.account.create).toHaveBeenCalledOnce();
   });
 
+  it("returns 400 when body fails validation", async () => {
+    const request = new Request("http://localhost/api/accounts", {
+      method: "POST",
+      body: JSON.stringify({ name: "" }),
+    });
+
+    const response = await POST(request as never);
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+  });
+
   it("returns 409 when creating account with duplicate userId+code", async () => {
     vi.mocked(db.account.create).mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError(

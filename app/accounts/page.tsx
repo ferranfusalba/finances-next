@@ -6,11 +6,15 @@ import AccountsOverviewTable from "@/components/accounts/tables/overview/Account
 
 export default async function AccountsPage() {
   const serverSession = await auth();
+  const userLocale = serverSession?.user?.userLocale ?? "en-US";
   const userAccounts = await getAccounts(serverSession?.user.id as string);
 
   return (
     <div className="w-full h-full p-4 md:p-8">
-      <AccountsOverviewTable accounts={userAccounts} />
+      <AccountsOverviewTable
+        accounts={userAccounts}
+        userLocale={userLocale}
+      />
     </div>
   );
 }

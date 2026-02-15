@@ -4,8 +4,10 @@ export type ExtendedUser = DefaultSession["user"] & {
   id: string;
   role: "ADMIN" | "USER";
   isOAuth: boolean;
-  defaultCountry: string;
-  defaultCurrency: string;
+  userCountry: string;
+  userCurrency: string;
+  userTimezone: string;
+  userLocale: string;
 };
 
 declare module "next-auth" {
@@ -20,7 +22,9 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: "ADMIN" | "USER";
     isOAuth?: boolean;
-    defaultCountry?: string;
-    defaultCurrency?: string;
+    userCountry?: string;
+    userCurrency?: string;
+    userTimezone?: string;
+    userLocale?: string;
   }
 }

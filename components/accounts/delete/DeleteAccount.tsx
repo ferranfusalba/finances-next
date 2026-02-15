@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { TrashCan } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
 
@@ -20,11 +21,20 @@ export default function DeleteAccount({ id }: { id: string }) {
 
   const handleOnClick = async () => {
     startTransition(async () => {
-      await fetch(`/api/accounts/${id}`, {
+      const res = await fetch(`/api/accounts/${id}`, {
         method: "DELETE",
       });
-      router.push("/accounts/");
-      router.refresh();
+
+      if (res.ok) {
+        toast("Account deleted successfully");
+        router.push("/accounts/");
+        router.refresh();
+      } else {
+        const json = await res.json();
+        toast("Failed to delete account", {
+          description: json.error ?? "Unknown error",
+        });
+      }
     });
   };
 

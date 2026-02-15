@@ -73,6 +73,20 @@ describe("POST /api/budgets", () => {
     expect(db.budget.create).toHaveBeenCalledOnce();
   });
 
+  it("returns 400 when body fails validation", async () => {
+    const request = new Request("http://localhost/api/budgets", {
+      method: "POST",
+      body: JSON.stringify({ name: "" }),
+    });
+
+    const response = await POST(request as never);
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+    expect(db.budget.create).not.toHaveBeenCalled();
+  });
+
   it("returns 409 when creating budget with duplicate userId+code", async () => {
     vi.mocked(db.budget.create).mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError(

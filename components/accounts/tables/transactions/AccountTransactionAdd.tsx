@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useForm, useWatch, Controller } from "react-hook-form";
+import { useForm, useWatch, useFieldArray, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,8 +38,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+import { CalendarIcon, Trash2, X } from "lucide-react";
 
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import {
+  computeTransactionAmount,
+  computeTaxAmount,
+  computeTotalTax,
+  convertFormTaxLines,
+  nextTimeIncrement,
+} from "@/lib/utils/transaction";
+import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
 
 import { Account } from "@/types/Account";
 import { Currency } from "@/types/Currency";
@@ -69,6 +81,10 @@ interface Props {
     }>;
   }>;
   userId: string;
+  userTimezone: string;
+  userForeignCurrencies: string[];
+  userTransactionLocations: string[];
+  hasTransactions: boolean;
 }
 
 export default function AccountTransactionAdd(props: Props) {
@@ -83,49 +99,40 @@ export default function AccountTransactionAdd(props: Props) {
   const [isAddingNewSubcategory, setIsAddingNewSubcategory] = useState(false);
 
   const [isPending, startTransition] = useTransition();
-  const currentYear = new Date().getFullYear();
+  const timeCounterRef = useRef(540); // 9 * 60 = 09:00 in total minutes
+  const defaultCurrencyCodes = ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD"];
+  const commonCurrencyCodes =
+    props.userForeignCurrencies.length > 0
+      ? props.userForeignCurrencies
+      : defaultCurrencyCodes;
+  const accountCurrency = props.account?.defaultCurrency;
   const foreignCurrenciesList = currencies.filter(
-    (currency) => currency.code !== props.account?.defaultCurrency
+    (currency) => currency.code !== accountCurrency
+  );
+  const commonCurrencies = foreignCurrenciesList.filter((c) =>
+    commonCurrencyCodes.includes(c.code)
+  );
+  const remainingCurrencies = foreignCurrenciesList.filter(
+    (c) => !commonCurrencyCodes.includes(c.code)
   );
 
-  // TODO: Temporary solution for user's timezone detection
-  function getCurrentTimezoneOffsetInHours() {
-    const now = new Date();
-    const timezoneOffset = now.getTimezoneOffset();
-    return -timezoneOffset / 60;
-  }
-
-  const currentOffset = getCurrentTimezoneOffsetInHours();
-
-  const matchingTimezone = timezones.find((tz) => tz.offset === currentOffset);
-
-  const matchingTimezoneValue = () => {
-    if (matchingTimezone) {
-      const result = `${matchingTimezone.offset}|${matchingTimezone.text}`;
-      return result;
-    }
-  };
+  const detectedTimezone = detectTimezone(props.userTimezone || undefined);
+  const detectedTimezoneValue = detectedTimezone
+    ? timezoneToSelectValue(detectedTimezone)
+    : undefined;
 
   const userAccounts4Transactions = props.userAccounts?.filter(
     (account) => account.name !== props.account?.name
   );
 
-  // TODO: Review rendering of Type Field & the implications in Amount
   const handleAmountPlaceholder = () => {
     switch (form.getValues().type) {
       case "":
-        return "Select a type first (Income, Expense, Transfer)";
-      case "INCOME":
-      case "INCOME_N":
-        return "+";
-      case "EXPENSE":
-      case "EXPENSE_N":
-      case "TRANSFER":
-        return "-";
+        return "Select a type first";
       case "OPENING":
-        return "+ / -";
+        return "Amount (positive or negative)";
       default:
-        return "";
+        return "Amount";
     }
   };
 
@@ -134,18 +141,11 @@ export default function AccountTransactionAdd(props: Props) {
       payee: z.string().min(1, {
         message: "Payee is required.",
       }),
-      concept: z.string().min(1, {
-        message: "Concept Type is required.",
-      }),
+      concept: z.string(),
       type: z.string().min(1, {
         message: "Transaction Type is required.",
       }),
-      typeTransferDestinationAccount: z.string(), // TODO: Add validation by conditional "type"
-      // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-      // typeTransferDestinationAccount: z.object({
-      //   id: z.string(),
-      //   currency: z.string(),
-      // }),
+      typeTransferDestinationAccount: z.string(),
       currency: z.string().min(3, {
         message: "Currency code is required.",
       }),
@@ -158,29 +158,18 @@ export default function AccountTransactionAdd(props: Props) {
       category: z.string(),
       subcategory: z.string(),
       tags: z.string(),
-      dateDay: z.string().min(1, {
-        message: "Required",
-      }),
-      dateMonth: z.string().min(1, {
-        message: "Required",
-      }),
-      dateYear: z.string().min(4, {
-        message: "Required",
-      }),
-      timeHour: z.string().min(1, {
-        message: "Required",
-      }),
-      timeMinute: z.string().min(1, {
-        message: "Required",
-      }),
-      timeSecond: z.string().min(1, {
-        message: "Required",
-      }),
+      date: z.date({ required_error: "A date is required." }),
+      time: z.string(),
       timezone: z.string().min(1, {
         message: "Timezone is required",
       }),
       location: z.string(),
       notes: z.string(),
+      taxLines: z.array(z.object({
+        rate: z.string(),
+        amount: z.string(),
+        inclusive: z.boolean(),
+      })),
     })
     .refine(
       (data) => {
@@ -210,18 +199,13 @@ export default function AccountTransactionAdd(props: Props) {
     );
 
   const form = useForm<z.infer<typeof formSchema>>({
-    mode: "onChange", // TODO: Review this
+    mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       payee: "", // Not at Budget Transaction Form
       concept: "",
       type: "",
-      typeTransferDestinationAccount: "", // Not at Budget Transaction Form
-      // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-      // typeTransferDestinationAccount: {
-      //   id: "",
-      //   currency: "",
-      // },
+      typeTransferDestinationAccount: "",
       currency: props.account?.defaultCurrency as string,
       amountForm: "",
       foreignCurrency: "",
@@ -230,47 +214,61 @@ export default function AccountTransactionAdd(props: Props) {
       category: "",
       subcategory: "",
       tags: "",
-      dateDay: "",
-      dateMonth: "",
-      dateYear: "",
-      timeHour: "",
-      timeMinute: "",
-      timeSecond: "",
-      timezone: matchingTimezoneValue(),
+      date: new Date(),
+      time: "09:00",
+      timezone: detectedTimezoneValue,
       location: "",
       notes: "",
+      taxLines: [],
     },
   });
 
-  const handleResetFC = () => form.resetField("foreignCurrency");
+  const { fields: taxFields, append: appendTax, remove: removeTax } = useFieldArray({
+    control: form.control,
+    name: "taxLines",
+  });
+
+  const watchedTaxLines = useWatch({ control: form.control, name: "taxLines" });
+
+  const watchedForeignCurrency = useWatch({ control: form.control, name: "foreignCurrency" });
+
+  const handleResetFC = () => {
+    form.setValue("foreignCurrency", "", { shouldValidate: false });
+    form.setValue("foreignCurrencyAmount", "", { shouldValidate: false });
+    form.setValue("foreignCurrencyExchangeRate", "", { shouldValidate: false });
+    form.clearErrors(["foreignCurrency", "foreignCurrencyAmount", "foreignCurrencyExchangeRate"]);
+  };
 
   const selectedType = useWatch({ control: form.control, name: "type" });
+  const watchedAmount = useWatch({ control: form.control, name: "amountForm" });
 
-  // If TRANSFER & is FC destination Account
-  const accountOriginAmount = useWatch({ control: form.control, name: "amountForm" });
+  useEffect(() => {
+    if (!watchedAmount || !watchedTaxLines?.length) return;
+    watchedTaxLines.forEach((_, index) => {
+      form.setValue(`taxLines.${index}.amount`, watchedAmount);
+    });
+  }, [watchedAmount]);
+
   const accountOriginCurrency = useWatch({ control: form.control, name: "currency" });
-  const accountDestinationAmount = useWatch({ control: form.control, name: "foreignCurrencyAmount" });
-  const accountDestinationCurrency = useWatch({ control: form.control, name: "foreignCurrency" });
 
-  // TODO: Review this (avoiding object of account id + default Currency, as Select value only accepts string)
-  const selectedTransferAccount = useWatch({ control: form.control, name: "typeTransferDestinationAccount" });
-  const selectedTransferAccountId = selectedTransferAccount.split("|")[0];
-  const selectedTransferAccountCurrency = selectedTransferAccount.split("|")[1];
+  const selectedTransferAccountId = useWatch({ control: form.control, name: "typeTransferDestinationAccount" });
+  const selectedTransferAccountCurrency = props.userAccounts.find(
+    (a) => a.id === selectedTransferAccountId
+  )?.defaultCurrency ?? "";
 
   useEffect(() => {
     if (
-      selectedTransferAccount &&
+      selectedTransferAccountId &&
       selectedTransferAccountCurrency !== accountOriginCurrency
     ) {
       form.setValue("foreignCurrency", selectedTransferAccountCurrency);
+    } else {
+      form.setValue("foreignCurrency", "");
+      form.setValue("foreignCurrencyAmount", "");
+      form.setValue("foreignCurrencyExchangeRate", "");
     }
-    // TODO: Review behavior on selecting foreignCurrency
-    // else {
-    //   form.setValue("foreignCurrency", "");
-    // }
   }, [
-    // TODO: Review behavior w/ empty dependency array
-    selectedTransferAccount,
+    selectedTransferAccountId,
     selectedTransferAccountCurrency,
     accountOriginCurrency,
     form,
@@ -286,13 +284,14 @@ export default function AccountTransactionAdd(props: Props) {
     const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
     const timezoneToOffsetString = values.timezone.split("|")[0];
 
+    const selectedDate = values.date;
     const dateBuilt = new Date(
-      Number(values.dateYear),
-      Number(values.dateMonth) - 1,
-      Number(values.dateDay),
-      Number(values.timeHour),
-      Number(values.timeMinute),
-      Number(values.timeSecond),
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      Number(values.time.split(":")[0]) || 9,
+      Number(values.time.split(":")[1]) || 0,
+      0,
       timezoneToOffset
     );
 
@@ -300,7 +299,8 @@ export default function AccountTransactionAdd(props: Props) {
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
-    const amountForm = parseFloat(values.amountForm);
+    const amountRaw = parseFloat(values.amountForm);
+    const amountForm = computeTransactionAmount(type, amountRaw);
     const foreignCurrency = values.foreignCurrency;
     const foreignCurrencyAmount = parseFloat(values.foreignCurrencyAmount);
     const foreignCurrencyExchangeRate = parseFloat(
@@ -313,6 +313,7 @@ export default function AccountTransactionAdd(props: Props) {
     const timezone = timezoneToOffsetString;
     const location = values.location;
     const notes = values.notes;
+    const taxLines = convertFormTaxLines(values.taxLines);
     const accountId = props.account?.id;
 
     startTransition(async () => {
@@ -340,7 +341,7 @@ export default function AccountTransactionAdd(props: Props) {
       });
 
       // Server handles balance recomputation and transfer mirror transaction
-      await fetch("/api/accounts/transactions/", {
+      const res = await fetch("/api/accounts/transactions/", {
         method: "POST",
         body: JSON.stringify({
           payee,
@@ -360,6 +361,7 @@ export default function AccountTransactionAdd(props: Props) {
           timezone,
           location,
           notes,
+          taxLines,
           accountId,
         }),
         headers: {
@@ -367,17 +369,30 @@ export default function AccountTransactionAdd(props: Props) {
         },
       });
 
-      setOpen(false);
-      toast(`Transaction for ${concept} has been added`, {
-        description: `${amountForm + " " + currency}`,
-      });
-
-      router.refresh();
+      if (res.ok) {
+        setOpen(false);
+        toast(`Transaction for ${concept} has been added`, {
+          description: `${amountForm + " " + currency}`,
+        });
+        router.refresh();
+      } else {
+        const json = await res.json();
+        toast("Failed to add transaction", {
+          description: json.error ?? "Unknown error",
+        });
+      }
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (isOpen) {
+        const { nextCounter, time } = nextTimeIncrement(timeCounterRef.current);
+        form.setValue("time", time);
+        timeCounterRef.current = nextCounter;
+      }
+    }}>
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
@@ -416,7 +431,8 @@ export default function AccountTransactionAdd(props: Props) {
                                   if (value === "__new__") {
                                     setIsAddingNewPayee(true);
                                     setNewPayee("");
-                                    controllerField.onChange("");
+                                    form.setValue("payee", "", { shouldValidate: false });
+                                    form.clearErrors("payee");
                                   } else {
                                     setIsAddingNewPayee(false);
                                     setNewPayee("");
@@ -495,7 +511,7 @@ export default function AccountTransactionAdd(props: Props) {
                   name="concept"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Concept*</FormLabel>
+                      <FormLabel>Concept</FormLabel>
                       <FormControl>
                         <Input
                           id="concept"
@@ -534,7 +550,9 @@ export default function AccountTransactionAdd(props: Props) {
                             EXPENSE (Not counted as such)
                           </SelectItem>
                           <SelectItem value="TRANSFER">TRANSFER</SelectItem>
-                          <SelectItem value="OPENING">OPENING</SelectItem>
+                          {!props.hasTransactions && (
+                            <SelectItem value="OPENING">OPENING</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -562,9 +580,7 @@ export default function AccountTransactionAdd(props: Props) {
                               {userAccounts4Transactions.map(
                                 (account: Account) => (
                                   <SelectItem
-                                    value={
-                                      account.id + "|" + account.defaultCurrency
-                                    }
+                                    value={account.id}
                                     key={account.id}
                                   >
                                     {account.bankName} - {account.name}{" "}
@@ -618,7 +634,6 @@ export default function AccountTransactionAdd(props: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Amount*</FormLabel>
-                      {/* TODO: Check negative amounts with minus sign on mobile */}
                       <FormControl>
                         <Input
                           id="amountForm"
@@ -626,19 +641,7 @@ export default function AccountTransactionAdd(props: Props) {
                           inputMode="decimal"
                           step="0.01"
                           disabled={selectedType === ""}
-                          min={
-                            selectedType === "INCOME" ||
-                            selectedType === "INCOME_N"
-                              ? 0
-                              : Number.MIN_SAFE_INTEGER
-                          }
-                          max={
-                            selectedType === "EXPENSE" ||
-                            selectedType === "EXPENSE_N" ||
-                            selectedType === "TRANSFER"
-                              ? 0
-                              : Number.MAX_SAFE_INTEGER
-                          }
+                          min={selectedType === "OPENING" ? undefined : 0}
                           placeholder={handleAmountPlaceholder()}
                           {...field}
                         />
@@ -647,155 +650,61 @@ export default function AccountTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
-                {/* Date & Time */}
-                <div className="flex justify-between">
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateDay"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Day*</FormLabel>
+                {/* Date Picker */}
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date*</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
                           <FormControl>
-                            <Input
-                              id="dateDay"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="31"
-                              placeholder="08"
-                              {...field}
-                            />
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? new Intl.DateTimeFormat("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  }).format(field.value)
+                                : "Pick a date"}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateMonth"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Month*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateMonth"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="12"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateYear"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Year*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateYear"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="1970"
-                              max={currentYear}
-                              placeholder={currentYear.toString()}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeHour"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Hour*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeHour"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="23"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeMinute"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeMinute"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeSecond"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sec.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeSecond"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="59"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Time */}
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {/* Timezone */}
                 <FormField
                   control={form.control}
@@ -980,7 +889,8 @@ export default function AccountTransactionAdd(props: Props) {
                                     {props.userTransactionCategories
                                       ?.find(
                                         (category) =>
-                                          // TODO: Ideally move this to id instead of name, or apply an object (label+value) structure
+                                          // Matches by name (not ID) because categories are stored as plain strings in the DB.
+                                          // Switching to ID-based lookup requires a DB migration and data migration.
                                           category.name ===
                                           form.getValues().category
                                       )
@@ -1048,41 +958,32 @@ export default function AccountTransactionAdd(props: Props) {
                   )}
                 />
                 {/* Foreign Currency Fields */}
-                <div className="flex items-center gap-2">
-                  <FormLabel>Foreign Currency</FormLabel>
-                </div>
-
                 <div className="space-y-4 border rounded-lg p-4">
-                  {/* Foreign Currency */}
                   <FormField
                     control={form.control}
                     name="foreignCurrency"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Currency</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a foreign currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {/* TODO: Add here the common currencies list */}
-                            {/* <SelectGroup>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="CAD">CAD</SelectItem>
-                            <SelectItem value="CHF">CHF</SelectItem>
-                          </SelectGroup> */}
-                            <SelectGroup>
-                              {/* <SelectLabel>
-                              <hr />
-                            </SelectLabel> */}
-                              {foreignCurrenciesList.map(
-                                (currency: Currency) => (
+                        <FormLabel>Foreign Currency</FormLabel>
+                        <div className="flex gap-2">
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a foreign currency" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>
+                                  {props.userForeignCurrencies.length > 0
+                                    ? "Previously used"
+                                    : "Common"}
+                                </SelectLabel>
+                                {commonCurrencies.map((currency: Currency) => (
                                   <SelectItem
                                     value={currency.code}
                                     key={currency.code}
@@ -1090,77 +991,81 @@ export default function AccountTransactionAdd(props: Props) {
                                     {currency.code} - {currency.name} (
                                     {currency.symbol_native})
                                   </SelectItem>
-                                )
-                              )}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="destructive"
-                          onClick={handleResetFC}
-                          disabled={field.value === ""}
-                        >
-                          Reset Field
-                        </Button>
+                                ))}
+                              </SelectGroup>
+                              <SelectGroup>
+                                <SelectLabel>All currencies</SelectLabel>
+                                {remainingCurrencies.map(
+                                  (currency: Currency) => (
+                                    <SelectItem
+                                      value={currency.code}
+                                      key={currency.code}
+                                    >
+                                      {currency.code} - {currency.name} (
+                                      {currency.symbol_native})
+                                    </SelectItem>
+                                  )
+                                )}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          {watchedForeignCurrency && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleResetFC}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {/* Foreign Currency Amount */}
-                  <FormField
-                    control={form.control}
-                    name="foreignCurrencyAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Amount
-                          {form.getValues().foreignCurrency !== "" ? "*" : ""}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            id="foreignCurrencyAmount"
-                            type="number"
-                            inputMode="decimal"
-                            step="0.01"
-                            placeholder={
-                              form.getValues().foreignCurrency === ""
-                                ? "Select a foreign currency first"
-                                : "34,50"
-                            }
-                            disabled={form.getValues().foreignCurrency === ""}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* Foreign Currency Exchange Rate */}
-                  <FormField
-                    control={form.control}
-                    name="foreignCurrencyExchangeRate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Exchange Rate</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="foreignCurrencyExchangeRate"
-                            type="number"
-                            inputMode="decimal"
-                            step="0.01"
-                            placeholder={
-                              form.getValues().foreignCurrency === ""
-                                ? "Select a foreign currency first"
-                                : "1.595"
-                            }
-                            disabled={form.getValues().foreignCurrency === ""}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {watchedForeignCurrency && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="foreignCurrencyAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Amount*</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                placeholder="34,50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="foreignCurrencyExchangeRate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Exchange Rate</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                placeholder="1.595"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
                 </div>
                 {/* Location */}
                 <FormField
@@ -1173,10 +1078,16 @@ export default function AccountTransactionAdd(props: Props) {
                         <Input
                           id="location"
                           type="text"
+                          list="locationSuggestions"
                           placeholder="Zürich Flughafen, Kloten, CH"
                           {...field}
                         />
                       </FormControl>
+                      <datalist id="locationSuggestions">
+                        {props.userTransactionLocations.map((loc) => (
+                          <option key={loc} value={loc} />
+                        ))}
+                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1200,6 +1111,126 @@ export default function AccountTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
+                {/* Sales Tax Lines */}
+                {(selectedType === "EXPENSE" || selectedType === "EXPENSE_N") && parseFloat(watchedAmount) > 0 && <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FormLabel>Sales Tax</FormLabel>
+                  </div>
+                  <div className="space-y-4 border rounded-lg p-4">
+                    {taxFields.length === 0 && (
+                      <p className="text-sm text-muted-foreground">No tax lines added.</p>
+                    )}
+                    {taxFields.map((taxField, index) => {
+                      const rate = parseFloat(watchedTaxLines?.[index]?.rate || "0");
+                      const amount = parseFloat(watchedTaxLines?.[index]?.amount || "0");
+                      const inclusive = watchedTaxLines?.[index]?.inclusive ?? true;
+                      const taxAmount = computeTaxAmount(rate, amount, inclusive);
+
+                      return (
+                        <div key={taxField.id} className="space-y-2 border-b pb-3 last:border-b-0 last:pb-0">
+                          <div className="flex gap-2">
+                            <FormField
+                              control={form.control}
+                              name={`taxLines.${index}.rate`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormLabel>Rate %</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      step="0.01"
+                                      min={0}
+                                      max={100}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`taxLines.${index}.amount`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormLabel>Amount</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      step="0.01"
+                                      min={0}
+                                      placeholder="50.00"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="mt-8"
+                              onClick={() => removeTax(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <FormField
+                              control={form.control}
+                              name={`taxLines.${index}.inclusive`}
+                              render={({ field }) => (
+                                <FormItem className="flex items-center gap-2">
+                                  <FormControl>
+                                    <input
+                                      type="checkbox"
+                                      checked={field.value}
+                                      onChange={field.onChange}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="mt-0! font-normal text-sm">
+                                    Tax included in amount
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                            {rate > 0 && amount > 0 ? (
+                              <span className="text-sm text-muted-foreground">
+                                Tax: {taxAmount.toFixed(2)}
+                              </span>
+                            ) : !watchedTaxLines?.[index]?.rate && (
+                              <span className="text-sm text-destructive">
+                                Rate required to register tax
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {taxFields.length > 0 && (() => {
+                      const totalTax = computeTotalTax(watchedTaxLines);
+                      return totalTax > 0 ? (
+                        <div className="text-sm font-medium pt-2 border-t">
+                          Total Tax: {totalTax.toFixed(2)}
+                        </div>
+                      ) : null;
+                    })()}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendTax({
+                        rate: "21",
+                        amount: form.getValues("amountForm") || "",
+                        inclusive: true,
+                      })}
+                    >
+                      + Add tax line
+                    </Button>
+                  </div>
+                </div>}
               </div>
             </div>
             <DialogFooter>

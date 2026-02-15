@@ -31,10 +31,10 @@ model User {
   updatedAt                 DateTime                  @updatedAt
   accounts                  Account[]
   budgets                   Budget[]
-  defaultCountry            String                    @default("")
-  defaultCurrency           String                    @default("")
-  defaultTimezone           String                    @default("")
-  defaultLocale             String                    @default("")
+  userCountry               String                    @default("") @map("defaultCountry")
+  userCurrency              String                    @default("") @map("defaultCurrency")
+  userTimezone              String                    @default("") @map("defaultTimezone")
+  userLocale                String                    @default("") @map("defaultLocale")
   theme                     String                    @default("")
 }
 
@@ -127,8 +127,19 @@ model AccountTransaction {
   timezone                    String?  @default("")
   location                    String?  @default("")
   notes                       String
+  taxLines                    TaxLine[]
   Account                     Account? @relation(fields: [accountId], references: [id])
   accountId                   String
+}
+
+model TaxLine {
+  id                   String             @id @default(uuid())
+  rate                 Decimal
+  amount               Decimal
+  inclusive            Boolean
+  taxAmount            Decimal
+  accountTransaction   AccountTransaction @relation(fields: [accountTransactionId], references: [id], onDelete: Cascade)
+  accountTransactionId String
 }
 
 model BudgetTransaction {

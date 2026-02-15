@@ -4,13 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   const data = await request.json();
 
-  const newTransactionCategory = await db.userTransactionCategory.create({
-    data: {
+  const transactionCategory = await db.userTransactionCategory.upsert({
+    where: {
+      userId_name: { userId: data.userId, name: data.name },
+    },
+    update: {},
+    create: {
       id: data.id,
       userId: data.userId,
       name: data.name,
     },
   });
 
-  return NextResponse.json(newTransactionCategory);
+  return NextResponse.json(transactionCategory);
 }

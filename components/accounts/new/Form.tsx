@@ -1,5 +1,6 @@
 "use client";
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { User } from "@/types/User";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -37,8 +38,8 @@ interface Props {
 }
 
 export default function NewAccountForm(props: Props) {
-  const defaultCountry = props.user.defaultCountry || "";
-  const defaultCurrency = props.user.defaultCurrency || "";
+  const userCountry = props.user.userCountry || "";
+  const userCurrency = props.user.userCurrency || "";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -73,8 +74,8 @@ export default function NewAccountForm(props: Props) {
       code: "",
       type: "",
       number: "",
-      country: defaultCountry,
-      defaultCurrency: defaultCurrency,
+      country: userCountry,
+      defaultCurrency: userCurrency,
       description: "",
     },
   });
@@ -113,10 +114,17 @@ export default function NewAccountForm(props: Props) {
         },
       });
 
-      const data = await res.json();
-
-      router.push("/accounts/" + data.id);
-      router.refresh();
+      if (res.ok) {
+        const data = await res.json();
+        toast("Account created successfully");
+        router.push("/accounts/" + data.id);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        toast("Failed to create account", {
+          description: data.error ?? "Unknown error",
+        });
+      }
     });
   };
 

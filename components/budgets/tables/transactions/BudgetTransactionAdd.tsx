@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +22,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -36,66 +37,103 @@ import {
 } from "@/components/ui/form";
 
 import "@/components/budgets/tables/transactions/BudgetTransactionAdd.css";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+import { CalendarIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  computeTransactionAmount,
+  nextTimeIncrement,
+} from "@/lib/utils/transaction";
+import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
 
 import { Budget } from "@/types/Budget";
 import { Currency } from "@/types/Currency";
+import { Timezone } from "@/types/Timezone";
 
 import currencies from "@/statics/currencies.json";
+import timezones from "@/statics/timezones.json";
 
 interface Props {
   budget: Budget | null;
+  userTimezone: string;
+  userForeignCurrencies: string[];
+  userTransactionLocations: string[];
 }
 
 export default function BudgetTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const currentYear = new Date().getFullYear();
+  const timeCounterRef = useRef(540); // 9 * 60 = 09:00 in total minutes
+  const defaultCurrencyCodes = ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD"];
+  const commonCurrencyCodes =
+    props.userForeignCurrencies.length > 0
+      ? props.userForeignCurrencies
+      : defaultCurrencyCodes;
+  const budgetCurrency = props.budget?.defaultCurrency;
   const foreignCurrenciesList = currencies.filter(
-    (currency) => currency.code !== props.budget?.defaultCurrency
+    (currency) => currency.code !== budgetCurrency
+  );
+  const commonCurrencies = foreignCurrenciesList.filter((c) =>
+    commonCurrencyCodes.includes(c.code)
+  );
+  const remainingCurrencies = foreignCurrenciesList.filter(
+    (c) => !commonCurrencyCodes.includes(c.code)
   );
 
-  const formSchema = z.object({
-    concept: z.string().min(1, {
-      message: "Concept Type is required.",
-    }),
-    type: z.string().min(1, {
-      message: "Transaction Type is required.",
-    }),
-    currency: z.string().min(3, {
-      message: "Currency code is required.",
-    }),
-    amountForm: z.string().min(1, {
-      message: "Amount Type is required.",
-    }),
-    foreignCurrency: z.string(),
-    foreignCurrencyAmount: z.string(),
-    foreignCurrencyExchangeRate: z.string(),
-    category: z.string(),
-    subcategory: z.string(),
-    tags: z.string(),
-    dateDay: z.string().min(1, {
-      message: "Required",
-    }),
-    dateMonth: z.string().min(1, {
-      message: "Required",
-    }),
-    dateYear: z.string().min(4, {
-      message: "Required",
-    }),
-    timeHour: z.string().min(1, {
-      message: "Required",
-    }),
-    timeMinute: z.string().min(1, {
-      message: "Required",
-    }),
-    timeSecond: z.string().min(1, {
-      message: "Required",
-    }),
-    timezone: z.string(),
-    location: z.string(),
-    notes: z.string(),
-  });
+  const handleResetFC = () => {
+    form.setValue("foreignCurrency", "", { shouldValidate: false });
+    form.setValue("foreignCurrencyAmount", "", { shouldValidate: false });
+    form.setValue("foreignCurrencyExchangeRate", "", { shouldValidate: false });
+    form.clearErrors(["foreignCurrency", "foreignCurrencyAmount", "foreignCurrencyExchangeRate"]);
+  };
+
+  const detectedTimezone = detectTimezone(props.userTimezone || undefined);
+  const detectedTimezoneValue = detectedTimezone
+    ? timezoneToSelectValue(detectedTimezone)
+    : undefined;
+
+  const formSchema = z
+    .object({
+      concept: z.string(),
+      type: z.string().min(1, {
+        message: "Transaction Type is required.",
+      }),
+      currency: z.string().min(3, {
+        message: "Currency code is required.",
+      }),
+      amountForm: z.string().min(1, {
+        message: "Amount Type is required.",
+      }),
+      foreignCurrency: z.string(),
+      foreignCurrencyAmount: z.string(),
+      foreignCurrencyExchangeRate: z.string(),
+      category: z.string(),
+      subcategory: z.string(),
+      tags: z.string(),
+      date: z.date({ required_error: "A date is required." }),
+      time: z.string(),
+      timezone: z.string().min(1, {
+        message: "Timezone is required",
+      }),
+      location: z.string(),
+      notes: z.string(),
+    })
+    .refine(
+      (data) => {
+        if (data.foreignCurrency && !data.foreignCurrencyAmount) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message:
+          "Foreign Currency Amount is required when Foreign Currency is provided.",
+        path: ["foreignCurrencyAmount"],
+      }
+    );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,33 +148,37 @@ export default function BudgetTransactionAdd(props: Props) {
       category: "",
       subcategory: "",
       tags: "",
-      dateDay: "",
-      dateMonth: "",
-      dateYear: "",
-      timeHour: "",
-      timeMinute: "",
-      timeSecond: "",
-      timezone: "",
+      date: new Date(),
+      time: "09:00",
+      timezone: detectedTimezoneValue,
       location: "",
       notes: "",
     },
   });
 
+
+  const selectedForeignCurrency = useWatch({ control: form.control, name: "foreignCurrency" });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
+    const timezoneToOffsetString = values.timezone.split("|")[0];
+
+    const selectedDate = values.date;
     const dateBuilt = new Date(
-      Number(values.dateYear),
-      Number(values.dateMonth) - 1,
-      Number(values.dateDay),
-      Number(values.timeHour),
-      Number(values.timeMinute),
-      Number(values.timeSecond),
-      0 // TODO: Integrate here timezone
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      Number(values.time.split(":")[0]) || 9,
+      Number(values.time.split(":")[1]) || 0,
+      0,
+      timezoneToOffset
     );
 
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
-    const amountForm = parseFloat(values.amountForm);
+    const amountRaw = parseFloat(values.amountForm);
+    const amountForm = computeTransactionAmount(type, amountRaw);
     const foreignCurrency = values.foreignCurrency;
     const foreignCurrencyAmount = parseFloat(values.foreignCurrencyAmount);
     const foreignCurrencyExchangeRate = parseFloat(
@@ -146,14 +188,14 @@ export default function BudgetTransactionAdd(props: Props) {
     const subcategory = values.subcategory;
     const tags = values.tags;
     const dateTime = dateBuilt;
-    const timezone = values.timezone;
+    const timezone = timezoneToOffsetString;
     const location = values.location;
     const notes = values.notes;
     const budgetId = props.budget?.id;
 
     startTransition(async () => {
       // Server handles balance recomputation
-      await fetch("/api/budgets/transactions/", {
+      const res = await fetch("/api/budgets/transactions/", {
         method: "POST",
         body: JSON.stringify({
           concept,
@@ -175,18 +217,32 @@ export default function BudgetTransactionAdd(props: Props) {
         headers: {
           "Content-Type": "application/json",
         },
-      }).then(() => {
+      });
+
+      if (res.ok) {
         setOpen(false);
         toast(`Transaction for ${concept} has been added`, {
           description: `${amountForm + " " + currency}`,
         });
         router.refresh();
-      });
+      } else {
+        const json = await res.json();
+        toast("Failed to add transaction", {
+          description: json.error ?? "Unknown error",
+        });
+      }
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (isOpen) {
+        const { time, nextCounter } = nextTimeIncrement(timeCounterRef.current);
+        form.setValue("time", time);
+        timeCounterRef.current = nextCounter;
+      }
+    }}>
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
@@ -207,7 +263,7 @@ export default function BudgetTransactionAdd(props: Props) {
                   name="concept"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Concept*</FormLabel>
+                      <FormLabel>Concept</FormLabel>
                       <FormControl>
                         <Input
                           id="concept"
@@ -269,25 +325,14 @@ export default function BudgetTransactionAdd(props: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Amount*</FormLabel>
-                      {/* TODO: Check negative amounts with minus sign on mobile */}
                       <FormControl>
                         <Input
                           id="amountForm"
                           type="number"
                           inputMode="decimal"
                           step="0.01"
-                          min={
-                            form.getValues().type === "INCOME"
-                              ? 0
-                              : Number.MIN_SAFE_INTEGER
-                          }
-                          max={
-                            form.getValues().type === "EXPENSE" ||
-                            form.getValues().type === "TRANSFER"
-                              ? 0
-                              : Number.MAX_SAFE_INTEGER
-                          }
-                          placeholder="+ / -"
+                          min={0}
+                          placeholder="Amount"
                           {...field}
                         />
                       </FormControl>
@@ -295,170 +340,97 @@ export default function BudgetTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
-                {/* Date & Time */}
-                <div className="flex justify-between">
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateDay"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Day*</FormLabel>
+                {/* Date Picker */}
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date*</FormLabel>
+                      <Popover modal={true}>
+                        <PopoverTrigger asChild>
                           <FormControl>
-                            <Input
-                              id="dateDay"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="31"
-                              placeholder="08"
-                              {...field}
-                            />
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                new Intl.DateTimeFormat("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }).format(field.value)
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateMonth"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Month*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateMonth"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="12"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="dateYear"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Year*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="dateYear"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="1970"
-                              max={currentYear}
-                              placeholder={currentYear.toString()}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeHour"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Hour*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeHour"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="23"
-                              placeholder="02"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeMinute"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeMinute"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="timeSecond"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sec.*</FormLabel>
-                          <FormControl>
-                            <Input
-                              id="timeSecond"
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              min="00"
-                              max="59"
-                              placeholder="59"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            autoFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Time */}
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {/* Timezone */}
                 <FormField
                   control={form.control}
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Timezone</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="timezone"
-                          type="text"
-                          placeholder="UTC+01:00"
-                          {...field}
-                        />
-                      </FormControl>
+                      <FormLabel>Timezone*</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a timezone" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            {timezones.map((timezone: Timezone) => (
+                              <SelectItem
+                                value={
+                                  timezone.offset.toString() +
+                                  "|" +
+                                  timezone.text
+                                }
+                                key={timezone.id}
+                              >
+                                {timezone.text} - {timezone.value}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -522,91 +494,116 @@ export default function BudgetTransactionAdd(props: Props) {
                     </FormItem>
                   )}
                 />
-                {/* Foreign Currency */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* TODO: Add here the common currencies list */}
-                          {/* <SelectGroup>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="CAD">CAD</SelectItem>
-                            <SelectItem value="CHF">CHF</SelectItem>
-                          </SelectGroup> */}
-                          <SelectGroup>
-                            {/* <SelectLabel>
-                              <hr />
-                            </SelectLabel> */}
-                            {foreignCurrenciesList.map((currency: Currency) => (
-                              <SelectItem
-                                value={currency.code}
-                                key={currency.code}
-                              >
-                                {currency.code} - {currency.name} (
-                                {currency.symbol_native})
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                {/* Foreign Currency Fields */}
+                <div className="space-y-4 border rounded-lg p-4">
+                  <FormField
+                    control={form.control}
+                    name="foreignCurrency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foreign Currency</FormLabel>
+                        <div className="flex gap-2">
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a foreign currency" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>
+                                  {props.userForeignCurrencies.length > 0
+                                    ? "Previously used"
+                                    : "Common"}
+                                </SelectLabel>
+                                {commonCurrencies.map((currency: Currency) => (
+                                  <SelectItem
+                                    value={currency.code}
+                                    key={currency.code}
+                                  >
+                                    {currency.code} - {currency.name} (
+                                    {currency.symbol_native})
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              <SelectGroup>
+                                <SelectLabel>All currencies</SelectLabel>
+                                {remainingCurrencies.map(
+                                  (currency: Currency) => (
+                                    <SelectItem
+                                      value={currency.code}
+                                      key={currency.code}
+                                    >
+                                      {currency.code} - {currency.name} (
+                                      {currency.symbol_native})
+                                    </SelectItem>
+                                  )
+                                )}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          {selectedForeignCurrency && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleResetFC}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {selectedForeignCurrency && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="foreignCurrencyAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Amount*</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                placeholder="34,50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="foreignCurrencyExchangeRate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Exchange Rate</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                placeholder="1.595"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
                   )}
-                />
-                {/* Foreign Currency Amount */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrencyAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="foreignCurrencyAmount"
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          placeholder="34,50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Foreign Currency Exchange Rate */}
-                <FormField
-                  control={form.control}
-                  name="foreignCurrencyExchangeRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Foreign Currency Exchange Rate</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="foreignCurrencyExchangeRate"
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          placeholder="1.595"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                </div>
                 {/* Location */}
                 <FormField
                   control={form.control}
@@ -618,10 +615,16 @@ export default function BudgetTransactionAdd(props: Props) {
                         <Input
                           id="location"
                           type="text"
+                          list="locationSuggestions"
                           placeholder="Zürich Airport, Kloten, CH"
                           {...field}
                         />
                       </FormControl>
+                      <datalist id="locationSuggestions">
+                        {props.userTransactionLocations.map((loc) => (
+                          <option key={loc} value={loc} />
+                        ))}
+                      </datalist>
                       <FormMessage />
                     </FormItem>
                   )}

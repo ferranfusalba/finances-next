@@ -33,6 +33,23 @@ describe("POST /api/budgets/transactions", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 400 when body fails validation", async () => {
+    const request = new Request(
+      "http://localhost/api/budgets/transactions",
+      {
+        method: "POST",
+        body: JSON.stringify({ amount: "not-a-number" }),
+      }
+    );
+
+    const response = await POST(request as never);
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+    expect(db.budgetTransaction.create).not.toHaveBeenCalled();
+  });
+
   it("creates a budget transaction and recomputes balance server-side", async () => {
     vi.mocked(db.budgetTransaction.create).mockResolvedValue({
       ...baseTransaction,

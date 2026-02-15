@@ -17,126 +17,127 @@ import { BudgetTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<BudgetTransaction>();
 
-const columns = [
-  columnHelper.accessor((row) => row.createdAt, {
-    id: "createdAt",
-    cell: (info) => {
-      return <i>{info.getValue().toLocaleString("ca")}</i>;
-    },
-    header: () => <span>createdAt</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor((row) => row.dateTime, {
-    id: "dateTime",
-    cell: (info) => {
-      return <i>{info.getValue().toLocaleString("ca")}</i>;
-    },
-    header: () => <span>Date & Time</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("timezone", {
-    header: "Timezone",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("concept", {
-    header: () => <span>Concept</span>,
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("type", {
-    cell: (info) => {
-      return info.getValue();
-    },
-    header: "Type",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("currency", {
-    header: "Currency",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("amount", {
-    cell: (info) => {
-      const number = info.getValue();
-      const defaultCurrency = info.row.original?.currency;
-
-      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
-    },
-    header: "Amount",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("balance", {
-    cell: (info) => {
-      const number = info.getValue();
-      const defaultCurrency = info.row.original?.currency;
-
-      return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
-    },
-    header: "Balance",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrency", {
-    header: "Foreign Currency",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrencyAmount", {
-    cell: (info) => {
-      const number = info.getValue();
-      const foreignCurrency = info.row.original?.foreignCurrency;
-
-      if (foreignCurrency) {
-        return (
-          <>
-            {currency("ca-AD", foreignCurrency as string).format(
-              number as number
-            )}
-          </>
-        );
-      }
-
-      return <></>;
-    },
-    header: "Foreign Currency Amount",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("foreignCurrencyExchangeRate", {
-    header: "Exchange Rate",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("category", {
-    header: "Category",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("subcategory", {
-    header: "Subcategory",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("tags", {
-    header: "Tags",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("location", {
-    header: "Location",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("notes", {
-    header: "Notes",
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor("id", {
-    cell: (info) => {
-      const transactionId = info.row.original?.id;
-
-      return <>{transactionId}</>;
-    },
-    header: "Transaction ID",
-    footer: (info) => info.column.id,
-  }),
-];
-
 export default function BudgetTransactionTable({
   budgetTransactions,
+  userLocale,
 }: {
   budgetTransactions: Array<BudgetTransaction>;
+  userLocale: string;
 }) {
+  const columns = [
+    columnHelper.accessor((row) => row.createdAt, {
+      id: "createdAt",
+      cell: (info) => {
+        return <i>{info.getValue().toLocaleString("ca")}</i>;
+      },
+      header: () => <span>createdAt</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor((row) => row.dateTime, {
+      id: "dateTime",
+      cell: (info) => {
+        return <i>{info.getValue().toLocaleString("ca")}</i>;
+      },
+      header: () => <span>Date & Time</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("timezone", {
+      header: "Timezone",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("concept", {
+      header: () => <span>Concept</span>,
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("type", {
+      cell: (info) => {
+        return info.getValue();
+      },
+      header: "Type",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("currency", {
+      header: "Currency",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("amount", {
+      cell: (info) => {
+        const number = info.getValue();
+        const defaultCurrency = info.row.original?.currency;
+
+        return <>{currency(userLocale, defaultCurrency).format(number)}</>;
+      },
+      header: "Amount",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("balance", {
+      cell: (info) => {
+        const number = info.getValue();
+        const defaultCurrency = info.row.original?.currency;
+
+        return <>{currency(userLocale, defaultCurrency).format(number)}</>;
+      },
+      header: "Balance",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrency", {
+      header: "Foreign Currency",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrencyAmount", {
+      cell: (info) => {
+        const number = info.getValue();
+        const foreignCurrency = info.row.original?.foreignCurrency;
+
+        if (foreignCurrency) {
+          return (
+            <>
+              {currency(userLocale, foreignCurrency as string).format(
+                number as number
+              )}
+            </>
+          );
+        }
+
+        return <></>;
+      },
+      header: "Foreign Currency Amount",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("foreignCurrencyExchangeRate", {
+      header: "Exchange Rate",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("category", {
+      header: "Category",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("subcategory", {
+      header: "Subcategory",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("tags", {
+      header: "Tags",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("location", {
+      header: "Location",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("notes", {
+      header: "Notes",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("id", {
+      cell: (info) => {
+        const transactionId = info.row.original?.id;
+
+        return <>{transactionId}</>;
+      },
+      header: "Transaction ID",
+      footer: (info) => info.column.id,
+    }),
+  ];
   const data = budgetTransactions;
 
   type ColumnSort = {

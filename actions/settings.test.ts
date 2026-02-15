@@ -44,8 +44,10 @@ import { settings } from "./settings";
 
 const validValues = {
   role: "USER" as const,
-  defaultCountry: "US",
-  defaultCurrency: "USD",
+  userCountry: "US",
+  userCurrency: "USD",
+  userTimezone: "America/New_York",
+  userLocale: "en-US",
 };
 
 describe("settings", () => {

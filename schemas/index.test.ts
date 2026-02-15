@@ -6,6 +6,12 @@ import {
   RegisterSchema,
   ResetSchema,
   SettingsSchema,
+  CreateAccountSchema,
+  UpdateAccountSchema,
+  CreateBudgetSchema,
+  UpdateBudgetSchema,
+  CreateAccountTransactionSchema,
+  CreateBudgetTransactionSchema,
 } from "./index";
 
 describe("LoginSchema", () => {
@@ -114,8 +120,10 @@ describe("NewPasswordSchema", () => {
 describe("SettingsSchema", () => {
   const validBase = {
     role: "USER" as const,
-    defaultCountry: "US",
-    defaultCurrency: "USD",
+    userCountry: "US",
+    userCurrency: "USD",
+    userTimezone: "America/New_York",
+    userLocale: "en-US",
   };
 
   it("accepts valid settings without password change", () => {
@@ -217,8 +225,10 @@ describe("boundary cases", () => {
   it("SettingsSchema rejects short password in password change", () => {
     const result = SettingsSchema.safeParse({
       role: "USER" as const,
-      defaultCountry: "US",
-      defaultCurrency: "USD",
+      userCountry: "US",
+      userCurrency: "USD",
+      userTimezone: "America/New_York",
+      userLocale: "en-US",
       password: "short",
       newPassword: "abcdef",
     });
@@ -228,11 +238,326 @@ describe("boundary cases", () => {
   it("SettingsSchema rejects short newPassword in password change", () => {
     const result = SettingsSchema.safeParse({
       role: "USER" as const,
-      defaultCountry: "US",
-      defaultCurrency: "USD",
+      userCountry: "US",
+      userCurrency: "USD",
+      userTimezone: "America/New_York",
+      userLocale: "en-US",
       password: "abcdef",
       newPassword: "short",
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("CreateAccountSchema", () => {
+  const validAccount = {
+    name: "Checking",
+    code: "CHK",
+    active: true,
+    type: "CHECKING",
+    defaultCurrency: "USD",
+    country: "US",
+    userId: "user-1",
+  };
+
+  it("accepts a valid account", () => {
+    const result = CreateAccountSchema.safeParse(validAccount);
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults currentBalance to 0 when omitted", () => {
+    const result = CreateAccountSchema.safeParse(validAccount);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.currentBalance).toBe(0);
+    }
+  });
+
+  it("defaults bankName to empty string when omitted", () => {
+    const result = CreateAccountSchema.safeParse(validAccount);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.bankName).toBe("");
+    }
+  });
+
+  it("rejects missing name", () => {
+    const { name: _, ...withoutName } = validAccount;
+    const result = CreateAccountSchema.safeParse(withoutName);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty name", () => {
+    const result = CreateAccountSchema.safeParse({ ...validAccount, name: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing code", () => {
+    const { code: _, ...withoutCode } = validAccount;
+    const result = CreateAccountSchema.safeParse(withoutCode);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing active", () => {
+    const { active: _, ...withoutActive } = validAccount;
+    const result = CreateAccountSchema.safeParse(withoutActive);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty type", () => {
+    const result = CreateAccountSchema.safeParse({ ...validAccount, type: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts nullable description", () => {
+    const result = CreateAccountSchema.safeParse({
+      ...validAccount,
+      description: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable number", () => {
+    const result = CreateAccountSchema.safeParse({
+      ...validAccount,
+      number: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("UpdateAccountSchema", () => {
+  it("accepts partial update with just name", () => {
+    const result = UpdateAccountSchema.safeParse({ name: "New Name" });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty object (all fields optional)", () => {
+    const result = UpdateAccountSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty name when provided", () => {
+    const result = UpdateAccountSchema.safeParse({ name: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty code when provided", () => {
+    const result = UpdateAccountSchema.safeParse({ code: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts order field", () => {
+    const result = UpdateAccountSchema.safeParse({ order: 5 });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts currentBalance update", () => {
+    const result = UpdateAccountSchema.safeParse({ currentBalance: 1500.50 });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("CreateBudgetSchema", () => {
+  const validBudget = {
+    name: "Marketing",
+    code: "MKT",
+    active: true,
+    type: "MONTHLY",
+    initialBalance: 1000,
+    userId: "user-1",
+  };
+
+  it("accepts a valid budget", () => {
+    const result = CreateBudgetSchema.safeParse(validBudget);
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults defaultCurrency to empty string when omitted", () => {
+    const result = CreateBudgetSchema.safeParse(validBudget);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.defaultCurrency).toBe("");
+    }
+  });
+
+  it("rejects missing name", () => {
+    const { name: _, ...withoutName } = validBudget;
+    const result = CreateBudgetSchema.safeParse(withoutName);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing code", () => {
+    const { code: _, ...withoutCode } = validBudget;
+    const result = CreateBudgetSchema.safeParse(withoutCode);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing initialBalance", () => {
+    const { initialBalance: _, ...withoutBalance } = validBudget;
+    const result = CreateBudgetSchema.safeParse(withoutBalance);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty type", () => {
+    const result = CreateBudgetSchema.safeParse({ ...validBudget, type: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts nullable description", () => {
+    const result = CreateBudgetSchema.safeParse({
+      ...validBudget,
+      description: null,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("UpdateBudgetSchema", () => {
+  it("accepts partial update with just name", () => {
+    const result = UpdateBudgetSchema.safeParse({ name: "New Budget" });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty object (all fields optional)", () => {
+    const result = UpdateBudgetSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty name when provided", () => {
+    const result = UpdateBudgetSchema.safeParse({ name: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty code when provided", () => {
+    const result = UpdateBudgetSchema.safeParse({ code: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts order field", () => {
+    const result = UpdateBudgetSchema.safeParse({ order: 3 });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts initialBalance and currentBalance updates", () => {
+    const result = UpdateBudgetSchema.safeParse({
+      initialBalance: 2000,
+      currentBalance: 1500,
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("CreateAccountTransactionSchema", () => {
+  const validTransaction = {
+    payee: "Store",
+    concept: "Groceries",
+    type: "EXPENSE",
+    currency: "USD",
+    amount: -50,
+    accountId: "acc-1",
+    dateTime: "2024-01-15T10:00:00Z",
+    notes: "",
+  };
+
+  it("accepts a valid transaction", () => {
+    const result = CreateAccountTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty concept (optional)", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      concept: "",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults concept to empty string when omitted", () => {
+    const { concept: _, ...withoutConcept } = validTransaction;
+    const result = CreateAccountTransactionSchema.safeParse(withoutConcept);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.concept).toBe("");
+    }
+  });
+
+  it("rejects missing required fields", () => {
+    const result = CreateAccountTransactionSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty type", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      type: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts transaction with taxLines", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      taxLines: [
+        { rate: 21, amount: 50, inclusive: true, taxAmount: 8.68 },
+        { rate: 10, amount: 30, inclusive: false, taxAmount: 3 },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts transaction with null taxLines", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      taxLines: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts transaction without taxLines (optional)", () => {
+    const result = CreateAccountTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.taxLines).toBeUndefined();
+    }
+  });
+
+  it("rejects taxLines with missing fields", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      taxLines: [{ rate: 21 }],
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("CreateBudgetTransactionSchema", () => {
+  const validTransaction = {
+    concept: "Office supplies",
+    type: "EXPENSE",
+    currency: "USD",
+    amount: -30,
+    budgetId: "bgt-1",
+    dateTime: "2024-01-15T10:00:00Z",
+    notes: "",
+  };
+
+  it("accepts a valid transaction", () => {
+    const result = CreateBudgetTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts empty concept (optional)", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      concept: "",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing budgetId", () => {
+    const { budgetId: _, ...withoutBudgetId } = validTransaction;
+    const result = CreateBudgetTransactionSchema.safeParse(withoutBudgetId);
     expect(result.success).toBe(false);
   });
 });

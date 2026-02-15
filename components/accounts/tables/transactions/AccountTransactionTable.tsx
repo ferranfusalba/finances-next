@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
   createColumnHelper,
@@ -22,14 +23,16 @@ import {
 
 import { currency } from "@/lib/utils";
 
-import { AccountTransaction } from "@/types/Transaction";
+import { type TaxLine, AccountTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
 export default function AccountTransactionTable({
   accountTransactions,
+  userLocale,
 }: {
   accountTransactions: Array<AccountTransaction>;
+  userLocale: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -37,11 +40,20 @@ export default function AccountTransactionTable({
 
   const handleDeleteTransaction = async (transactionId: string) => {
     startTransition(async () => {
-      await fetch(`/api/accounts/transactions/${transactionId}`, {
+      const res = await fetch(`/api/accounts/transactions/${transactionId}`, {
         method: "DELETE",
       });
-      setDeleteDialogOpen(null);
-      router.refresh();
+
+      if (res.ok) {
+        toast("Transaction deleted successfully");
+        setDeleteDialogOpen(null);
+        router.refresh();
+      } else {
+        const json = await res.json();
+        toast("Failed to delete transaction", {
+          description: json.error ?? "Unknown error",
+        });
+      }
     });
   };
 
@@ -112,7 +124,7 @@ export default function AccountTransactionTable({
         const number = info.getValue();
         const defaultCurrency = info.row.original?.currency;
 
-        return <>{currency("ca-AD", defaultCurrency).format(number)}</>;
+        return <>{currency(userLocale, defaultCurrency).format(number)}</>;
       },
       header: "Amount",
       footer: (info) => info.column.id,
@@ -124,7 +136,7 @@ export default function AccountTransactionTable({
         const defaultCurrency = info.row.original?.currency;
         const bal = balanceByTransactionId.get(transactionId) ?? 0;
 
-        return <>{currency("ca-AD", defaultCurrency).format(bal)}</>;
+        return <>{currency(userLocale, defaultCurrency).format(bal)}</>;
       },
       header: "Balance",
       footer: () => "balance",
@@ -141,7 +153,7 @@ export default function AccountTransactionTable({
         if (foreignCurrency) {
           return (
             <>
-              {currency("ca-AD", foreignCurrency as string).format(
+              {currency(userLocale, foreignCurrency as string).format(
                 number as number
               )}
             </>
@@ -171,6 +183,19 @@ export default function AccountTransactionTable({
     }),
     columnHelper.accessor("location", {
       header: "Location",
+      footer: (info) => info.column.id,
+    }),
+    columnHelper.accessor("taxLines", {
+      header: "Sales Tax",
+      cell: (info) => {
+        const lines = info.getValue() as TaxLine[] | null;
+        if (!lines?.length) return "";
+        const txCurrency = info.row.original?.currency;
+        return lines.map(l => {
+          const label = l.inclusive ? "incl." : "excl.";
+          return l.taxAmount != null ? `${l.rate}% ${label} (${currency(userLocale, txCurrency).format(l.taxAmount)})` : `${l.rate}% ${label}`;
+        }).join(", ");
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("notes", {
@@ -225,7 +250,6 @@ export default function AccountTransactionTable({
 
   type SortingState = ColumnSort[];
 
-  // Sorting by dateTime on client to ensure it is presented correctly - TODO: enhance it maybe?
   const [sorting, setSorting] = useState<SortingState>([
     { id: "dateTime", desc: false },
   ]);

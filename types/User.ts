@@ -13,9 +13,9 @@ export interface User {
   updatedAt: Date;
   accounts?: Array<Account> | null;
   budgets?: Array<Budget> | null;
-  defaultCountry?: string | null;
-  defaultCurrency?: string | null;
-  defaultTimezone?: string | null;
-  defaultLocale?: string | null;
+  userCountry?: string | null;
+  userCurrency?: string | null;
+  userTimezone?: string | null;
+  userLocale?: string | null;
   theme?: string | null;
 }

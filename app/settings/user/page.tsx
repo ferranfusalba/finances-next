@@ -39,9 +39,11 @@ import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeTo
 
 import countries from "@/statics/countries.json";
 import currencies from "@/statics/currencies.json";
+import timezones from "@/statics/timezones.json";
 
 import { Currency } from "@/types/Currency";
 import { Country } from "@/types/Country";
+import { Timezone } from "@/types/Timezone";
 
 const UserPage = () => {
   const user = useCurrentUser();
@@ -59,8 +61,10 @@ const UserPage = () => {
       name: user?.name || undefined,
       email: user?.email || undefined,
       role: user?.role || undefined,
-      defaultCountry: user?.defaultCountry || undefined,
-      defaultCurrency: user?.defaultCurrency || undefined,
+      userCountry: user?.userCountry || undefined,
+      userCurrency: user?.userCurrency || undefined,
+      userTimezone: user?.userTimezone || undefined,
+      userLocale: user?.userLocale || undefined,
     },
   });
 
@@ -197,7 +201,7 @@ const UserPage = () => {
                 ></FormField>
                 <FormField
                   control={form.control}
-                  name="defaultCountry"
+                  name="userCountry"
                   render={({ field }) => {
                     return (
                       <FormItem>
@@ -235,7 +239,7 @@ const UserPage = () => {
                 ></FormField>
                 <FormField
                   control={form.control}
-                  name="defaultCurrency"
+                  name="userCurrency"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Currency</FormLabel>
@@ -261,6 +265,54 @@ const UserPage = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage></FormMessage>
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="userTimezone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Timezone</FormLabel>
+                      <Select
+                        disabled={isPending}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a timezone"></SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {timezones.map((timezone: Timezone) => (
+                            <SelectItem
+                              value={timezone.utc[0]}
+                              key={timezone.id}
+                            >
+                              {timezone.text} - {timezone.value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage></FormMessage>
+                    </FormItem>
+                  )}
+                ></FormField>
+                <FormField
+                  control={form.control}
+                  name="userLocale"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Locale</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="en-US, es-ES, ca-AD..."
+                          disabled={isPending}
+                        ></Input>
+                      </FormControl>
                       <FormMessage></FormMessage>
                     </FormItem>
                   )}

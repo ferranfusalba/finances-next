@@ -70,6 +70,20 @@ describe("PUT /api/accounts/[id]", () => {
     });
   });
 
+  it("returns 400 when body fails validation", async () => {
+    const request = new Request("http://localhost", {
+      method: "PUT",
+      body: JSON.stringify({ name: "", code: "" }),
+    });
+
+    const response = await PUT(request as never, makeParams("acc-1"));
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toBeDefined();
+    expect(db.account.update).not.toHaveBeenCalled();
+  });
+
   it("returns 409 when update causes duplicate code", async () => {
     vi.mocked(db.account.update).mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError(

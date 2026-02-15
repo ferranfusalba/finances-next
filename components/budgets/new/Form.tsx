@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export default function NewBudgetForm(props: Props) {
-  const defaultCurrency = props.user.defaultCurrency || "";
+  const userCurrency = props.user.userCurrency || "";
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -65,7 +66,7 @@ export default function NewBudgetForm(props: Props) {
       name: "",
       code: "",
       type: "",
-      defaultCurrency: defaultCurrency,
+      defaultCurrency: userCurrency,
       description: "",
       initialBalance: "",
     },
@@ -99,10 +100,17 @@ export default function NewBudgetForm(props: Props) {
         },
       });
 
-      const data = await res.json();
-
-      router.push("/budgets/" + data.id);
-      router.refresh();
+      if (res.ok) {
+        const data = await res.json();
+        toast("Budget created successfully");
+        router.push("/budgets/" + data.id);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        toast("Failed to create budget", {
+          description: data.error ?? "Unknown error",
+        });
+      }
     });
   };
 
