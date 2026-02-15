@@ -31,10 +31,10 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
   });
 
-  it("renders login button", () => {
+  it("renders sign in button", () => {
     render(<LoginForm />);
 
-    expect(screen.getByRole("button", { name: "Login" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument();
   });
 
   it("renders forgot password link", () => {
@@ -59,7 +59,7 @@ describe("LoginForm", () => {
 
     await user.type(screen.getByLabelText("Email"), "user@example.com");
     await user.type(screen.getByLabelText("Password"), "password123");
-    await user.click(screen.getByRole("button", { name: "Login" }));
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
 
     await waitFor(() => {
       expect(login).toHaveBeenCalledWith({
@@ -77,7 +77,7 @@ describe("LoginForm", () => {
 
     await user.type(screen.getByLabelText("Email"), "user@example.com");
     await user.type(screen.getByLabelText("Password"), "wrong");
-    await user.click(screen.getByRole("button", { name: "Login" }));
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
 
     await waitFor(() => {
       expect(screen.getByText("Invalid credentials!")).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe("LoginForm", () => {
 
     await user.type(screen.getByLabelText("Email"), "user@example.com");
     await user.type(screen.getByLabelText("Password"), "password123");
-    await user.click(screen.getByRole("button", { name: "Login" }));
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
 
     await waitFor(() => {
       expect(
@@ -106,6 +106,8 @@ describe("LoginForm", () => {
   it("renders header label", () => {
     render(<LoginForm />);
 
-    expect(screen.getByText("Welcome back")).toBeInTheDocument();
+    const headerLabel = screen.getAllByText("Sign In");
+    expect(headerLabel.length).toBeGreaterThanOrEqual(1);
+    expect(headerLabel.some((el) => el.tagName === "P")).toBe(true);
   });
 });

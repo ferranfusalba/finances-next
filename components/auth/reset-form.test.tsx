@@ -42,7 +42,7 @@ describe("ResetForm", () => {
     render(<ResetForm />);
 
     expect(screen.getByText("Forgot your password?")).toBeInTheDocument();
-    expect(screen.getByText("Back to login")).toBeInTheDocument();
+    expect(screen.getByText("Back to sign in")).toBeInTheDocument();
   });
 
   it("calls reset action with email on valid submit", async () => {

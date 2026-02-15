@@ -50,7 +50,7 @@ export const LoginForm = () => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
+      headerLabel="Sign In"
       backButtonLabel="Don't have an account?"
       backButtonHref="/auth/register"
     >
@@ -105,7 +105,7 @@ export const LoginForm = () => {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button disabled={isPending} type="submit" className="w-full">
-            Login
+            Sign In
           </Button>
         </form>
       </Form>

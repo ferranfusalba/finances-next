@@ -36,11 +36,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import "@/components/budgets/tables/transactions/BudgetTransactionAdd.css";
+
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { CalendarIcon, X } from "lucide-react";
+import { Calendar as CalendarIcon, Close as X } from "@carbon/icons-react";
 import { cn } from "@/lib/utils";
 import {
   computeTransactionAmount,
@@ -246,7 +246,7 @@ export default function BudgetTransactionAdd(props: Props) {
       <DialogTrigger asChild>
         <Button>Add Transaction</Button>
       </DialogTrigger>
-      <DialogContent className="max-[800px]:max-h-margins-y-mobile sm:max-w-[800px] overflow-y-auto h-5/6 md:h-max modal-content">
+      <DialogContent className="max-md:max-h-margins-y-mobile max-md:h-screen max-md:overflow-y-scroll sm:max-w-200 overflow-y-auto h-5/6 md:h-max">
         <DialogHeader>
           <DialogTitle>Add Transaction</DialogTitle>
           <DialogDescription>

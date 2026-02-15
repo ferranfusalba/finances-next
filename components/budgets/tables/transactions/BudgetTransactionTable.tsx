@@ -9,7 +9,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import "@/components/budgets/tables/transactions/BudgetTransactionTable.css";
 
 import { currency } from "@/lib/utils";
 
@@ -167,9 +166,12 @@ export default function BudgetTransactionTable({
       <table>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className="bg-slate-400">
               {headerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th
+                  key={header.id}
+                  className="text-start px-2 border-r border-r-slate-900 font-bold"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -183,9 +185,12 @@ export default function BudgetTransactionTable({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.id}
+              className="bg-slate-900 border-b border-b-slate-400"
+            >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td key={cell.id} className="px-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -194,9 +199,9 @@ export default function BudgetTransactionTable({
         </tbody>
         <tfoot>
           {table.getFooterGroups().map((footerGroup) => (
-            <tr key={footerGroup.id}>
+            <tr key={footerGroup.id} className="bg-slate-400 text-slate-600">
               {footerGroup.headers.map((header) => (
-                <th key={header.id}>
+                <th key={header.id} className="px-2 font-bold">
                   {header.isPlaceholder
                     ? null
                     : flexRender(

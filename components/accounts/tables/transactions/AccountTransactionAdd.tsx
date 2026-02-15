@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import "@/components/accounts/tables/transactions/AccountTransactionAdd.css";
+
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +45,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { CalendarIcon, Trash2, X } from "lucide-react";
+import { Calendar as CalendarIcon, TrashCan as Trash2, Close as X } from "@carbon/icons-react";
 
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import {
@@ -493,7 +493,7 @@ export default function AccountTransactionAdd(props: Props) {
           <Button>Add Transaction</Button>
         </DialogTrigger>
       )}
-      <DialogContent className="max-[1000px]:max-h-margins-y-mobile sm:max-w-[1000px] overflow-y-auto h-5/6 md:h-max modal-content">
+      <DialogContent className="max-lg:max-h-margins-y-mobile max-lg:h-screen max-lg:overflow-y-scroll sm:max-w-250 overflow-y-auto h-5/6 md:h-max">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Transaction" : "New Transaction"}

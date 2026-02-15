@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { DragHorizontal } from "@carbon/icons-react";
 
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,8 @@ export default function SectionNavMenuListItem({
   const settingsSelected = "/settings/" + item.id === pathname;
   const playgroundSelected = "/playground/" + item.id === pathname;
 
+  const draggable = type !== "settings";
+
   const {
     attributes,
     listeners,
@@ -29,7 +31,7 @@ export default function SectionNavMenuListItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id });
+  } = useSortable({ id: item.id, disabled: !draggable });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -68,13 +70,15 @@ export default function SectionNavMenuListItem({
         }
       )}
     >
-      <button
-        className="select-none cursor-grab active:cursor-grabbing px-1 opacity-50 hover:opacity-100 transition-opacity"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical className="h-4 w-4" />
-      </button>
+      {draggable && (
+        <button
+          className="select-none cursor-grab active:cursor-grabbing px-1 opacity-50 hover:opacity-100 transition-opacity"
+          {...attributes}
+          {...listeners}
+        >
+          <DragHorizontal className="h-4 w-4" />
+        </button>
+      )}
       <Link
         className="w-max min-w-10rem text-center px-3"
         href={`/${type}/` + item.id}

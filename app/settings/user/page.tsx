@@ -87,7 +87,7 @@ const UserPage = () => {
 
   return (
     <Layout02b>
-      <Card className="md:w-[600px]">
+      <Card className="md:w-150">
         <CardHeader>
           <p className="text-2xl font-semibold text-center">⚙️ Settings</p>
         </CardHeader>

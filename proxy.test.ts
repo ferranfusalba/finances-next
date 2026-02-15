@@ -66,9 +66,13 @@ describe("proxy middleware", () => {
     expect(result).toBeNull();
   });
 
-  it("allows unauthenticated users to access public routes", () => {
+  it("redirects unauthenticated users from home to login", () => {
     const result = authCallback(makeReq("/", false));
-    expect(result).toBeNull();
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).status).toBe(302);
+    expect(
+      new URL((result as Response).headers.get("location")!).pathname
+    ).toBe("/auth/login");
   });
 
   it("allows unauthenticated users to access verification route", () => {

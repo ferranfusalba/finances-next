@@ -45,7 +45,7 @@ describe("NewPasswordForm", () => {
     render(<NewPasswordForm />);
 
     expect(screen.getByText("Enter a new password")).toBeInTheDocument();
-    expect(screen.getByText("Back to login")).toBeInTheDocument();
+    expect(screen.getByText("Back to sign in")).toBeInTheDocument();
   });
 
   it("calls newPassword action with password and token", async () => {

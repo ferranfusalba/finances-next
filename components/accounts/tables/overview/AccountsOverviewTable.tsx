@@ -25,7 +25,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { DragHorizontal } from "@carbon/icons-react";
 
 import BackgroundChip from "@/components/chips/BackgroundChip";
 
@@ -72,7 +72,7 @@ function SortableRow({
           {...attributes}
           {...listeners}
         >
-          <GripVertical className="h-4 w-4" />
+          <DragHorizontal className="h-4 w-4" />
         </button>
       </td>
       {children}

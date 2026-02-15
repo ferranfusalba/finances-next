@@ -98,11 +98,11 @@ export default async function RootLayout({
               <Toaster />
               {children}
             </main>
-            {serverSession?.user && (
-              <footer className="fixed bottom-0 w-full h-auto">
-                <BottomNav />
-              </footer>
-            )}
+            <footer
+              className={`fixed bottom-0 w-full h-auto ${!serverSession?.user ? "hidden" : ""}`}
+            >
+              <BottomNav />
+            </footer>
           </ThemeProvider>
         </SessionProvider>
       </body>

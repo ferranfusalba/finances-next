@@ -49,7 +49,7 @@ export const ResetForm = () => {
   return (
     <CardWrapper
       headerLabel="Forgot your password?"
-      backButtonLabel="Back to login"
+      backButtonLabel="Back to sign in"
       backButtonHref="/auth/login"
     >
       <Form {...form}>
