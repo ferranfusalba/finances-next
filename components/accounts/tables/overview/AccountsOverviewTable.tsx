@@ -68,6 +68,7 @@ function SortableRow({
     >
       <td className="p-2">
         <button
+          aria-label="Drag to reorder"
           className="select-none cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity"
           {...attributes}
           {...listeners}
@@ -269,12 +270,14 @@ export default function AccountsOverviewTable({
         onDragEnd={handleDragEnd}
       >
         <table>
+          <caption className="sr-only">Accounts overview</caption>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="bg-slate-400">
-                <th className="text-start px-2 border-r border-r-slate-900 font-bold" />
+                <th scope="col" className="text-start px-2 border-r border-r-slate-900 font-bold" />
                 {headerGroup.headers.map((header) => (
                   <th
+                    scope="col"
                     key={header.id}
                     className="text-start px-2 border-r border-r-slate-900 font-bold"
                   >

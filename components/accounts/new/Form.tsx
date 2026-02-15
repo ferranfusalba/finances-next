@@ -132,6 +132,7 @@ export default function NewAccountForm(props: Props) {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 m-auto w-11/12 md:w-5/12 min-w-80 md:min-w-96"
+          aria-busy={isPending}
         >
           {/* Bank Name */}
           <FormField
@@ -141,7 +142,7 @@ export default function NewAccountForm(props: Props) {
               <FormItem>
                 <FormLabel>Bank Name</FormLabel>
                 <FormControl>
-                  <Input id="name" type="text" placeholder="N26" {...field} />
+                  <Input type="text" placeholder="N26" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -156,7 +157,6 @@ export default function NewAccountForm(props: Props) {
                 <FormLabel>Account Name</FormLabel>
                 <FormControl>
                   <Input
-                    id="name"
                     type="text"
                     placeholder="Primary Space"
                     {...field}
@@ -175,7 +175,6 @@ export default function NewAccountForm(props: Props) {
                 <FormLabel>Account Code</FormLabel>
                 <FormControl>
                   <Input
-                    id="code"
                     type="text"
                     placeholder="N26.PS"
                     {...field}
@@ -194,7 +193,6 @@ export default function NewAccountForm(props: Props) {
                 <FormLabel>Account Type</FormLabel>
                 <FormControl>
                   <Input
-                    id="type"
                     type="text"
                     placeholder="Checking"
                     {...field}
@@ -213,7 +211,6 @@ export default function NewAccountForm(props: Props) {
                 <FormLabel>Account Number</FormLabel>
                 <FormControl>
                   <Input
-                    id="number"
                     type="text"
                     placeholder="ES12 3456 7890"
                     {...field}

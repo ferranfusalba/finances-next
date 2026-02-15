@@ -15,6 +15,7 @@ export default async function SectionNavMenu({
   return (
     <>
       <nav
+        aria-label={`${type} navigation`}
         className={cn(
           "flex fixed top-16 w-full z-10",
           { "bg-sky-900": type === "accounts" },

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -41,13 +42,17 @@ export default function DeleteAccount({ id }: { id: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive">
+        <Button variant="destructive" aria-label="Delete account">
           <TrashCan />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Account</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete the
+            account and all its transactions.
+          </DialogDescription>
         </DialogHeader>
         <Button
           variant="destructive"

@@ -165,11 +165,13 @@ export default function BudgetTransactionTable({
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch">
       <table>
+        <caption className="sr-only">Budget transactions</caption>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="bg-slate-400">
               {headerGroup.headers.map((header) => (
                 <th
+                  scope="col"
                   key={header.id}
                   className="text-start px-2 border-r border-r-slate-900 font-bold"
                 >

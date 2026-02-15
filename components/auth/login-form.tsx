@@ -61,7 +61,7 @@ export const LoginForm = () => {
       backButtonHref="/auth/register"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" aria-busy={isPending}>
           <div className="space-y-4">
             {showTwoFactor && (
               <FormField

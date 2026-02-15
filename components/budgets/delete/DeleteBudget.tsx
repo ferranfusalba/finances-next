@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -41,13 +42,17 @@ export default function DeleteBudget({ id }: { id: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive">
+        <Button variant="destructive" aria-label="Delete budget">
           <TrashCan />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Budget</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete the
+            budget and all its transactions.
+          </DialogDescription>
         </DialogHeader>
         <Button
           variant="destructive"

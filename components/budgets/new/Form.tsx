@@ -118,6 +118,7 @@ export default function NewBudgetForm(props: Props) {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 m-auto w-11/12 md:w-5/12 min-w-80 md:min-w-96"
+          aria-busy={isPending}
         >
           {/* Budget Name */}
           <FormField
@@ -128,7 +129,6 @@ export default function NewBudgetForm(props: Props) {
                 <FormLabel>Budget Name</FormLabel>
                 <FormControl>
                   <Input
-                    id="name"
                     type="text"
                     placeholder="Budget Name"
                     {...field}
@@ -147,7 +147,6 @@ export default function NewBudgetForm(props: Props) {
                 <FormLabel>Budget Code</FormLabel>
                 <FormControl>
                   <Input
-                    id="code"
                     type="text"
                     placeholder="Budget Code"
                     {...field}
@@ -166,7 +165,6 @@ export default function NewBudgetForm(props: Props) {
                 <FormLabel>Budget Type</FormLabel>
                 <FormControl>
                   <Input
-                    id="type"
                     type="text"
                     placeholder="Budget Type"
                     {...field}
@@ -233,7 +231,6 @@ export default function NewBudgetForm(props: Props) {
                 <FormLabel>Initial Balance</FormLabel>
                 <FormControl>
                   <Input
-                    id="initialBalance"
                     type="number"
                     step="0.01"
                     placeholder="Initial Balance"

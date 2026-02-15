@@ -94,7 +94,7 @@ const UserPage = () => {
     <Layout02b>
       <Card className="md:w-150">
         <CardHeader>
-          <p className="text-2xl font-semibold text-center">⚙️ Settings</p>
+          <h1 className="text-2xl font-semibold text-center">Settings</h1>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -102,6 +102,7 @@ const UserPage = () => {
               action=""
               className="space-y-6"
               onSubmit={form.handleSubmit(onSubmit)}
+              aria-busy={isPending}
             >
               <div className="space-y-4">
                 <FormField

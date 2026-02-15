@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -228,6 +229,7 @@ export default function AccountTransactionTable(props: Props) {
             {transactionId}
             <Button
               variant="outline"
+              aria-label="Edit transaction"
               onClick={() => setEditTransactionId(transactionId)}
             >
               <EditIcon />
@@ -239,13 +241,16 @@ export default function AccountTransactionTable(props: Props) {
               }
             >
               <DialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="destructive" aria-label="Delete transaction">
                   <TrashCan />
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Delete Transaction</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone.
+                  </DialogDescription>
                 </DialogHeader>
                 <Button
                   variant="destructive"
@@ -291,11 +296,13 @@ export default function AccountTransactionTable(props: Props) {
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch">
       <table>
+        <caption className="sr-only">Account transactions</caption>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="bg-slate-400">
               {headerGroup.headers.map((header) => (
                 <th
+                  scope="col"
                   key={header.id}
                   className="text-start px-2 border-r border-r-slate-900 font-bold"
                 >
