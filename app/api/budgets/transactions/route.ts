@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { currentUser } from "@/lib/auth";
 import { CreateBudgetTransactionSchema } from "@/schemas";
 
 async function recomputeBalance(budgetId: string) {
@@ -26,6 +27,11 @@ async function recomputeBalance(budgetId: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const parsed = CreateBudgetTransactionSchema.safeParse(body);
 
@@ -37,6 +43,16 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
+
+  // Verify user owns the budget
+  const budget = await db.budget.findUnique({
+    where: { id: data.budgetId },
+    select: { userId: true },
+  });
+
+  if (!budget || budget.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   try {
     const newTransaction = await db.budgetTransaction.create({

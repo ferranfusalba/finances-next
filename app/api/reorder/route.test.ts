@@ -12,8 +12,15 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+vi.mock("@/lib/auth", () => ({
+  currentUser: vi.fn(),
+}));
+
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { POST } from "./route";
+
+const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
 
 function makeRequest(body: Record<string, unknown>) {
   return new Request("http://localhost/api/reorder", {
@@ -27,7 +34,19 @@ describe("POST /api/reorder", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await POST(
+      makeRequest({ type: "accounts", items: [{ id: "1", order: 0 }] })
+    );
+
+    expect(response.status).toBe(401);
+  });
+
   it("returns 400 for invalid type", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const response = await POST(
       makeRequest({ type: "invalid", items: [{ id: "1", order: 0 }] })
     );
@@ -38,6 +57,8 @@ describe("POST /api/reorder", () => {
   });
 
   it("returns 400 when items is not an array", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const response = await POST(
       makeRequest({ type: "accounts", items: "not-array" })
     );
@@ -48,6 +69,8 @@ describe("POST /api/reorder", () => {
   });
 
   it("returns 400 when items is empty", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const response = await POST(
       makeRequest({ type: "accounts", items: [] })
     );
@@ -57,7 +80,8 @@ describe("POST /api/reorder", () => {
     expect(json.error).toBe("Items must be a non-empty array");
   });
 
-  it("reorders accounts via $transaction", async () => {
+  it("reorders accounts scoped to user via $transaction", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.$transaction).mockResolvedValue(undefined as never);
 
     const items = [
@@ -75,16 +99,17 @@ describe("POST /api/reorder", () => {
     const transactionArg = vi.mocked(db.$transaction).mock.calls[0][0];
     expect(transactionArg).toHaveLength(2);
     expect(db.account.update).toHaveBeenCalledWith({
-      where: { id: "acc-1" },
+      where: { id: "acc-1", userId: "user-1" },
       data: { order: 0 },
     });
     expect(db.account.update).toHaveBeenCalledWith({
-      where: { id: "acc-2" },
+      where: { id: "acc-2", userId: "user-1" },
       data: { order: 1 },
     });
   });
 
-  it("reorders budgets via $transaction", async () => {
+  it("reorders budgets scoped to user via $transaction", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.$transaction).mockResolvedValue(undefined as never);
 
     const items = [
@@ -100,12 +125,13 @@ describe("POST /api/reorder", () => {
     expect(json.success).toBe(true);
     expect(db.budget.update).toHaveBeenCalledTimes(3);
     expect(db.budget.update).toHaveBeenCalledWith({
-      where: { id: "bgt-1" },
+      where: { id: "bgt-1", userId: "user-1" },
       data: { order: 0 },
     });
   });
 
   it("returns 500 when $transaction fails", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.$transaction).mockRejectedValue(
       new Error("Transaction failed")
     );

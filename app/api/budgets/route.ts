@@ -3,10 +3,18 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { currentUser } from "@/lib/auth";
 import { CreateBudgetSchema } from "@/schemas";
 
 export async function GET() {
-  const budgets = await db.budget.findMany();
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const budgets = await db.budget.findMany({
+    where: { userId: user.id },
+  });
   return NextResponse.json(
     budgets.map((b) => ({
       ...b,
@@ -17,6 +25,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const parsed = CreateBudgetSchema.safeParse(body);
 
@@ -39,7 +52,7 @@ export async function POST(request: NextRequest) {
         initialBalance: data.initialBalance,
         name: data.name,
         type: data.type,
-        userId: data.userId,
+        userId: user.id,
       },
     });
 

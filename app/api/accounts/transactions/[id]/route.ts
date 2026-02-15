@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { UpdateAccountTransactionSchema } from "@/schemas";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
@@ -21,6 +22,11 @@ export async function PUT(
   request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const body = await request.json();
   const parsed = UpdateAccountTransactionSchema.safeParse(body);
@@ -42,6 +48,16 @@ export async function PUT(
 
     if (!existing) {
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+    }
+
+    // Verify user owns the account
+    const account = await db.account.findUnique({
+      where: { id: existing.accountId },
+      select: { userId: true },
+    });
+
+    if (!account || account.userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Delete existing tax lines, they'll be re-created
@@ -81,6 +97,11 @@ export async function DELETE(
   _request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   try {
     const transaction = await db.accountTransaction.findUnique({
@@ -90,6 +111,16 @@ export async function DELETE(
 
     if (!transaction) {
       return NextResponse.json("Transaction not found", { status: 404 });
+    }
+
+    // Verify user owns the account
+    const account = await db.account.findUnique({
+      where: { id: transaction.accountId },
+      select: { userId: true },
+    });
+
+    if (!account || account.userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     await db.accountTransaction.delete({

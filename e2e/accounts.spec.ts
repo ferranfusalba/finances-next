@@ -88,7 +88,7 @@ test.describe("Accounts", () => {
     ).toBeVisible();
 
     // Click the trash icon button (destructive variant) to open delete dialog
-    await page.getByRole("button").filter({ has: page.locator("svg") }).first().click();
+    await page.locator('button[class*="destructive"]').click();
 
     // Confirm deletion in the dialog
     await expect(

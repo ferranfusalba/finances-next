@@ -62,19 +62,8 @@ test.describe("Account Transactions", () => {
     await dialog.getByRole("combobox", { name: "Type*" }).click();
     await page.getByRole("option", { name: "INCOME", exact: true }).click();
 
-    // Fill amount (positive for income)
-    await dialog.getByPlaceholder("+").fill("100.50");
-
-    // Fill date fields using placeholders
-    const now = new Date();
-    await dialog.getByPlaceholder("08").fill(String(now.getDate()));
-    await dialog.getByPlaceholder("02").first().fill(String(now.getMonth() + 1));
-    await dialog
-      .getByPlaceholder(String(new Date().getFullYear()))
-      .fill(String(now.getFullYear()));
-    await dialog.getByPlaceholder("02").last().fill("12");
-    await dialog.getByPlaceholder("50", { exact: true }).fill("0");
-    await dialog.getByPlaceholder("59", { exact: true }).fill("0");
+    // Fill amount
+    await dialog.getByPlaceholder("Amount").fill("100.50");
 
     // Select timezone
     await dialog.getByRole("combobox", { name: "Timezone*" }).click();
@@ -121,19 +110,8 @@ test.describe("Account Transactions", () => {
     await dialog.getByRole("combobox", { name: "Type*" }).click();
     await page.getByRole("option", { name: "EXPENSE", exact: true }).click();
 
-    // Fill amount (negative for expense)
-    await dialog.getByPlaceholder("-").fill("-50.25");
-
-    // Fill date
-    const now = new Date();
-    await dialog.getByPlaceholder("08").fill(String(now.getDate()));
-    await dialog.getByPlaceholder("02").first().fill(String(now.getMonth() + 1));
-    await dialog
-      .getByPlaceholder(String(new Date().getFullYear()))
-      .fill(String(now.getFullYear()));
-    await dialog.getByPlaceholder("02").last().fill("14");
-    await dialog.getByPlaceholder("50", { exact: true }).fill("30");
-    await dialog.getByPlaceholder("59").fill("0");
+    // Fill amount
+    await dialog.getByPlaceholder("Amount").fill("50.25");
 
     // Select timezone
     await dialog.getByRole("combobox", { name: "Timezone*" }).click();
@@ -195,19 +173,8 @@ test.describe("Account Transactions", () => {
       .getByRole("option", { name: /Transfer Destination/ })
       .click();
 
-    // Fill amount (negative for transfer out)
-    await dialog.getByPlaceholder("-").fill("-25.00");
-
-    // Fill date
-    const now = new Date();
-    await dialog.getByPlaceholder("08").fill(String(now.getDate()));
-    await dialog.getByPlaceholder("02").first().fill(String(now.getMonth() + 1));
-    await dialog
-      .getByPlaceholder(String(new Date().getFullYear()))
-      .fill(String(now.getFullYear()));
-    await dialog.getByPlaceholder("02").last().fill("16");
-    await dialog.getByPlaceholder("50", { exact: true }).fill("0");
-    await dialog.getByPlaceholder("59", { exact: true }).fill("0");
+    // Fill amount
+    await dialog.getByPlaceholder("Amount").fill("25.00");
 
     // Select timezone
     await dialog.getByRole("combobox", { name: "Timezone*" }).click();

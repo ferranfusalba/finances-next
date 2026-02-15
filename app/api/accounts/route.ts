@@ -9,10 +9,13 @@ import { CreateAccountSchema } from "@/schemas";
 
 export async function GET() {
   const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const accounts = await db.account.findMany({
     where: {
-      userId: user?.id,
+      userId: user.id,
     },
   });
   return NextResponse.json(
@@ -24,6 +27,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const parsed = CreateAccountSchema.safeParse(body);
 
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
         country: data.country,
         name: data.name,
         type: data.type,
-        userId: data.userId,
+        userId: user.id,
       },
     });
 

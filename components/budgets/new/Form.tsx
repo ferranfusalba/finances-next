@@ -80,7 +80,6 @@ export default function NewBudgetForm(props: Props) {
     const description = values.description;
     const initialBalance = parseFloat(values.initialBalance);
     const defaultCurrency = values.defaultCurrency;
-    const userId = props.user.id;
 
     startTransition(async () => {
       const res = await fetch("/api/budgets/", {
@@ -93,7 +92,6 @@ export default function NewBudgetForm(props: Props) {
           description,
           initialBalance,
           defaultCurrency,
-          userId,
         }),
         headers: {
           "Content-Type": "application/json",

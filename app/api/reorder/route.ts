@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { type, items } = await request.json();
 
   if (type !== "accounts" && type !== "budgets") {
@@ -20,14 +26,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Scope updates to only resources owned by the current user
     const updates = items.map((item: { id: string; order: number }) =>
       type === "accounts"
         ? db.account.update({
-            where: { id: item.id },
+            where: { id: item.id, userId: user.id },
             data: { order: item.order },
           })
         : db.budget.update({
-            where: { id: item.id },
+            where: { id: item.id, userId: user.id },
             data: { order: item.order },
           })
     );

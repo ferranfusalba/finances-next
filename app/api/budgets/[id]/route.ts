@@ -3,20 +3,28 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { currentUser } from "@/lib/auth";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { UpdateBudgetSchema } from "@/schemas";
 
 export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const budget = await db.budget.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
   if (!budget) {
     return NextResponse.json({ error: "Budget not found" }, { status: 404 });
+  }
+
+  if (budget.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   return NextResponse.json({
@@ -27,6 +35,11 @@ export async function GET(_request: NextRequest, { params }: AccountBudgetParams
 }
 
 export async function PUT(request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const body = await request.json();
   const parsed = UpdateBudgetSchema.safeParse(body);
@@ -38,11 +51,22 @@ export async function PUT(request: NextRequest, { params }: AccountBudgetParamsP
     );
   }
 
+  const budget = await db.budget.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+
+  if (!budget) {
+    return NextResponse.json({ error: "Budget not found" }, { status: 404 });
+  }
+
+  if (budget.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     await db.budget.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: parsed.data,
     });
 
@@ -66,18 +90,33 @@ export async function DELETE(
   _request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
+
+  const budget = await db.budget.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+
+  if (!budget) {
+    return NextResponse.json({ error: "Budget not found" }, { status: 404 });
+  }
+
+  if (budget.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     await db.budgetTransaction.deleteMany({
-      where: {
-        budgetId: id,
-      },
+      where: { budgetId: id },
     });
 
     const budgetDeleted = await db.budget.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     return NextResponse.json(budgetDeleted);

@@ -4,7 +4,7 @@ export async function loginAs(page: Page, email: string, password: string) {
   await page.goto("/auth/login");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign In" }).click();
+  await page.getByRole("main").getByRole("button", { name: "Sign In" }).click();
 
   // Wait for redirect to home page after successful login
   await expect(page).toHaveURL("/", { timeout: 10_000 });

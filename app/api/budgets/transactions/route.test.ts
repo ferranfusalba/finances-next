@@ -14,8 +14,15 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+vi.mock("@/lib/auth", () => ({
+  currentUser: vi.fn(),
+}));
+
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { POST } from "./route";
+
+const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
 
 const baseTransaction = {
   concept: "Office supplies",
@@ -33,7 +40,44 @@ describe("POST /api/budgets/transactions", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const request = new Request(
+      "http://localhost/api/budgets/transactions",
+      {
+        method: "POST",
+        body: JSON.stringify(baseTransaction),
+      }
+    );
+
+    const response = await POST(request as never);
+
+    expect(response.status).toBe(401);
+    expect(db.budgetTransaction.create).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when user does not own the budget", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.budget.findUnique).mockResolvedValueOnce({ userId: "other-user" } as never);
+
+    const request = new Request(
+      "http://localhost/api/budgets/transactions",
+      {
+        method: "POST",
+        body: JSON.stringify(baseTransaction),
+      }
+    );
+
+    const response = await POST(request as never);
+
+    expect(response.status).toBe(403);
+    expect(db.budgetTransaction.create).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when body fails validation", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const request = new Request(
       "http://localhost/api/budgets/transactions",
       {
@@ -51,15 +95,17 @@ describe("POST /api/budgets/transactions", () => {
   });
 
   it("creates a budget transaction and recomputes balance server-side", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    // First findUnique call is for ownership check, second is inside recomputeBalance
+    vi.mocked(db.budget.findUnique)
+      .mockResolvedValueOnce({ userId: "user-1" } as never)
+      .mockResolvedValueOnce({ initialBalance: 1000 } as never);
     vi.mocked(db.budgetTransaction.create).mockResolvedValue({
       ...baseTransaction,
       id: "btxn-1",
       balance: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as never);
-    vi.mocked(db.budget.findUnique).mockResolvedValue({
-      initialBalance: 1000,
     } as never);
     vi.mocked(db.budgetTransaction.aggregate).mockResolvedValue({
       _sum: { amount: -30 },
@@ -80,10 +126,6 @@ describe("POST /api/budgets/transactions", () => {
 
     expect(json.id).toBe("btxn-1");
     expect(db.budgetTransaction.create).toHaveBeenCalledOnce();
-    expect(db.budget.findUnique).toHaveBeenCalledWith({
-      where: { id: "bgt-1" },
-      select: { initialBalance: true },
-    });
     expect(db.budgetTransaction.aggregate).toHaveBeenCalledWith({
       where: { budgetId: "bgt-1" },
       _sum: { amount: true },
@@ -99,6 +141,8 @@ describe("POST /api/budgets/transactions", () => {
   });
 
   it("returns 500 when create fails", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.budget.findUnique).mockResolvedValueOnce({ userId: "user-1" } as never);
     vi.mocked(db.budgetTransaction.create).mockRejectedValue(
       new Error("DB write failed")
     );

@@ -18,17 +18,23 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { GET, POST } from "./route";
 
+const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
+
 describe("GET /api/accounts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await GET();
+
+    expect(response.status).toBe(401);
+  });
+
   it("returns accounts for the current user", async () => {
-    vi.mocked(currentUser).mockResolvedValue({
-      id: "user-1",
-      name: "John",
-      email: "john@example.com",
-    } as never);
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.account.findMany).mockResolvedValue([
       { id: "acc-1", name: "Checking" },
       { id: "acc-2", name: "Savings" },
@@ -42,19 +48,6 @@ describe("GET /api/accounts", () => {
       where: { userId: "user-1" },
     });
   });
-
-  it("queries with undefined userId when no user session", async () => {
-    vi.mocked(currentUser).mockResolvedValue(undefined as never);
-    vi.mocked(db.account.findMany).mockResolvedValue([] as never);
-
-    const response = await GET();
-    const json = await response.json();
-
-    expect(json).toHaveLength(0);
-    expect(db.account.findMany).toHaveBeenCalledWith({
-      where: { userId: undefined },
-    });
-  });
 });
 
 describe("POST /api/accounts", () => {
@@ -62,7 +55,23 @@ describe("POST /api/accounts", () => {
     vi.clearAllMocks();
   });
 
-  it("creates a new account", async () => {
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const request = new Request("http://localhost/api/accounts", {
+      method: "POST",
+      body: JSON.stringify({ name: "Test" }),
+    });
+
+    const response = await POST(request as never);
+
+    expect(response.status).toBe(401);
+    expect(db.account.create).not.toHaveBeenCalled();
+  });
+
+  it("creates a new account with userId from session", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const accountData = {
       id: "acc-1",
       bankName: "Test Bank",
@@ -80,18 +89,32 @@ describe("POST /api/accounts", () => {
 
     const request = new Request("http://localhost/api/accounts", {
       method: "POST",
-      body: JSON.stringify(accountData),
+      body: JSON.stringify({
+        bankName: "Test Bank",
+        name: "Checking",
+        code: "CHK",
+        type: "CHECKING",
+        defaultCurrency: "USD",
+        country: "US",
+        currentBalance: 0,
+        active: true,
+      }),
     });
 
     const response = await POST(request as never);
     const json = await response.json();
 
     expect(json.id).toBe("acc-1");
-    expect(json.bankName).toBe("Test Bank");
     expect(db.account.create).toHaveBeenCalledOnce();
+
+    // Verify userId comes from session, not request body
+    const createCall = vi.mocked(db.account.create).mock.calls[0][0];
+    expect(createCall.data.userId).toBe("user-1");
   });
 
   it("returns 400 when body fails validation", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const request = new Request("http://localhost/api/accounts", {
       method: "POST",
       body: JSON.stringify({ name: "" }),
@@ -104,7 +127,8 @@ describe("POST /api/accounts", () => {
     expect(json.error).toBeDefined();
   });
 
-  it("returns 409 when creating account with duplicate userId+code", async () => {
+  it("returns 409 when creating account with duplicate code", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.account.create).mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError(
         "Unique constraint failed on the fields: (`userId`,`code`)",
@@ -118,7 +142,6 @@ describe("POST /api/accounts", () => {
         name: "Duplicate",
         code: "CHK",
         type: "CHECKING",
-        userId: "user-1",
         active: true,
       }),
     });

@@ -16,27 +16,36 @@ import { currency } from "@/lib/utils";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import { getUserForeignCurrencies, getUserTransactionLocations } from "@/lib/user";
 
+import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
+
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
 export default async function BudgetLayout({
   params,
 }: AccountBudgetParamsProps) {
   const { id } = await params;
-  const budget = await getBudget(id);
+
+  const [budget, serverSession] = await Promise.all([
+    getBudget(id),
+    auth(),
+  ]);
 
   if (!budget) {
     notFound();
   }
 
-  const budgetTransactions = await getBudgetTransactions(budget.id);
-  const serverSession = await auth();
+  const userId = serverSession?.user?.id as string;
   const userLocale = serverSession?.user?.userLocale ?? "en-US";
-  const userForeignCurrencies = await getUserForeignCurrencies(
-    serverSession?.user?.id as string,
-  );
-  const userTransactionLocations = await getUserTransactionLocations(
-    serverSession?.user?.id as string,
-  );
+
+  const [
+    budgetTransactions,
+    userForeignCurrencies,
+    userTransactionLocations,
+  ] = await Promise.all([
+    getBudgetTransactions(budget.id),
+    getUserForeignCurrencies(userId),
+    getUserTransactionLocations(userId),
+  ]);
 
   const color0 = getCurrencyColor0(budget.defaultCurrency) ?? "";
   const color1 = getCurrencyColor1(budget.defaultCurrency) ?? "";
@@ -75,20 +84,28 @@ export default async function BudgetLayout({
           <DeleteBudget id={id} />
         </div>
       </LayoutAccountBudgetHeader>
-      <LayoutAccountBudgetActions>
-        <BudgetTransactionAdd
-          budget={budget}
-          userTimezone={serverSession?.user?.userTimezone ?? ""}
-          userForeignCurrencies={userForeignCurrencies}
-          userTransactionLocations={userTransactionLocations}
-        />
-      </LayoutAccountBudgetActions>
-      <LayoutAccountBudgetTable>
-        <BudgetTransactionTable
-          budgetTransactions={budgetTransactions}
-          userLocale={userLocale}
-        />
-      </LayoutAccountBudgetTable>
+      <TransactionUserProvider
+        value={{
+          userId,
+          userLocale,
+          userTimezone: serverSession?.user?.userTimezone ?? "",
+          userAccounts: [],
+          userTransactionPayees: [],
+          userTransactionCategories: [],
+          userForeignCurrencies,
+          userTransactionLocations,
+          hasTransactions: budgetTransactions.length > 0,
+        }}
+      >
+        <LayoutAccountBudgetActions>
+          <BudgetTransactionAdd budget={budget} />
+        </LayoutAccountBudgetActions>
+        <LayoutAccountBudgetTable>
+          <BudgetTransactionTable
+            budgetTransactions={budgetTransactions}
+          />
+        </LayoutAccountBudgetTable>
+      </TransactionUserProvider>
     </Layout02a>
   );
 }

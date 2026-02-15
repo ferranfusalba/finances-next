@@ -84,19 +84,12 @@ test.describe("Budgets", () => {
     await dialog.getByRole("combobox", { name: "Type*" }).click();
     await page.getByRole("option", { name: "EXPENSE" }).click();
 
-    // Fill amount (the placeholder is "+ / -" for budget transactions)
-    await dialog.getByPlaceholder("+ / -").fill("-100");
+    // Fill amount
+    await dialog.getByPlaceholder("Amount").fill("100");
 
-    // Fill date fields using placeholders
-    const now = new Date();
-    await dialog.getByPlaceholder("08").fill(String(now.getDate()));
-    await dialog.getByPlaceholder("02").first().fill(String(now.getMonth() + 1));
-    await dialog
-      .getByPlaceholder(String(new Date().getFullYear()))
-      .fill(String(now.getFullYear()));
-    await dialog.getByPlaceholder("02").last().fill("10");
-    await dialog.getByPlaceholder("50", { exact: true }).fill("0");
-    await dialog.getByPlaceholder("59", { exact: true }).fill("0");
+    // Select timezone
+    await dialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category (budget uses plain text input for category)
     await dialog

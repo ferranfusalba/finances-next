@@ -24,6 +24,8 @@ import {
 
 import { currency } from "@/lib/utils";
 
+import { useTransactionUser } from "@/contexts/TransactionUserContext";
+
 import { Account } from "@/types/Account";
 import { type TaxLine, AccountTransaction } from "@/types/Transaction";
 
@@ -31,34 +33,12 @@ const columnHelper = createColumnHelper<AccountTransaction>();
 
 interface Props {
   accountTransactions: Array<AccountTransaction>;
-  userLocale: string;
   account: Account | null;
-  userAccounts: Array<Account>;
-  userTransactionPayees: Array<{
-    id: string | null;
-    userId: string | null;
-    name: string | null;
-  }>;
-  userTransactionCategories: Array<{
-    id: string | null;
-    userId: string | null;
-    name: string | null;
-    subcategories: Array<{
-      categoryId: string | null;
-      id: string | null;
-      name: string | null;
-      userId: string | null;
-    }>;
-  }>;
-  userId: string;
-  userTimezone: string;
-  userForeignCurrencies: string[];
-  userTransactionLocations: string[];
-  hasTransactions: boolean;
 }
 
 export default function AccountTransactionTable(props: Props) {
-  const { accountTransactions, userLocale } = props;
+  const { accountTransactions } = props;
+  const { userLocale } = useTransactionUser();
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -365,14 +345,6 @@ export default function AccountTransactionTable(props: Props) {
         <AccountTransactionAdd
           key={editTransaction.id}
           account={props.account}
-          userAccounts={props.userAccounts}
-          userTransactionPayees={props.userTransactionPayees}
-          userTransactionCategories={props.userTransactionCategories}
-          userId={props.userId}
-          userTimezone={props.userTimezone}
-          userForeignCurrencies={props.userForeignCurrencies}
-          userTransactionLocations={props.userTransactionLocations}
-          hasTransactions={props.hasTransactions}
           editTransaction={editTransaction}
           editOpen={!!editTransactionId}
           onEditOpenChange={(open) => {

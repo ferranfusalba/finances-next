@@ -32,34 +32,40 @@ import {
   getUserTransactionLocations,
   getUserTransactionPayees,
 } from "@/lib/user";
+import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
 
 export default async function AccountLayout({
   params,
 }: AccountBudgetParamsProps) {
   const { id } = await params;
-  const account = await getAccount(id);
+
+  const [account, serverSession] = await Promise.all([
+    getAccount(id),
+    auth(),
+  ]);
 
   if (!account) {
     notFound();
   }
 
-  const accountTransactions = await getAccountTransactions(account.id);
-
-  const serverSession = await auth();
+  const userId = serverSession?.user?.id as string;
   const userLocale = serverSession?.user?.userLocale ?? "en-US";
-  const userAccounts = await getAccounts(serverSession?.user?.id as string);
-  const userTransactionPayees = await getUserTransactionPayees(
-    serverSession?.user.id as string,
-  );
-  const userTransactionCategories = await getUserTransactionCategories(
-    serverSession?.user.id as string,
-  );
-  const userForeignCurrencies = await getUserForeignCurrencies(
-    serverSession?.user.id as string,
-  );
-  const userTransactionLocations = await getUserTransactionLocations(
-    serverSession?.user.id as string,
-  );
+
+  const [
+    accountTransactions,
+    userAccounts,
+    userTransactionPayees,
+    userTransactionCategories,
+    userForeignCurrencies,
+    userTransactionLocations,
+  ] = await Promise.all([
+    getAccountTransactions(account.id),
+    getAccounts(userId),
+    getUserTransactionPayees(userId),
+    getUserTransactionCategories(userId),
+    getUserForeignCurrencies(userId),
+    getUserTransactionLocations(userId),
+  ]);
 
   function getCountryFullName(alpha2Code: string) {
     const country = countries.filter(
@@ -122,38 +128,33 @@ export default async function AccountLayout({
           <DeleteAccount id={id} />
         </div>
       </LayoutAccountBudgetHeader>
-      <LayoutAccountBudgetActions>
-        <AccountTransactionAdd
-          account={account}
-          userAccounts={userAccounts}
-          userTransactionPayees={userTransactionPayees}
-          userTransactionCategories={userTransactionCategories}
-          userId={serverSession?.user?.id ?? ""}
-          userTimezone={serverSession?.user?.userTimezone ?? ""}
-          userForeignCurrencies={userForeignCurrencies}
-          userTransactionLocations={userTransactionLocations}
-          hasTransactions={accountTransactions.length > 0}
-        />
-        <AccountTransactionDownload
-          accountTransactions={accountTransactions}
-          accountName={account.name}
-        />
-      </LayoutAccountBudgetActions>
-      <LayoutAccountBudgetTable>
-        <AccountTransactionTable
-          accountTransactions={accountTransactions}
-          userLocale={userLocale}
-          account={account}
-          userAccounts={userAccounts}
-          userTransactionPayees={userTransactionPayees}
-          userTransactionCategories={userTransactionCategories}
-          userId={serverSession?.user?.id ?? ""}
-          userTimezone={serverSession?.user?.userTimezone ?? ""}
-          userForeignCurrencies={userForeignCurrencies}
-          userTransactionLocations={userTransactionLocations}
-          hasTransactions={accountTransactions.length > 0}
-        />
-      </LayoutAccountBudgetTable>
+      <TransactionUserProvider
+        value={{
+          userId,
+          userLocale,
+          userTimezone: serverSession?.user?.userTimezone ?? "",
+          userAccounts,
+          userTransactionPayees,
+          userTransactionCategories,
+          userForeignCurrencies,
+          userTransactionLocations,
+          hasTransactions: accountTransactions.length > 0,
+        }}
+      >
+        <LayoutAccountBudgetActions>
+          <AccountTransactionAdd account={account} />
+          <AccountTransactionDownload
+            accountTransactions={accountTransactions}
+            accountName={account.name}
+          />
+        </LayoutAccountBudgetActions>
+        <LayoutAccountBudgetTable>
+          <AccountTransactionTable
+            accountTransactions={accountTransactions}
+            account={account}
+          />
+        </LayoutAccountBudgetTable>
+      </TransactionUserProvider>
     </Layout02a>
   );
 }

@@ -3,20 +3,28 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { currentUser } from "@/lib/auth";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import { UpdateAccountSchema } from "@/schemas";
 
 export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const account = await db.account.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
   if (!account) {
     return NextResponse.json({ error: "Account not found" }, { status: 404 });
+  }
+
+  if (account.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   return NextResponse.json({
@@ -26,6 +34,11 @@ export async function GET(_request: NextRequest, { params }: AccountBudgetParams
 }
 
 export async function PUT(request: NextRequest, { params }: AccountBudgetParamsProps) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
   const body = await request.json();
   const parsed = UpdateAccountSchema.safeParse(body);
@@ -37,11 +50,22 @@ export async function PUT(request: NextRequest, { params }: AccountBudgetParamsP
     );
   }
 
+  const account = await db.account.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+
+  if (!account) {
+    return NextResponse.json({ error: "Account not found" }, { status: 404 });
+  }
+
+  if (account.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     await db.account.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: parsed.data,
     });
 
@@ -65,18 +89,33 @@ export async function DELETE(
   _request: NextRequest,
   { params }: AccountBudgetParamsProps
 ) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await params;
+
+  const account = await db.account.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+
+  if (!account) {
+    return NextResponse.json({ error: "Account not found" }, { status: 404 });
+  }
+
+  if (account.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     await db.accountTransaction.deleteMany({
-      where: {
-        accountId: id,
-      },
+      where: { accountId: id },
     });
 
     const accountDeleted = await db.account.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     return NextResponse.json(accountDeleted);

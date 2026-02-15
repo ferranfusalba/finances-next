@@ -12,17 +12,18 @@ import {
 
 import { currency } from "@/lib/utils";
 
+import { useTransactionUser } from "@/contexts/TransactionUserContext";
+
 import { BudgetTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<BudgetTransaction>();
 
 export default function BudgetTransactionTable({
   budgetTransactions,
-  userLocale,
 }: {
   budgetTransactions: Array<BudgetTransaction>;
-  userLocale: string;
 }) {
+  const { userLocale } = useTransactionUser();
   const columns = [
     columnHelper.accessor((row) => row.createdAt, {
       id: "createdAt",

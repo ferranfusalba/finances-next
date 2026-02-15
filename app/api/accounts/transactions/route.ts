@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { CreateAccountTransactionSchema } from "@/schemas";
 
 async function recomputeBalance(accountId: string) {
@@ -16,6 +17,11 @@ async function recomputeBalance(accountId: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const parsed = CreateAccountTransactionSchema.safeParse(body);
 
@@ -27,6 +33,28 @@ export async function POST(request: NextRequest) {
   }
 
   const data = parsed.data;
+
+  // Verify user owns the account
+  const account = await db.account.findUnique({
+    where: { id: data.accountId },
+    select: { userId: true },
+  });
+
+  if (!account || account.userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // For transfers, verify user also owns the destination account
+  if (data.type === "TRANSFER" && data.typeTransferDestination) {
+    const destAccount = await db.account.findUnique({
+      where: { id: data.typeTransferDestination },
+      select: { userId: true },
+    });
+
+    if (!destAccount || destAccount.userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
 
   try {
     const transactionData = {
@@ -96,4 +124,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

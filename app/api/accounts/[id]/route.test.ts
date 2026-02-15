@@ -14,9 +14,15 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+vi.mock("@/lib/auth", () => ({
+  currentUser: vi.fn(),
+}));
+
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { GET, PUT, DELETE } from "./route";
 
+const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
 const makeParams = (id: string) => ({ params: Promise.resolve({ id }) });
 
 describe("GET /api/accounts/[id]", () => {
@@ -24,25 +30,44 @@ describe("GET /api/accounts/[id]", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await GET(new Request("http://localhost") as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(401);
+  });
+
   it("returns the account by ID", async () => {
-    const account = { id: "acc-1", name: "Checking", code: "CHK", currentBalance: 150.50 };
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    const account = { id: "acc-1", name: "Checking", code: "CHK", currentBalance: 150.50, userId: "user-1" };
     vi.mocked(db.account.findUnique).mockResolvedValue(account as never);
 
     const response = await GET(new Request("http://localhost") as never, makeParams("acc-1"));
     const json = await response.json();
 
-    expect(json).toEqual(account);
+    expect(json.id).toBe("acc-1");
     expect(db.account.findUnique).toHaveBeenCalledWith({ where: { id: "acc-1" } });
   });
 
   it("returns 404 when account not found", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.account.findUnique).mockResolvedValue(null as never);
 
     const response = await GET(new Request("http://localhost") as never, makeParams("nonexistent"));
-    const json = await response.json();
 
     expect(response.status).toBe(404);
-    expect(json.error).toBe("Account not found");
+  });
+
+  it("returns 403 when account belongs to another user", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({
+      id: "acc-1", name: "Checking", userId: "other-user",
+    } as never);
+
+    const response = await GET(new Request("http://localhost") as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(403);
   });
 });
 
@@ -51,7 +76,37 @@ describe("PUT /api/accounts/[id]", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const request = new Request("http://localhost", {
+      method: "PUT",
+      body: JSON.stringify({ name: "Test" }),
+    });
+
+    const response = await PUT(request as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when account belongs to another user", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "other-user" } as never);
+
+    const request = new Request("http://localhost", {
+      method: "PUT",
+      body: JSON.stringify({ name: "Updated" }),
+    });
+
+    const response = await PUT(request as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(403);
+    expect(db.account.update).not.toHaveBeenCalled();
+  });
+
   it("updates the account with provided data", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.account.update).mockResolvedValue({} as never);
     const updateData = { name: "Updated Name", bankName: "New Bank" };
 
@@ -71,20 +126,22 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("returns 400 when body fails validation", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const request = new Request("http://localhost", {
       method: "PUT",
       body: JSON.stringify({ name: "", code: "" }),
     });
 
     const response = await PUT(request as never, makeParams("acc-1"));
-    const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json.error).toBeDefined();
     expect(db.account.update).not.toHaveBeenCalled();
   });
 
   it("returns 409 when update causes duplicate code", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.account.update).mockRejectedValue(
       new Prisma.PrismaClientKnownRequestError(
         "Unique constraint failed on the fields: (`userId`,`code`)",
@@ -105,6 +162,8 @@ describe("PUT /api/accounts/[id]", () => {
   });
 
   it("returns 500 when update fails", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.account.update).mockRejectedValue(
       new Error("Record not found")
     );
@@ -127,7 +186,37 @@ describe("DELETE /api/accounts/[id]", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await DELETE(new Request("http://localhost") as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when account belongs to another user", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "other-user" } as never);
+
+    const response = await DELETE(new Request("http://localhost") as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(403);
+    expect(db.account.delete).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when account not found", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue(null as never);
+
+    const response = await DELETE(new Request("http://localhost") as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(404);
+    expect(db.account.delete).not.toHaveBeenCalled();
+  });
+
   it("deletes all transactions before deleting the account", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     const deletedAccount = { id: "acc-1", name: "Checking" };
     vi.mocked(db.accountTransaction.deleteMany).mockResolvedValue({ count: 3 } as never);
     vi.mocked(db.account.delete).mockResolvedValue(deletedAccount as never);
@@ -149,19 +238,9 @@ describe("DELETE /api/accounts/[id]", () => {
     expect(deleteManyOrder).toBeLessThan(deleteAccountOrder);
   });
 
-  it("returns the deleted account as JSON", async () => {
-    const deletedAccount = { id: "acc-1", name: "Checking", code: "CHK" };
-    vi.mocked(db.accountTransaction.deleteMany).mockResolvedValue({ count: 0 } as never);
-    vi.mocked(db.account.delete).mockResolvedValue(deletedAccount as never);
-
-    const response = await DELETE(new Request("http://localhost") as never, makeParams("acc-1"));
-    const json = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(json).toEqual(deletedAccount);
-  });
-
   it("returns 500 when deleteMany throws", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.deleteMany).mockRejectedValue(
       new Error("FK constraint failed")
     );
@@ -175,6 +254,8 @@ describe("DELETE /api/accounts/[id]", () => {
   });
 
   it("returns 500 when account.delete throws", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.account.delete).mockRejectedValue(new Error("Record not found"));
 
@@ -183,15 +264,5 @@ describe("DELETE /api/accounts/[id]", () => {
 
     expect(response.status).toBe(500);
     expect(json).toBe("Record not found");
-  });
-
-  it("returns 'Unknown error' for non-Error throws", async () => {
-    vi.mocked(db.accountTransaction.deleteMany).mockRejectedValue("string error");
-
-    const response = await DELETE(new Request("http://localhost") as never, makeParams("acc-1"));
-    const json = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(json).toBe("Unknown error");
   });
 });

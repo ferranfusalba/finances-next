@@ -91,7 +91,6 @@ export default function NewAccountForm(props: Props) {
     const defaultCurrency = values.defaultCurrency;
     const number = values.number;
     const country = values.country;
-    const userId = props.user.id;
 
     startTransition(async () => {
       const res = await fetch("/api/accounts/", {
@@ -107,7 +106,6 @@ export default function NewAccountForm(props: Props) {
           defaultCurrency,
           number,
           country,
-          userId,
         }),
         headers: {
           "Content-Type": "application/json",

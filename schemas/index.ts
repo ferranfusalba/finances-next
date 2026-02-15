@@ -90,7 +90,6 @@ export const CreateAccountSchema = z.object({
   currentBalance: z.number().default(0),
   number: z.string().nullable().optional(),
   country: z.string().default(""),
-  userId: z.string().optional(),
 });
 
 export const UpdateAccountSchema = z.object({
@@ -115,7 +114,6 @@ export const CreateBudgetSchema = z.object({
   description: z.string().nullable().optional(),
   defaultCurrency: z.string().default(""),
   initialBalance: z.number(),
-  userId: z.string().optional(),
 });
 
 export const UpdateBudgetSchema = z.object({

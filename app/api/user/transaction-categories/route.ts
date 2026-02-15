@@ -1,17 +1,22 @@
 import { db } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import { currentUser } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const data = await request.json();
 
   const transactionCategory = await db.userTransactionCategory.upsert({
     where: {
-      userId_name: { userId: data.userId, name: data.name },
+      userId_name: { userId: user.id, name: data.name },
     },
     update: {},
     create: {
-      id: data.id,
-      userId: data.userId,
+      userId: user.id,
       name: data.name,
     },
   });

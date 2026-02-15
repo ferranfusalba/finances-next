@@ -2,18 +2,26 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/db", () => ({
   db: {
+    account: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
     accountTransaction: {
       create: vi.fn(),
       aggregate: vi.fn(),
     },
-    account: {
-      update: vi.fn(),
-    },
   },
 }));
 
+vi.mock("@/lib/auth", () => ({
+  currentUser: vi.fn(),
+}));
+
 import { db } from "@/lib/db";
+import { currentUser } from "@/lib/auth";
 import { POST } from "./route";
+
+const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
 
 function makeRequest(body: Record<string, unknown>) {
   return new Request("http://localhost/api/accounts/transactions", {
@@ -39,7 +47,28 @@ describe("POST /api/accounts/transactions", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await POST(makeRequest(baseTransaction));
+
+    expect(response.status).toBe(401);
+    expect(db.accountTransaction.create).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when user does not own the account", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "other-user" } as never);
+
+    const response = await POST(makeRequest(baseTransaction));
+
+    expect(response.status).toBe(403);
+    expect(db.accountTransaction.create).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when body fails validation", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
     const response = await POST(makeRequest({ amount: "not-a-number" }));
     const json = await response.json();
 
@@ -49,6 +78,8 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("creates a transaction and recomputes balance", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -76,6 +107,8 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("sets currentBalance to 0 when aggregate sum is null", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -96,6 +129,12 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("creates mirror transaction for transfers", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    // Both accounts belong to user
+    vi.mocked(db.account.findUnique)
+      .mockResolvedValueOnce({ userId: "user-1" } as never)
+      .mockResolvedValueOnce({ userId: "user-1" } as never);
+
     const transferData = {
       ...baseTransaction,
       type: "TRANSFER",
@@ -128,7 +167,28 @@ describe("POST /api/accounts/transactions", () => {
     expect(db.account.update).toHaveBeenCalledTimes(2);
   });
 
+  it("returns 403 when transfer destination belongs to another user", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique)
+      .mockResolvedValueOnce({ userId: "user-1" } as never)
+      .mockResolvedValueOnce({ userId: "other-user" } as never);
+
+    const transferData = {
+      ...baseTransaction,
+      type: "TRANSFER",
+      amount: 100,
+      typeTransferDestination: "acc-2",
+    };
+
+    const response = await POST(makeRequest(transferData));
+
+    expect(response.status).toBe(403);
+    expect(db.accountTransaction.create).not.toHaveBeenCalled();
+  });
+
   it("does not create mirror transaction for non-transfer types", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -148,6 +208,8 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("passes taxLines as nested create to the database", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     const taxLines = [
       { rate: 21, amount: 50, inclusive: true, taxAmount: 8.68 },
       { rate: 10, amount: 30, inclusive: false, taxAmount: 3 },
@@ -178,6 +240,8 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("does not include taxLines when none provided", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -196,6 +260,8 @@ describe("POST /api/accounts/transactions", () => {
   });
 
   it("returns 500 when create fails", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(db.accountTransaction.create).mockRejectedValue(
       new Error("DB write failed")
     );
