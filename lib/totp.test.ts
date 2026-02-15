@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 // Set encryption key before imports that use it

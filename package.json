@@ -1,11 +1,11 @@
 {
   "name": "finances-next",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
     "build": "next build",
-    "vercel-build": "npm run test:run && next build",
+    "vercel-build": "NODE_ENV=test npm run test:run && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
