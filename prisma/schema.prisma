@@ -36,6 +36,9 @@ model User {
   userTimezone              String                    @default("") @map("defaultTimezone")
   userLocale                String                    @default("") @map("defaultLocale")
   theme                     String                    @default("")
+  twoFactorEnabled          Boolean                   @default(false)
+  totpSecret                String?
+  twoFactorBackupCodes      TwoFactorBackupCode[]
 }
 
 model UserAccount {
@@ -86,6 +89,13 @@ model UserTransactionSubcategory {
   categoryId String
 
   @@unique([categoryId, name])
+}
+
+model TwoFactorBackupCode {
+  id     String @id @default(cuid())
+  userId String
+  code   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

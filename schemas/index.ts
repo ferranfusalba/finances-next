@@ -63,6 +63,11 @@ export const LoginSchema = z.object({
   password: z.string().min(1, {
     message: "Password is required",
   }),
+  code: z.optional(z.string()),
+});
+
+export const TwoFactorSetupSchema = z.object({
+  code: z.string().length(6, { message: "Code must be 6 digits" }),
 });
 
 export const RegisterSchema = z.object({

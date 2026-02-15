@@ -13,15 +13,26 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import LogoutButtonClient from "@/components/nav/TopNav/components/UserDropdownMenu/LogoutButtonClient";
 import { ExtendedUser } from "@/next-auth";
 import Link from "next/link";
+import { logout } from "@/actions/logout";
 
 interface UserDropdownMenuProps {
   user: ExtendedUser;
 }
 
 export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.metaKey && e.key === "Q") {
+        e.preventDefault();
+        logout();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -56,8 +67,8 @@ export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
           v{process.env.APP_VERSION}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogoutButtonClient />
+        <DropdownMenuItem onClick={() => logout()}>
+          Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -36,6 +36,7 @@ import { UserRole } from "@prisma/client";
 
 import { SettingsSchema } from "@/schemas";
 import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeToggle";
+import { TwoFactorSection } from "@/components/auth/two-factor-section";
 
 import countries from "@/statics/countries.json";
 import currencies from "@/statics/currencies.json";
@@ -176,6 +177,11 @@ const UserPage = () => {
                         </FormItem>
                       )}
                     ></FormField>
+                    <div className="rounded-lg border p-4">
+                      <TwoFactorSection
+                        initialEnabled={user?.twoFactorEnabled ?? false}
+                      />
+                    </div>
                   </>
                 )}
                 <FormField
@@ -290,14 +296,20 @@ const UserPage = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {timezones.map((timezone: Timezone) => (
-                            <SelectItem
-                              value={timezone.utc[0]}
-                              key={timezone.id}
-                            >
-                              {timezone.text} - {timezone.value}
-                            </SelectItem>
-                          ))}
+                          {timezones
+                            .filter(
+                              (tz: Timezone, i: number, arr: Timezone[]) =>
+                                tz.utc.length > 0 &&
+                                arr.findIndex((t) => t.utc[0] === tz.utc[0]) === i
+                            )
+                            .map((timezone: Timezone) => (
+                              <SelectItem
+                                value={timezone.utc[0]}
+                                key={timezone.utc[0]}
+                              >
+                                {timezone.text} - {timezone.value}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormMessage></FormMessage>

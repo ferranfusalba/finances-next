@@ -10,6 +10,9 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { getUserByEmail } from "@/data/user";
 import { sendVerificationEmail } from "@/lib/mail";
 import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { decryptSecret, verifyTotpCode } from "@/lib/totp";
+import bcrypt from "bcryptjs";
+import { db } from "@/lib/db";
 
 const limiter = createRateLimiter({
   name: "login",
@@ -30,7 +33,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password } = validatedFields.data;
+  const { email, password, code } = validatedFields.data;
 
   const existingUser = await getUserByEmail(email);
 
@@ -49,6 +52,39 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     );
 
     return { success: "Confirmation email sent" };
+  }
+
+  // Two-factor authentication check
+  if (existingUser.twoFactorEnabled && existingUser.totpSecret) {
+    if (!code) {
+      return { twoFactor: true };
+    }
+
+    const secret = decryptSecret(existingUser.totpSecret);
+    const isValidTotp = verifyTotpCode(secret, code);
+
+    if (!isValidTotp) {
+      // Try backup codes
+      const backupCodes = await db.twoFactorBackupCode.findMany({
+        where: { userId: existingUser.id },
+      });
+
+      let backupMatch = false;
+      for (const backupCode of backupCodes) {
+        const match = await bcrypt.compare(code, backupCode.code);
+        if (match) {
+          await db.twoFactorBackupCode.delete({
+            where: { id: backupCode.id },
+          });
+          backupMatch = true;
+          break;
+        }
+      }
+
+      if (!backupMatch) {
+        return { error: "Invalid code" };
+      }
+    }
   }
 
   try {

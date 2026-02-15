@@ -21,6 +21,24 @@ vi.mock("@/lib/rate-limit", () => ({
   getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
 }));
 
+vi.mock("@/lib/totp", () => ({
+  decryptSecret: vi.fn(() => "JBSWY3DPEHPK3PXP"),
+  verifyTotpCode: vi.fn(),
+}));
+
+vi.mock("bcryptjs", () => ({
+  default: { compare: vi.fn() },
+}));
+
+vi.mock("@/lib/db", () => ({
+  db: {
+    twoFactorBackupCode: {
+      findMany: vi.fn(),
+      delete: vi.fn(),
+    },
+  },
+}));
+
 vi.mock("@/routes", () => ({
   DEFAULT_LOGIN_REDIRECT: "/",
 }));
@@ -41,6 +59,9 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { verifyTotpCode } from "@/lib/totp";
+import bcrypt from "bcryptjs";
+import { db } from "@/lib/db";
 import { login } from "./login";
 
 describe("login", () => {
@@ -181,5 +202,100 @@ describe("login", () => {
     await expect(
       login({ email: "user@example.com", password: "password123" })
     ).rejects.toThrow("Network failure");
+  });
+
+  it("returns twoFactor when 2FA enabled and no code provided", async () => {
+    vi.mocked(getUserByEmail).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+      password: "hashed",
+      emailVerified: new Date(),
+      twoFactorEnabled: true,
+      totpSecret: "encrypted-secret",
+    } as never);
+
+    const result = await login({
+      email: "user@example.com",
+      password: "password123",
+    });
+
+    expect(result).toEqual({ twoFactor: true });
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it("proceeds to signIn when valid TOTP code provided", async () => {
+    vi.mocked(getUserByEmail).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+      password: "hashed",
+      emailVerified: new Date(),
+      twoFactorEnabled: true,
+      totpSecret: "encrypted-secret",
+    } as never);
+    vi.mocked(verifyTotpCode).mockReturnValue(true);
+    vi.mocked(signIn).mockResolvedValue(undefined);
+
+    await login({
+      email: "user@example.com",
+      password: "password123",
+      code: "123456",
+    });
+
+    expect(signIn).toHaveBeenCalledWith("credentials", {
+      email: "user@example.com",
+      password: "password123",
+      redirectTo: "/",
+    });
+  });
+
+  it("returns error when invalid TOTP code and no matching backup code", async () => {
+    vi.mocked(getUserByEmail).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+      password: "hashed",
+      emailVerified: new Date(),
+      twoFactorEnabled: true,
+      totpSecret: "encrypted-secret",
+    } as never);
+    vi.mocked(verifyTotpCode).mockReturnValue(false);
+    vi.mocked(db.twoFactorBackupCode.findMany).mockResolvedValue([]);
+
+    const result = await login({
+      email: "user@example.com",
+      password: "password123",
+      code: "000000",
+    });
+
+    expect(result).toEqual({ error: "Invalid code" });
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it("accepts a valid backup code and deletes it", async () => {
+    vi.mocked(getUserByEmail).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+      password: "hashed",
+      emailVerified: new Date(),
+      twoFactorEnabled: true,
+      totpSecret: "encrypted-secret",
+    } as never);
+    vi.mocked(verifyTotpCode).mockReturnValue(false);
+    vi.mocked(db.twoFactorBackupCode.findMany).mockResolvedValue([
+      { id: "bc-1", userId: "user-1", code: "hashed-backup" },
+    ]);
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    vi.mocked(db.twoFactorBackupCode.delete).mockResolvedValue({} as never);
+    vi.mocked(signIn).mockResolvedValue(undefined);
+
+    await login({
+      email: "user@example.com",
+      password: "password123",
+      code: "abc12345",
+    });
+
+    expect(db.twoFactorBackupCode.delete).toHaveBeenCalledWith({
+      where: { id: "bc-1" },
+    });
+    expect(signIn).toHaveBeenCalled();
   });
 });

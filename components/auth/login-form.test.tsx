@@ -65,6 +65,7 @@ describe("LoginForm", () => {
       expect(login).toHaveBeenCalledWith({
         email: "user@example.com",
         password: "password123",
+        code: "",
       });
     });
   });

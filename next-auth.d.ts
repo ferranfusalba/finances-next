@@ -8,6 +8,7 @@ export type ExtendedUser = DefaultSession["user"] & {
   userCurrency: string;
   userTimezone: string;
   userLocale: string;
+  twoFactorEnabled: boolean;
 };
 
 declare module "next-auth" {
@@ -26,5 +27,6 @@ declare module "next-auth/jwt" {
     userCurrency?: string;
     userTimezone?: string;
     userLocale?: string;
+    twoFactorEnabled?: boolean;
   }
 }

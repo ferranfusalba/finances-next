@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -32,12 +32,15 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.2.6",
     "@tanstack/react-table": "^8.21.3",
+    "@types/qrcode": "^1.5.6",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.6",
+    "otpauth": "^9.5.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-day-picker": "^9.13.1",
     "react-dom": "^19.2.4",

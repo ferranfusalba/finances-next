@@ -52,13 +52,13 @@ describe("proxy middleware", () => {
     expect(result).toBeNull();
   });
 
-  it("redirects unauthenticated users from private routes to login", () => {
+  it("redirects unauthenticated users from private routes to login with callback URL", () => {
     const result = authCallback(makeReq("/accounts", false));
     expect(result).toBeInstanceOf(Response);
     expect((result as Response).status).toBe(302);
-    expect(
-      new URL((result as Response).headers.get("location")!).pathname
-    ).toBe("/auth/login");
+    const redirectUrl = new URL((result as Response).headers.get("location")!);
+    expect(redirectUrl.pathname).toBe("/auth/login");
+    expect(redirectUrl.searchParams.get("callbackUrl")).toBe("/accounts");
   });
 
   it("allows authenticated users to access private routes", () => {
@@ -66,13 +66,13 @@ describe("proxy middleware", () => {
     expect(result).toBeNull();
   });
 
-  it("redirects unauthenticated users from home to login", () => {
+  it("redirects unauthenticated users from home to login with callback URL", () => {
     const result = authCallback(makeReq("/", false));
     expect(result).toBeInstanceOf(Response);
     expect((result as Response).status).toBe(302);
-    expect(
-      new URL((result as Response).headers.get("location")!).pathname
-    ).toBe("/auth/login");
+    const redirectUrl = new URL((result as Response).headers.get("location")!);
+    expect(redirectUrl.pathname).toBe("/auth/login");
+    expect(redirectUrl.searchParams.get("callbackUrl")).toBe("/");
   });
 
   it("allows unauthenticated users to access verification route", () => {

@@ -42,6 +42,7 @@ export const {
         session.user.userCurrency = token.userCurrency ?? "";
         session.user.userTimezone = token.userTimezone ?? "";
         session.user.userLocale = token.userLocale || "en-US";
+        session.user.twoFactorEnabled = token.twoFactorEnabled ?? false;
       }
 
       return session;
@@ -63,6 +64,7 @@ export const {
       token.userCurrency = existingUser.userCurrency ?? "";
       token.userTimezone = existingUser.userTimezone ?? "";
       token.userLocale = existingUser.userLocale || "en-US";
+      token.twoFactorEnabled = existingUser.twoFactorEnabled;
 
       return token;
     },
