@@ -192,7 +192,10 @@ describe("settings", () => {
       newPassword: "newpass123",
     });
 
-    expect(result).toEqual({ success: "Settings Updated" });
+    expect(result).toEqual({
+      success: "Password updated. Please log in again.",
+      passwordChanged: true,
+    });
     const updateData = vi.mocked(db.user.update).mock.calls[0][0].data as Record<string, unknown>;
     expect(updateData.password).toBe("new-hashed-password");
     expect(updateData.newPassword).toBeUndefined();

@@ -4,7 +4,7 @@ import { useTransition, useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import { settings } from "@/actions/settings";
 
@@ -77,6 +77,10 @@ const UserPage = () => {
           }
 
           if (data.success) {
+            if ("passwordChanged" in data) {
+              signOut();
+              return;
+            }
             update();
             setSuccess(data.success);
           }

@@ -6,11 +6,24 @@ import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
 import { getUserByEmail } from "@/data/user";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+
+const limiter = createRateLimiter({
+  name: "new-password",
+  interval: 60_000,
+  maxRequests: 5,
+});
 
 export const newPassword = async (
   values: z.infer<typeof NewPasswordSchema>,
   token?: string | null
 ) => {
+  const ip = await getClientIp();
+  const { success: allowed } = limiter.check(ip);
+  if (!allowed) {
+    return { error: "Too many requests. Please try again later." };
+  }
+
   if (!token) {
     return { error: "Missing token" };
   }

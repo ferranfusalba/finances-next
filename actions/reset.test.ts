@@ -12,6 +12,11 @@ vi.mock("@/lib/mail", () => ({
   sendPasswordResetEmail: vi.fn(),
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  createRateLimiter: () => ({ check: () => ({ success: true }) }),
+  getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
+}));
+
 import { getUserByEmail } from "@/data/user";
 import { generatePasswordResetToken } from "@/lib/tokens";
 import { sendPasswordResetEmail } from "@/lib/mail";
@@ -28,12 +33,14 @@ describe("reset", () => {
     expect(result).toEqual({ error: "Invalid email" });
   });
 
-  it("returns error when user does not exist", async () => {
+  it("returns success even when user does not exist (prevents enumeration)", async () => {
     vi.mocked(getUserByEmail).mockResolvedValue(null);
 
     const result = await reset({ email: "ghost@example.com" });
 
-    expect(result).toEqual({ error: "Email not found" });
+    expect(result).toEqual({ success: "Reset email sent" });
+    expect(generatePasswordResetToken).not.toHaveBeenCalled();
+    expect(sendPasswordResetEmail).not.toHaveBeenCalled();
   });
 
   it("generates token and sends reset email on success", async () => {

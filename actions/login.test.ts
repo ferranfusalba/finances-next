@@ -16,6 +16,11 @@ vi.mock("@/auth", () => ({
   signIn: vi.fn(),
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  createRateLimiter: () => ({ check: () => ({ success: true }) }),
+  getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
+}));
+
 vi.mock("@/routes", () => ({
   DEFAULT_LOGIN_REDIRECT: "/",
 }));

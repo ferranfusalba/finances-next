@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 
 export const generatePasswordResetToken = async (email: string) => {
   const token = uuidv4();
-  const expires = new Date(new Date().getTime() + 5 * 60 * 1000);
+  const expires = new Date(new Date().getTime() + 15 * 60 * 1000);
 
   const existingToken = await getPasswordResetTokenByEmail(email);
 

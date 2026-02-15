@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterAll } from "vitest";
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -22,6 +22,11 @@ vi.mock("bcryptjs", () => ({
   default: { hash: vi.fn(() => "hashed-password") },
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  createRateLimiter: () => ({ check: () => ({ success: true }) }),
+  getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
+}));
+
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken } from "@/lib/tokens";
@@ -29,8 +34,28 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { register } from "./register";
 
 describe("register", () => {
+  const originalEnv = process.env;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env = { ...originalEnv };
+    delete process.env.REGISTRATION_DISABLED;
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  it("returns error when registration is disabled", async () => {
+    process.env.REGISTRATION_DISABLED = "true";
+
+    const result = await register({
+      email: "new@example.com",
+      password: "password123",
+      name: "John",
+    });
+
+    expect(result).toEqual({ error: "Registration is currently disabled" });
   });
 
   it("returns error for invalid fields", async () => {

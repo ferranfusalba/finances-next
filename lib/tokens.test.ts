@@ -38,7 +38,7 @@ describe("generatePasswordResetToken", () => {
     vi.clearAllMocks();
   });
 
-  it("creates a new token with 5-minute expiry", async () => {
+  it("creates a new token with 15-minute expiry", async () => {
     vi.mocked(getPasswordResetTokenByEmail).mockResolvedValue(null);
     vi.mocked(db.passwordResetToken.create).mockResolvedValue({
       id: "1",
@@ -57,9 +57,9 @@ describe("generatePasswordResetToken", () => {
     expect(callArgs.data.token).toBe("mock-uuid-token");
 
     const expiresMs = (callArgs.data.expires as Date).getTime();
-    // Expiry should be ~5 minutes (300_000ms) from now
-    expect(expiresMs).toBeGreaterThanOrEqual(before + 5 * 60 * 1000 - 100);
-    expect(expiresMs).toBeLessThanOrEqual(after + 5 * 60 * 1000 + 100);
+    // Expiry should be ~15 minutes (900_000ms) from now
+    expect(expiresMs).toBeGreaterThanOrEqual(before + 15 * 60 * 1000 - 100);
+    expect(expiresMs).toBeLessThanOrEqual(after + 15 * 60 * 1000 + 100);
   });
 
   it("deletes existing token before creating new one", async () => {

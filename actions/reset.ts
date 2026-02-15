@@ -5,8 +5,21 @@ import { ResetSchema } from "@/schemas";
 import { getUserByEmail } from "@/data/user";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { generatePasswordResetToken } from "@/lib/tokens";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+
+const limiter = createRateLimiter({
+  name: "reset",
+  interval: 60_000,
+  maxRequests: 3,
+});
 
 export const reset = async (values: z.infer<typeof ResetSchema>) => {
+  const ip = await getClientIp();
+  const { success: allowed } = limiter.check(ip);
+  if (!allowed) {
+    return { error: "Too many requests. Please try again later." };
+  }
+
   const validatedFields = ResetSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -17,8 +30,9 @@ export const reset = async (values: z.infer<typeof ResetSchema>) => {
 
   const existingUser = await getUserByEmail(email);
 
+  // Return same message regardless of whether email exists to prevent enumeration
   if (!existingUser) {
-    return { error: "Email not found" };
+    return { success: "Reset email sent" };
   }
 
   const passwordResetToken = await generatePasswordResetToken(email);

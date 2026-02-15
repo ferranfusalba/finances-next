@@ -19,6 +19,11 @@ vi.mock("bcryptjs", () => ({
   default: { hash: vi.fn(() => "hashed-password") },
 }));
 
+vi.mock("@/lib/rate-limit", () => ({
+  createRateLimiter: () => ({ check: () => ({ success: true }) }),
+  getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
+}));
+
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
 import { getPasswordResetTokenByToken } from "@/data/password-reset-token";
