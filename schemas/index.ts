@@ -157,6 +157,33 @@ export const CreateAccountTransactionSchema = z.object({
   accountId: z.string().min(1),
 });
 
+export const UpdateAccountTransactionSchema = z.object({
+  payee: z.string().optional(),
+  concept: z.string().optional(),
+  type: z.string().min(1).optional(),
+  typeTransferOrigin: z.string().nullable().optional(),
+  typeTransferDestination: z.string().nullable().optional(),
+  currency: z.string().min(1).optional(),
+  amount: z.number().optional(),
+  foreignCurrency: z.string().nullable().optional(),
+  foreignCurrencyAmount: z.number().nullable().optional(),
+  foreignCurrencyExchangeRate: z.number().nullable().optional(),
+  category: z.string().optional(),
+  subcategory: z.string().nullable().optional(),
+  tags: z.string().nullable().optional(),
+  dateTime: z.string().or(z.date()).optional(),
+  timezone: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  notes: z.string().optional(),
+  taxLines: z.array(z.object({
+    rate: z.number(),
+    amount: z.number(),
+    inclusive: z.boolean(),
+    taxAmount: z.number(),
+  })).nullable().optional(),
+  accountId: z.string().min(1).optional(),
+});
+
 export const CreateBudgetTransactionSchema = z.object({
   concept: z.string().default(""),
   type: z.string().min(1),

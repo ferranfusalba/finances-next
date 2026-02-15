@@ -143,6 +143,15 @@ export default async function AccountLayout({
         <AccountTransactionTable
           accountTransactions={accountTransactions}
           userLocale={userLocale}
+          account={account}
+          userAccounts={userAccounts}
+          userTransactionPayees={userTransactionPayees}
+          userTransactionCategories={userTransactionCategories}
+          userId={serverSession?.user?.id ?? ""}
+          userTimezone={serverSession?.user?.userTimezone ?? ""}
+          userForeignCurrencies={userForeignCurrencies}
+          userTransactionLocations={userTransactionLocations}
+          hasTransactions={accountTransactions.length > 0}
         />
       </LayoutAccountBudgetTable>
     </Layout02a>

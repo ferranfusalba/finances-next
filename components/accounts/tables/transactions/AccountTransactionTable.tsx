@@ -10,8 +10,9 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { TrashCan } from "@carbon/icons-react";
+import { Edit as EditIcon, TrashCan } from "@carbon/icons-react";
 
+import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,20 +24,52 @@ import {
 
 import { currency } from "@/lib/utils";
 
+import { Account } from "@/types/Account";
 import { type TaxLine, AccountTransaction } from "@/types/Transaction";
 
 const columnHelper = createColumnHelper<AccountTransaction>();
 
-export default function AccountTransactionTable({
-  accountTransactions,
-  userLocale,
-}: {
+interface Props {
   accountTransactions: Array<AccountTransaction>;
   userLocale: string;
-}) {
+  account: Account | null;
+  userAccounts: Array<Account>;
+  userTransactionPayees: Array<{
+    id: string | null;
+    userId: string | null;
+    name: string | null;
+  }>;
+  userTransactionCategories: Array<{
+    id: string | null;
+    userId: string | null;
+    name: string | null;
+    subcategories: Array<{
+      categoryId: string | null;
+      id: string | null;
+      name: string | null;
+      userId: string | null;
+    }>;
+  }>;
+  userId: string;
+  userTimezone: string;
+  userForeignCurrencies: string[];
+  userTransactionLocations: string[];
+  hasTransactions: boolean;
+}
+
+export default function AccountTransactionTable(props: Props) {
+  const { accountTransactions, userLocale } = props;
+
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
+  const [editTransactionId, setEditTransactionId] = useState<string | null>(
+    null,
+  );
+
+  const editTransaction = editTransactionId
+    ? (accountTransactions.find((t) => t.id === editTransactionId) ?? null)
+    : null;
 
   const handleDeleteTransaction = async (transactionId: string) => {
     startTransition(async () => {
@@ -154,7 +187,7 @@ export default function AccountTransactionTable({
           return (
             <>
               {currency(userLocale, foreignCurrency as string).format(
-                number as number
+                number as number,
               )}
             </>
           );
@@ -191,10 +224,14 @@ export default function AccountTransactionTable({
         const lines = info.getValue() as TaxLine[] | null;
         if (!lines?.length) return "";
         const txCurrency = info.row.original?.currency;
-        return lines.map(l => {
-          const label = l.inclusive ? "incl." : "excl.";
-          return l.taxAmount != null ? `${l.rate}% ${label} (${currency(userLocale, txCurrency).format(l.taxAmount)})` : `${l.rate}% ${label}`;
-        }).join(", ");
+        return lines
+          .map((l) => {
+            const label = l.inclusive ? "incl." : "excl.";
+            return l.taxAmount != null
+              ? `${l.rate}% ${label} (${currency(userLocale, txCurrency).format(l.taxAmount)})`
+              : `${l.rate}% ${label}`;
+          })
+          .join(", ");
       },
       footer: (info) => info.column.id,
     }),
@@ -207,8 +244,14 @@ export default function AccountTransactionTable({
         const transactionId = info.row.original?.id;
 
         return (
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", gap: "4px" }}>
             {transactionId}
+            <Button
+              variant="outline"
+              onClick={() => setEditTransactionId(transactionId)}
+            >
+              <EditIcon />
+            </Button>
             <Dialog
               open={deleteDialogOpen === transactionId}
               onOpenChange={(open) =>
@@ -280,7 +323,7 @@ export default function AccountTransactionTable({
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </th>
               ))}
@@ -310,7 +353,7 @@ export default function AccountTransactionTable({
                     ? null
                     : flexRender(
                         header.column.columnDef.footer,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </th>
               ))}
@@ -318,6 +361,25 @@ export default function AccountTransactionTable({
           ))}
         </tfoot>
       </table>
+      {editTransaction && (
+        <AccountTransactionAdd
+          key={editTransaction.id}
+          account={props.account}
+          userAccounts={props.userAccounts}
+          userTransactionPayees={props.userTransactionPayees}
+          userTransactionCategories={props.userTransactionCategories}
+          userId={props.userId}
+          userTimezone={props.userTimezone}
+          userForeignCurrencies={props.userForeignCurrencies}
+          userTransactionLocations={props.userTransactionLocations}
+          hasTransactions={props.hasTransactions}
+          editTransaction={editTransaction}
+          editOpen={!!editTransactionId}
+          onEditOpenChange={(open) => {
+            if (!open) setEditTransactionId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -39,7 +39,11 @@ import {
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { CalendarIcon, Trash2, X } from "lucide-react";
 
@@ -55,6 +59,7 @@ import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
 
 import { Account } from "@/types/Account";
 import { Currency } from "@/types/Currency";
+import { AccountTransaction } from "@/types/Transaction";
 import { Timezone } from "@/types/Timezone";
 
 import currencies from "@/statics/currencies.json";
@@ -85,6 +90,9 @@ interface Props {
   userForeignCurrencies: string[];
   userTransactionLocations: string[];
   hasTransactions: boolean;
+  editTransaction?: AccountTransaction;
+  editOpen?: boolean;
+  onEditOpenChange?: (open: boolean) => void;
 }
 
 export default function AccountTransactionAdd(props: Props) {
@@ -100,20 +108,28 @@ export default function AccountTransactionAdd(props: Props) {
 
   const [isPending, startTransition] = useTransition();
   const timeCounterRef = useRef(540); // 9 * 60 = 09:00 in total minutes
-  const defaultCurrencyCodes = ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD"];
+  const defaultCurrencyCodes = [
+    "USD",
+    "EUR",
+    "GBP",
+    "CHF",
+    "JPY",
+    "CAD",
+    "AUD",
+  ];
   const commonCurrencyCodes =
     props.userForeignCurrencies.length > 0
       ? props.userForeignCurrencies
       : defaultCurrencyCodes;
   const accountCurrency = props.account?.defaultCurrency;
   const foreignCurrenciesList = currencies.filter(
-    (currency) => currency.code !== accountCurrency
+    (currency) => currency.code !== accountCurrency,
   );
   const commonCurrencies = foreignCurrenciesList.filter((c) =>
-    commonCurrencyCodes.includes(c.code)
+    commonCurrencyCodes.includes(c.code),
   );
   const remainingCurrencies = foreignCurrenciesList.filter(
-    (c) => !commonCurrencyCodes.includes(c.code)
+    (c) => !commonCurrencyCodes.includes(c.code),
   );
 
   const detectedTimezone = detectTimezone(props.userTimezone || undefined);
@@ -121,8 +137,23 @@ export default function AccountTransactionAdd(props: Props) {
     ? timezoneToSelectValue(detectedTimezone)
     : undefined;
 
+  const editTx = props.editTransaction;
+  const isEditing = !!editTx;
+  const editDate = editTx ? new Date(editTx.dateTime) : undefined;
+  const editTime = editDate
+    ? `${editDate.getHours().toString().padStart(2, "0")}:${editDate.getMinutes().toString().padStart(2, "0")}`
+    : undefined;
+  const editTimezoneValue = editTx?.timezone
+    ? (() => {
+        const tz = timezones.find(
+          (t) => t.offset.toString() === editTx.timezone,
+        );
+        return tz ? timezoneToSelectValue(tz) : undefined;
+      })()
+    : undefined;
+
   const userAccounts4Transactions = props.userAccounts?.filter(
-    (account) => account.name !== props.account?.name
+    (account) => account.name !== props.account?.name,
   );
 
   const handleAmountPlaceholder = () => {
@@ -165,11 +196,13 @@ export default function AccountTransactionAdd(props: Props) {
       }),
       location: z.string(),
       notes: z.string(),
-      taxLines: z.array(z.object({
-        rate: z.string(),
-        amount: z.string(),
-        inclusive: z.boolean(),
-      })),
+      taxLines: z.array(
+        z.object({
+          rate: z.string(),
+          amount: z.string(),
+          inclusive: z.boolean(),
+        }),
+      ),
     })
     .refine(
       (data) => {
@@ -182,7 +215,7 @@ export default function AccountTransactionAdd(props: Props) {
         message:
           "Foreign Currency Amount is required when Foreign Currency is provided.",
         path: ["foreignCurrencyAmount"],
-      }
+      },
     )
     .refine(
       (data) => {
@@ -195,48 +228,68 @@ export default function AccountTransactionAdd(props: Props) {
         message:
           "Transfer to Destination Account is required when Transaction Type is TRANSFER.",
         path: ["typeTransferDestinationAccount"],
-      }
+      },
     );
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
-      payee: "", // Not at Budget Transaction Form
-      concept: "",
-      type: "",
-      typeTransferDestinationAccount: "",
-      currency: props.account?.defaultCurrency as string,
-      amountForm: "",
-      foreignCurrency: "",
-      foreignCurrencyAmount: "",
-      foreignCurrencyExchangeRate: "",
-      category: "",
-      subcategory: "",
-      tags: "",
-      date: new Date(),
-      time: "09:00",
-      timezone: detectedTimezoneValue,
-      location: "",
-      notes: "",
-      taxLines: [],
+      payee: editTx?.payee ?? "",
+      concept: editTx?.concept ?? "",
+      type: editTx?.type ?? "",
+      typeTransferDestinationAccount: editTx?.typeTransferDestination ?? "",
+      currency: editTx?.currency ?? (props.account?.defaultCurrency as string),
+      amountForm: editTx ? Math.abs(editTx.amount).toString() : "",
+      foreignCurrency: editTx?.foreignCurrency ?? "",
+      foreignCurrencyAmount: editTx?.foreignCurrencyAmount
+        ? editTx.foreignCurrencyAmount.toString()
+        : "",
+      foreignCurrencyExchangeRate: editTx?.foreignCurrencyExchangeRate
+        ? editTx.foreignCurrencyExchangeRate.toString()
+        : "",
+      category: editTx?.category ?? "",
+      subcategory: editTx?.subcategory ?? "",
+      tags: editTx?.tags ?? "",
+      date: editDate ?? new Date(),
+      time: editTime ?? "09:00",
+      timezone: editTimezoneValue ?? detectedTimezoneValue,
+      location: editTx?.location ?? "",
+      notes: editTx?.notes ?? "",
+      taxLines:
+        editTx?.taxLines?.map((tl) => ({
+          rate: tl.rate.toString(),
+          amount: tl.amount.toString(),
+          inclusive: tl.inclusive,
+        })) ?? [],
     },
   });
 
-  const { fields: taxFields, append: appendTax, remove: removeTax } = useFieldArray({
+  const {
+    fields: taxFields,
+    append: appendTax,
+    remove: removeTax,
+  } = useFieldArray({
     control: form.control,
     name: "taxLines",
   });
 
   const watchedTaxLines = useWatch({ control: form.control, name: "taxLines" });
 
-  const watchedForeignCurrency = useWatch({ control: form.control, name: "foreignCurrency" });
+  const watchedForeignCurrency = useWatch({
+    control: form.control,
+    name: "foreignCurrency",
+  });
 
   const handleResetFC = () => {
     form.setValue("foreignCurrency", "", { shouldValidate: false });
     form.setValue("foreignCurrencyAmount", "", { shouldValidate: false });
     form.setValue("foreignCurrencyExchangeRate", "", { shouldValidate: false });
-    form.clearErrors(["foreignCurrency", "foreignCurrencyAmount", "foreignCurrencyExchangeRate"]);
+    form.clearErrors([
+      "foreignCurrency",
+      "foreignCurrencyAmount",
+      "foreignCurrencyExchangeRate",
+    ]);
   };
 
   const selectedType = useWatch({ control: form.control, name: "type" });
@@ -249,12 +302,18 @@ export default function AccountTransactionAdd(props: Props) {
     });
   }, [watchedAmount]);
 
-  const accountOriginCurrency = useWatch({ control: form.control, name: "currency" });
+  const accountOriginCurrency = useWatch({
+    control: form.control,
+    name: "currency",
+  });
 
-  const selectedTransferAccountId = useWatch({ control: form.control, name: "typeTransferDestinationAccount" });
-  const selectedTransferAccountCurrency = props.userAccounts.find(
-    (a) => a.id === selectedTransferAccountId
-  )?.defaultCurrency ?? "";
+  const selectedTransferAccountId = useWatch({
+    control: form.control,
+    name: "typeTransferDestinationAccount",
+  });
+  const selectedTransferAccountCurrency =
+    props.userAccounts.find((a) => a.id === selectedTransferAccountId)
+      ?.defaultCurrency ?? "";
 
   useEffect(() => {
     if (
@@ -275,8 +334,13 @@ export default function AccountTransactionAdd(props: Props) {
   ]);
 
   const category = useWatch({ control: form.control, name: "category" });
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     form.setValue("subcategory", ""); // Reset subcategory when category changes
   }, [category, form]); // Watch for changes in category
 
@@ -292,7 +356,7 @@ export default function AccountTransactionAdd(props: Props) {
       Number(values.time.split(":")[0]) || 9,
       Number(values.time.split(":")[1]) || 0,
       0,
-      timezoneToOffset
+      timezoneToOffset,
     );
 
     const payee = values.payee;
@@ -304,7 +368,7 @@ export default function AccountTransactionAdd(props: Props) {
     const foreignCurrency = values.foreignCurrency;
     const foreignCurrencyAmount = parseFloat(values.foreignCurrencyAmount);
     const foreignCurrencyExchangeRate = parseFloat(
-      values.foreignCurrencyExchangeRate
+      values.foreignCurrencyExchangeRate,
     );
     const category = values.category;
     const subcategory = values.subcategory;
@@ -340,67 +404,103 @@ export default function AccountTransactionAdd(props: Props) {
         headers: { "Content-Type": "application/json" },
       });
 
-      // Server handles balance recomputation and transfer mirror transaction
-      const res = await fetch("/api/accounts/transactions/", {
-        method: "POST",
-        body: JSON.stringify({
-          payee,
-          concept,
-          type,
-          typeTransferOrigin: accountId,
-          typeTransferDestination: selectedTransferAccountId,
-          currency,
-          amount: amountForm,
-          foreignCurrency,
-          foreignCurrencyAmount,
-          foreignCurrencyExchangeRate,
-          category,
-          subcategory,
-          tags,
-          dateTime,
-          timezone,
-          location,
-          notes,
-          taxLines,
-          accountId,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const transactionPayload = {
+        payee,
+        concept,
+        type,
+        typeTransferOrigin: accountId,
+        typeTransferDestination: selectedTransferAccountId,
+        currency,
+        amount: amountForm,
+        foreignCurrency,
+        foreignCurrencyAmount,
+        foreignCurrencyExchangeRate,
+        category,
+        subcategory,
+        tags,
+        dateTime,
+        timezone,
+        location,
+        notes,
+        taxLines,
+        accountId,
+      };
+
+      const res = isEditing
+        ? await fetch(`/api/accounts/transactions/${editTx!.id}`, {
+            method: "PUT",
+            body: JSON.stringify(transactionPayload),
+            headers: { "Content-Type": "application/json" },
+          })
+        : await fetch("/api/accounts/transactions/", {
+            method: "POST",
+            body: JSON.stringify(transactionPayload),
+            headers: { "Content-Type": "application/json" },
+          });
 
       if (res.ok) {
-        setOpen(false);
-        toast(`Transaction for ${concept} has been added`, {
-          description: `${amountForm + " " + currency}`,
-        });
+        if (isEditing) {
+          props.onEditOpenChange?.(false);
+        } else {
+          setOpen(false);
+        }
+        toast(
+          isEditing
+            ? `Transaction for ${concept} has been updated`
+            : `Transaction for ${concept} has been added`,
+          { description: `${amountForm + " " + currency}` },
+        );
         router.refresh();
       } else {
         const json = await res.json();
-        toast("Failed to add transaction", {
-          description: json.error ?? "Unknown error",
-        });
+        toast(
+          isEditing
+            ? "Failed to update transaction"
+            : "Failed to add transaction",
+          {
+            description: json.error ?? "Unknown error",
+          },
+        );
       }
     });
   };
 
-  return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
+  const dialogOpen = isEditing ? (props.editOpen ?? false) : open;
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    if (isEditing) {
+      props.onEditOpenChange?.(isOpen);
+    } else {
       setOpen(isOpen);
       if (isOpen) {
+        form.reset();
+        setIsAddingNewPayee(false);
+        setIsAddingNewCategory(false);
+        setIsAddingNewSubcategory(false);
+        setNewPayee("");
+        setNewCategory("");
+        setNewSubcategory("");
         const { nextCounter, time } = nextTimeIncrement(timeCounterRef.current);
         form.setValue("time", time);
         timeCounterRef.current = nextCounter;
       }
-    }}>
-      <DialogTrigger asChild>
-        <Button>Add Transaction</Button>
-      </DialogTrigger>
+    }
+  };
+
+  return (
+    <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+      {!isEditing && (
+        <DialogTrigger asChild>
+          <Button>Add Transaction</Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-[1000px]:max-h-margins-y-mobile sm:max-w-[1000px] overflow-y-auto h-5/6 md:h-max modal-content">
         <DialogHeader>
-          <DialogTitle>New Transaction</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Transaction" : "New Transaction"}
+          </DialogTitle>
           <DialogDescription>
-            Add a new transaction to {props.account?.bankName}
+            {isEditing ? "Edit" : "Add a new"} transaction
+            {isEditing ? " in" : " to"} {props.account?.bankName}
             {" · "}
             {props.account?.name}:
           </DialogDescription>
@@ -431,7 +531,9 @@ export default function AccountTransactionAdd(props: Props) {
                                   if (value === "__new__") {
                                     setIsAddingNewPayee(true);
                                     setNewPayee("");
-                                    form.setValue("payee", "", { shouldValidate: false });
+                                    form.setValue("payee", "", {
+                                      shouldValidate: false,
+                                    });
                                     form.clearErrors("payee");
                                   } else {
                                     setIsAddingNewPayee(false);
@@ -456,7 +558,8 @@ export default function AccountTransactionAdd(props: Props) {
                                   </SelectItem>
                                   <Separator className="my-2 px-2" />
                                   {props.userTransactionPayees
-                                    ?.map((payee) => (
+                                    ?.filter((payee) => payee.name)
+                                    .map((payee) => (
                                       <SelectItem
                                         key={payee.id}
                                         value={payee.name as string}
@@ -550,7 +653,8 @@ export default function AccountTransactionAdd(props: Props) {
                             EXPENSE (Not counted as such)
                           </SelectItem>
                           <SelectItem value="TRANSFER">TRANSFER</SelectItem>
-                          {!props.hasTransactions && (
+                          {(!props.hasTransactions ||
+                            editTx?.type === "OPENING") && (
                             <SelectItem value="OPENING">OPENING</SelectItem>
                           )}
                         </SelectContent>
@@ -590,12 +694,12 @@ export default function AccountTransactionAdd(props: Props) {
                                         data={account.defaultCurrency as string}
                                         backgroundColor={
                                           getCurrencyColor0(
-                                            account.defaultCurrency as string
+                                            account.defaultCurrency as string,
                                           ) as string
                                         }
                                         textColor={
                                           getCurrencyColor1(
-                                            account.defaultCurrency as string
+                                            account.defaultCurrency as string,
                                           ) as string
                                         }
                                       />
@@ -603,7 +707,7 @@ export default function AccountTransactionAdd(props: Props) {
                                       ""
                                     )}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectGroup>
                           </SelectContent>
@@ -664,7 +768,7 @@ export default function AccountTransactionAdd(props: Props) {
                               variant="outline"
                               className={cn(
                                 "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               {field.value
@@ -791,7 +895,8 @@ export default function AccountTransactionAdd(props: Props) {
                                   </SelectItem>
                                   <Separator className="my-2 px-2" />
                                   {props.userTransactionCategories
-                                    ?.map((category) => (
+                                    ?.filter((category) => category.name)
+                                    .map((category) => (
                                       <SelectItem
                                         key={category.id}
                                         value={category.name as string}
@@ -892,14 +997,15 @@ export default function AccountTransactionAdd(props: Props) {
                                           // Matches by name (not ID) because categories are stored as plain strings in the DB.
                                           // Switching to ID-based lookup requires a DB migration and data migration.
                                           category.name ===
-                                          form.getValues().category
+                                          form.getValues().category,
                                       )
-                                      ?.subcategories?.sort((a, b) =>
+                                      ?.subcategories?.filter((sub) => sub.name)
+                                      .sort((a, b) =>
                                         (a.name as string).localeCompare(
-                                          b.name as string
-                                        )
+                                          b.name as string,
+                                        ),
                                       )
-                                      ?.map((sub) => (
+                                      .map((sub) => (
                                         <SelectItem
                                           key={sub.id}
                                           value={sub.name as string}
@@ -1004,7 +1110,7 @@ export default function AccountTransactionAdd(props: Props) {
                                       {currency.code} - {currency.name} (
                                       {currency.symbol_native})
                                     </SelectItem>
-                                  )
+                                  ),
                                 )}
                               </SelectGroup>
                             </SelectContent>
@@ -1112,125 +1218,146 @@ export default function AccountTransactionAdd(props: Props) {
                   )}
                 />
                 {/* Sales Tax Lines */}
-                {(selectedType === "EXPENSE" || selectedType === "EXPENSE_N") && parseFloat(watchedAmount) > 0 && <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <FormLabel>Sales Tax</FormLabel>
-                  </div>
-                  <div className="space-y-4 border rounded-lg p-4">
-                    {taxFields.length === 0 && (
-                      <p className="text-sm text-muted-foreground">No tax lines added.</p>
-                    )}
-                    {taxFields.map((taxField, index) => {
-                      const rate = parseFloat(watchedTaxLines?.[index]?.rate || "0");
-                      const amount = parseFloat(watchedTaxLines?.[index]?.amount || "0");
-                      const inclusive = watchedTaxLines?.[index]?.inclusive ?? true;
-                      const taxAmount = computeTaxAmount(rate, amount, inclusive);
+                {(selectedType === "EXPENSE" || selectedType === "EXPENSE_N") &&
+                  parseFloat(watchedAmount) > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <FormLabel>Sales Tax</FormLabel>
+                      </div>
+                      <div className="space-y-4 border rounded-lg p-4">
+                        {taxFields.length === 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            No tax lines added.
+                          </p>
+                        )}
+                        {taxFields.map((taxField, index) => {
+                          const rate = parseFloat(
+                            watchedTaxLines?.[index]?.rate || "0",
+                          );
+                          const amount = parseFloat(
+                            watchedTaxLines?.[index]?.amount || "0",
+                          );
+                          const inclusive =
+                            watchedTaxLines?.[index]?.inclusive ?? true;
+                          const taxAmount = computeTaxAmount(
+                            rate,
+                            amount,
+                            inclusive,
+                          );
 
-                      return (
-                        <div key={taxField.id} className="space-y-2 border-b pb-3 last:border-b-0 last:pb-0">
-                          <div className="flex gap-2">
-                            <FormField
-                              control={form.control}
-                              name={`taxLines.${index}.rate`}
-                              render={({ field }) => (
-                                <FormItem className="flex-1">
-                                  <FormLabel>Rate %</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      inputMode="decimal"
-                                      step="0.01"
-                                      min={0}
-                                      max={100}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name={`taxLines.${index}.amount`}
-                              render={({ field }) => (
-                                <FormItem className="flex-1">
-                                  <FormLabel>Amount</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      inputMode="decimal"
-                                      step="0.01"
-                                      min={0}
-                                      placeholder="50.00"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="mt-8"
-                              onClick={() => removeTax(index)}
+                          return (
+                            <div
+                              key={taxField.id}
+                              className="space-y-2 border-b pb-3 last:border-b-0 last:pb-0"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <FormField
-                              control={form.control}
-                              name={`taxLines.${index}.inclusive`}
-                              render={({ field }) => (
-                                <FormItem className="flex items-center gap-2">
-                                  <FormControl>
-                                    <input
-                                      type="checkbox"
-                                      checked={field.value}
-                                      onChange={field.onChange}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="mt-0! font-normal text-sm">
-                                    Tax included in amount
-                                  </FormLabel>
-                                </FormItem>
-                              )}
-                            />
-                            {rate > 0 && amount > 0 ? (
-                              <span className="text-sm text-muted-foreground">
-                                Tax: {taxAmount.toFixed(2)}
-                              </span>
-                            ) : !watchedTaxLines?.[index]?.rate && (
-                              <span className="text-sm text-destructive">
-                                Rate required to register tax
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {taxFields.length > 0 && (() => {
-                      const totalTax = computeTotalTax(watchedTaxLines);
-                      return totalTax > 0 ? (
-                        <div className="text-sm font-medium pt-2 border-t">
-                          Total Tax: {totalTax.toFixed(2)}
-                        </div>
-                      ) : null;
-                    })()}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => appendTax({
-                        rate: "21",
-                        amount: form.getValues("amountForm") || "",
-                        inclusive: true,
-                      })}
-                    >
-                      + Add tax line
-                    </Button>
-                  </div>
-                </div>}
+                              <div className="flex gap-2">
+                                <FormField
+                                  control={form.control}
+                                  name={`taxLines.${index}.rate`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex-1">
+                                      <FormLabel>Rate %</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          inputMode="decimal"
+                                          step="0.01"
+                                          min={0}
+                                          max={100}
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name={`taxLines.${index}.amount`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex-1">
+                                      <FormLabel>Amount</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          inputMode="decimal"
+                                          step="0.01"
+                                          min={0}
+                                          placeholder="50.00"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  className="mt-8"
+                                  onClick={() => removeTax(index)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <FormField
+                                  control={form.control}
+                                  name={`taxLines.${index}.inclusive`}
+                                  render={({ field }) => (
+                                    <FormItem className="flex items-center gap-2">
+                                      <FormControl>
+                                        <input
+                                          type="checkbox"
+                                          checked={field.value}
+                                          onChange={field.onChange}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="mt-0! font-normal text-sm">
+                                        Tax included in amount
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
+                                {rate > 0 && amount > 0 ? (
+                                  <span className="text-sm text-muted-foreground">
+                                    Tax: {taxAmount.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  !watchedTaxLines?.[index]?.rate && (
+                                    <span className="text-sm text-destructive">
+                                      Rate required to register tax
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {taxFields.length > 0 &&
+                          (() => {
+                            const totalTax = computeTotalTax(watchedTaxLines);
+                            return totalTax > 0 ? (
+                              <div className="text-sm font-medium pt-2 border-t">
+                                Total Tax: {totalTax.toFixed(2)}
+                              </div>
+                            ) : null;
+                          })()}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            appendTax({
+                              rate: "21",
+                              amount: form.getValues("amountForm") || "",
+                              inclusive: true,
+                            })
+                          }
+                        >
+                          + Add tax line
+                        </Button>
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
             <DialogFooter>
