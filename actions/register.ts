@@ -9,6 +9,7 @@ import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { detectCountry } from "@/lib/utils/geo";
 
 const limiter = createRateLimiter({
   name: "register",
@@ -33,8 +34,9 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, name } = validatedFields.data;
+  const { email, password, name, userTimezone, userLocale } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
+  const userCountry = await detectCountry();
 
   const existingUser = await getUserByEmail(email);
 
@@ -47,6 +49,10 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
       name,
       email,
       password: hashedPassword,
+      userCountry,
+      userCurrency: "EUR",
+      userTimezone: userTimezone ?? "",
+      userLocale: userLocale ?? "",
     },
   });
 

@@ -16,6 +16,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
+vi.mock("@/lib/utils/timezone", () => ({
+  detectTimezone: () => ({ utc: ["America/New_York"], offset: -5, text: "(UTC-05:00) Eastern Time" }),
+}));
+
 import { register } from "@/actions/register";
 import { RegisterForm } from "./register-form";
 
@@ -68,6 +72,8 @@ describe("RegisterForm", () => {
         name: "John Doe",
         email: "john@example.com",
         password: "password123",
+        userTimezone: "America/New_York",
+        userLocale: "en-US",
       });
     });
   });

@@ -36,6 +36,7 @@ model User {
   userTimezone              String                    @default("") @map("defaultTimezone")
   userLocale                String                    @default("") @map("defaultLocale")
   theme                     String                    @default("")
+  preferencesSet            Boolean                   @default(false)
   twoFactorEnabled          Boolean                   @default(false)
   totpSecret                String?
   twoFactorBackupCodes      TwoFactorBackupCode[]

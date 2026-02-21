@@ -20,7 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -92,19 +98,19 @@ const UserPage = () => {
 
   return (
     <Layout02b>
-      <Card className="md:w-150">
-        <CardHeader>
-          <h1 className="text-2xl font-semibold text-center">Settings</h1>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              action=""
-              className="space-y-6"
-              onSubmit={form.handleSubmit(onSubmit)}
-              aria-busy={isPending}
-            >
-              <div className="space-y-4">
+      <div className="w-full h-full p-4 md:p-8">
+        <Form {...form}>
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            onSubmit={form.handleSubmit(onSubmit)}
+            aria-busy={isPending}
+          >
+            {/* Profile */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -116,75 +122,91 @@ const UserPage = () => {
                           {...field}
                           placeholder="John Doe"
                           disabled={isPending}
-                        ></Input>
+                        />
                       </FormControl>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
                 {user?.isOAuth === false && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="john.doe@example.com"
-                              disabled={isPending}
-                              type="email"
-                            ></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="*******"
-                              disabled={isPending}
-                              type="password"
-                            ></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <FormField
-                      control={form.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>New Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="*******"
-                              disabled={isPending}
-                              type="password"
-                            ></Input>
-                          </FormControl>
-                          <FormMessage></FormMessage>
-                        </FormItem>
-                      )}
-                    ></FormField>
-                    <div className="rounded-lg border p-4">
-                      <TwoFactorSection
-                        initialEnabled={user?.twoFactorEnabled ?? false}
-                      />
-                    </div>
-                  </>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="john.doe@example.com"
+                            disabled={isPending}
+                            type="email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Security */}
+            {user?.isOAuth === false && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="*******"
+                            disabled={isPending}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="*******"
+                            disabled={isPending}
+                            type="password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <TwoFactorSection
+                    initialEnabled={user?.twoFactorEnabled ?? false}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Preferences */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Preferences</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="role"
@@ -198,7 +220,7 @@ const UserPage = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a role"></SelectValue>
+                            <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -206,54 +228,21 @@ const UserPage = () => {
                           <SelectItem value={UserRole.USER}>User</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
                 <FormField
                   control={form.control}
                   name="userCountry"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Country</FormLabel>
-                        <Select
-                          disabled={isPending}
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a country"></SelectValue>
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countries.map((country: Country) => (
-                              <SelectItem
-                                value={country["alpha-2"]}
-                                key={country["alpha-2"]}
-                              >
-                                {country["alpha-2"]} {country["emoji-flag"]}{" "}
-                                {"  "}
-                                {country.name}
-                                {"  "}
-                                {country["full-name"] &&
-                                  "(" + country["full-name"] + ")"}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage></FormMessage>
-                      </FormItem>
-                    );
-                  }}
-                ></FormField>
-                <FormField
-                  control={form.control}
-                  name="userCurrency"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Country</FormLabel>
+                        {!user?.preferencesSet && (
+                          <Badge variant="secondary">Detected</Badge>
+                        )}
+                      </div>
                       <Select
                         disabled={isPending}
                         onValueChange={field.onChange}
@@ -261,7 +250,48 @@ const UserPage = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a currency"></SelectValue>
+                            <SelectValue placeholder="Select a country" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {countries.map((country: Country) => (
+                            <SelectItem
+                              value={country["alpha-2"]}
+                              key={country["alpha-2"]}
+                            >
+                              {country["alpha-2"]} {country["emoji-flag"]}{" "}
+                              {"  "}
+                              {country.name}
+                              {"  "}
+                              {country["full-name"] &&
+                                "(" + country["full-name"] + ")"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="userCurrency"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Currency</FormLabel>
+                        {!user?.preferencesSet && (
+                          <Badge variant="secondary">Default</Badge>
+                        )}
+                      </div>
+                      <Select
+                        disabled={isPending}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a currency" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -276,16 +306,21 @@ const UserPage = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
                 <FormField
                   control={form.control}
                   name="userTimezone"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Timezone</FormLabel>
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Timezone</FormLabel>
+                        {!user?.preferencesSet && (
+                          <Badge variant="secondary">Detected</Badge>
+                        )}
+                      </div>
                       <Select
                         disabled={isPending}
                         onValueChange={field.onChange}
@@ -293,7 +328,7 @@ const UserPage = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a timezone"></SelectValue>
+                            <SelectValue placeholder="Select a timezone" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -301,7 +336,8 @@ const UserPage = () => {
                             .filter(
                               (tz: Timezone, i: number, arr: Timezone[]) =>
                                 tz.utc.length > 0 &&
-                                arr.findIndex((t) => t.utc[0] === tz.utc[0]) === i
+                                arr.findIndex((t) => t.utc[0] === tz.utc[0]) ===
+                                  i
                             )
                             .map((timezone: Timezone) => (
                               <SelectItem
@@ -313,41 +349,55 @@ const UserPage = () => {
                             ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
+                />
                 <FormField
                   control={form.control}
                   name="userLocale"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Locale</FormLabel>
+                    <FormItem className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Locale</FormLabel>
+                        {!user?.preferencesSet && (
+                          <Badge variant="secondary">Detected</Badge>
+                        )}
+                      </div>
                       <FormControl>
                         <Input
                           {...field}
                           placeholder="en-US, es-ES, ca-AD..."
                           disabled={isPending}
-                        ></Input>
+                        />
                       </FormControl>
-                      <FormMessage></FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
-                <div className="flex flex-col gap-2">
-                  <FormLabel>Theme</FormLabel>
-                  <ModeToggle />
-                </div>
-              </div>
-              <FormError message={error}></FormError>
-              <FormSuccess message={success}></FormSuccess>
+                />
+              </CardContent>
+            </Card>
+
+            {/* Appearance */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Appearance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ModeToggle />
+              </CardContent>
+            </Card>
+
+            <div className="md:col-span-2 space-y-6">
+              <FormError message={error} />
+              <FormSuccess message={success} />
               <Button disabled={isPending} type="submit">
                 Save
               </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </div>
+          </form>
+        </Form>
+      </div>
     </Layout02b>
   );
 };

@@ -80,6 +80,8 @@ export const RegisterSchema = z.object({
   name: z.string().min(1, {
     message: "Name is required",
   }),
+  userTimezone: z.optional(z.string()),
+  userLocale: z.optional(z.string()),
 });
 
 // --- API Route Schemas ---

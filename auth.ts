@@ -43,6 +43,7 @@ export const {
         session.user.userTimezone = token.userTimezone ?? "";
         session.user.userLocale = token.userLocale || "en-US";
         session.user.twoFactorEnabled = token.twoFactorEnabled ?? false;
+        session.user.preferencesSet = token.preferencesSet ?? false;
       }
 
       return session;
@@ -65,6 +66,7 @@ export const {
       token.userTimezone = existingUser.userTimezone ?? "";
       token.userLocale = existingUser.userLocale || "en-US";
       token.twoFactorEnabled = existingUser.twoFactorEnabled;
+      token.preferencesSet = existingUser.preferencesSet;
 
       return token;
     },

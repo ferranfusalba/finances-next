@@ -12,12 +12,7 @@ export default async function SettingsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const defaultSettings = [
-    { id: "overview-server", name: "User's Overview (Server component)" },
-    { id: "overview-client", name: "User's Overview (Client component)" },
-    { id: "user", name: "User" },
-    { id: "admin", name: "Admin" },
-  ];
+  const defaultSettings = [{ id: "user", name: "User" }];
 
   return (
     <>

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { register } from "@/actions/register";
+import { detectTimezone } from "@/lib/utils/timezone";
 
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { FormError } from "@/components/form-error";
@@ -41,8 +42,15 @@ export const RegisterForm = () => {
     setError("");
     setSuccess("");
 
+    const detectedTz = detectTimezone();
+    const enriched = {
+      ...values,
+      userTimezone: detectedTz?.utc[0] ?? "",
+      userLocale: navigator.language ?? "en-US",
+    };
+
     startTransition(() => {
-      register(values).then((data) => {
+      register(enriched).then((data) => {
         setError(data.error);
         setSuccess(data.success);
       });

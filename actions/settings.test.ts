@@ -98,6 +98,7 @@ describe("settings", () => {
     expect(updateData.email).toBeUndefined();
     expect(updateData.password).toBeUndefined();
     expect(updateData.newPassword).toBeUndefined();
+    expect(updateData.preferencesSet).toBe(true);
   });
 
   it("sends verification email when changing email", async () => {
@@ -199,6 +200,7 @@ describe("settings", () => {
     const updateData = vi.mocked(db.user.update).mock.calls[0][0].data as Record<string, unknown>;
     expect(updateData.password).toBe("new-hashed-password");
     expect(updateData.newPassword).toBeUndefined();
+    expect(updateData.preferencesSet).toBe(true);
   });
 
   it("updates settings without password change", async () => {
@@ -220,7 +222,7 @@ describe("settings", () => {
     expect(result).toEqual({ success: "Settings Updated" });
     expect(db.user.update).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      data: expect.objectContaining({ name: "New Name" }),
+      data: expect.objectContaining({ name: "New Name", preferencesSet: true }),
     });
   });
 });

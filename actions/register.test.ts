@@ -27,6 +27,10 @@ vi.mock("@/lib/rate-limit", () => ({
   getClientIp: vi.fn().mockResolvedValue("127.0.0.1"),
 }));
 
+vi.mock("@/lib/utils/geo", () => ({
+  detectCountry: vi.fn().mockResolvedValue("US"),
+}));
+
 import { db } from "@/lib/db";
 import { getUserByEmail } from "@/data/user";
 import { generateVerificationToken } from "@/lib/tokens";
@@ -105,6 +109,10 @@ describe("register", () => {
         name: "John",
         email: "new@example.com",
         password: "hashed-password",
+        userCountry: "US",
+        userCurrency: "EUR",
+        userTimezone: "",
+        userLocale: "",
       },
     });
     expect(generateVerificationToken).toHaveBeenCalledWith("new@example.com");
