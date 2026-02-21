@@ -62,7 +62,7 @@ export default function BudgetTransactionAdd(props: Props) {
       foreignCurrencyExchangeRate: "",
       category: "",
       subcategory: "",
-      tags: "",
+      tags: [],
       date: new Date(),
       time: "09:00",
       timezone: detectedTimezoneValue,

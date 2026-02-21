@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
 import { useRouter } from "next/navigation";
 import {
   createColumnHelper,
@@ -25,7 +26,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { DragHorizontal } from "@carbon/icons-react";
+import { DragVertical } from "@carbon/icons-react";
 
 import BackgroundChip from "@/components/chips/BackgroundChip";
 
@@ -73,7 +74,7 @@ function SortableRow({
           {...attributes}
           {...listeners}
         >
-          <DragHorizontal className="h-4 w-4" />
+          <DragVertical className="h-4 w-4" />
         </button>
       </td>
       {children}
@@ -220,6 +221,7 @@ export default function AccountsOverviewTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const isCoarsePointer = useCoarsePointer();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -265,7 +267,7 @@ export default function AccountsOverviewTable({
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch pb-24">
       <DndContext
         id="accounts-table"
-        sensors={sensors}
+        sensors={isCoarsePointer ? [] : sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >

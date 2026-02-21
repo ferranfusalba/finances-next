@@ -14,7 +14,7 @@ import { auth } from "@/auth";
 import { getBudget, getBudgetTransactions } from "@/lib/budgets";
 import { currency } from "@/lib/utils";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
-import { getUserForeignCurrencies, getUserTransactionLocations } from "@/lib/user";
+import { getUserForeignCurrencies, getUserTransactionLocations, getUserTransactionTags } from "@/lib/user";
 
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
 
@@ -41,10 +41,12 @@ export default async function BudgetLayout({
     budgetTransactions,
     userForeignCurrencies,
     userTransactionLocations,
+    userTransactionTags,
   ] = await Promise.all([
     getBudgetTransactions(budget.id),
     getUserForeignCurrencies(userId),
     getUserTransactionLocations(userId),
+    getUserTransactionTags(userId),
   ]);
 
   const color0 = getCurrencyColor0(budget.defaultCurrency) ?? "";
@@ -94,6 +96,7 @@ export default async function BudgetLayout({
           userTransactionCategories: [],
           userForeignCurrencies,
           userTransactionLocations,
+          userTransactionTags,
           hasTransactions: budgetTransactions.length > 0,
         }}
       >

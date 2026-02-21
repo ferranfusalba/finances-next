@@ -16,7 +16,7 @@ const baseFields = {
   foreignCurrencyExchangeRate: z.string(),
   category: z.string(),
   subcategory: z.string(),
-  tags: z.string(),
+  tags: z.array(z.string()),
   date: z.date({ required_error: "A date is required." }),
   time: z.string(),
   timezone: z.string().min(1, {

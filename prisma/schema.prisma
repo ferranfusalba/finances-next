@@ -133,7 +133,7 @@ model AccountTransaction {
   foreignCurrencyExchangeRate Decimal? @default(0.00)
   category                    String   @default("")
   subcategory                 String?  @default("")
-  tags                        String?  @default("")
+  tags                        String[]
   dateTime                    DateTime @default(now())
   timezone                    String?  @default("")
   location                    String?  @default("")
@@ -167,7 +167,7 @@ model BudgetTransaction {
   foreignCurrencyExchangeRate Decimal? @default(0.00)
   category                    String   @default("")
   subcategory                 String?  @default("")
-  tags                        String?  @default("")
+  tags                        String[]
   dateTime                    DateTime @default(now())
   timezone                    String?  @default("")
   location                    String?  @default("")

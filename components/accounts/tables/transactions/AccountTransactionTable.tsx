@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { Edit as EditIcon, TrashCan } from "@carbon/icons-react";
+import { Badge } from "@/components/ui/badge";
 
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import { Button } from "@/components/ui/button";
@@ -194,6 +195,19 @@ export default function AccountTransactionTable(props: Props) {
     columnHelper.accessor("tags", {
       header: "Tags",
       footer: (info) => info.column.id,
+      cell: (info) => {
+        const tags = info.getValue();
+        if (!tags?.length) return null;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="select-none">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        );
+      },
     }),
     columnHelper.accessor("location", {
       header: "Location",

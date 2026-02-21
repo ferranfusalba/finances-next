@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -31,6 +32,7 @@ export default function SectionNavMenuList({
   const [items, setItems] = useState(list);
   useEffect(() => setItems(list), [list]);
 
+  const isCoarsePointer = useCoarsePointer();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -70,7 +72,7 @@ export default function SectionNavMenuList({
   return (
     <DndContext
       id={`nav-${type}`}
-      sensors={sensors}
+      sensors={isCoarsePointer ? [] : sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >

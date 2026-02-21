@@ -102,7 +102,7 @@ export default function AccountTransactionAdd(props: Props) {
         : "",
       category: editTx?.category ?? "",
       subcategory: editTx?.subcategory ?? "",
-      tags: editTx?.tags ?? "",
+      tags: editTx?.tags ?? [],
       date: editDate ?? new Date(),
       time: editTime ?? "09:00",
       timezone: editTimezoneValue ?? detectedTimezoneValue,

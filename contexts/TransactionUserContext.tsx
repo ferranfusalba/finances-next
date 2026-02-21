@@ -26,6 +26,7 @@ interface TransactionUserContextValue {
   }>;
   userForeignCurrencies: string[];
   userTransactionLocations: string[];
+  userTransactionTags: string[];
   hasTransactions: boolean;
 }
 

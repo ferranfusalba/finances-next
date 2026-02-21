@@ -21,7 +21,7 @@ interface Transaction {
   location?: string | null;
   notes: string;
   subcategory?: string | null;
-  tags?: string | null;
+  tags?: string[];
   timezone?: string | null;
   type: string;
   updatedAt: Date;

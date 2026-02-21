@@ -3,6 +3,7 @@
 import { useFormContext } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
+import { TagInput } from "@/components/ui/tag-input";
 import {
   FormControl,
   FormField,
@@ -15,7 +16,7 @@ import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
 export default function TransactionFormMetadataFields() {
   const form = useFormContext();
-  const { userTransactionLocations } = useTransactionUser();
+  const { userTransactionLocations, userTransactionTags } = useTransactionUser();
 
   return (
     <>
@@ -26,14 +27,12 @@ export default function TransactionFormMetadataFields() {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Tags</FormLabel>
-            <FormControl>
-              <Input
-                id="tags"
-                type="text"
-                placeholder="Duty Free, Gifts"
-                {...field}
-              />
-            </FormControl>
+            <TagInput
+              value={field.value ?? []}
+              onChange={field.onChange}
+              placeholder="Duty Free, Gifts..."
+              suggestions={userTransactionTags}
+            />
             <FormMessage />
           </FormItem>
         )}

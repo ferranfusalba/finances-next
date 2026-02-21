@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: AccountBudgetParamsP
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.flatten().fieldErrors },
+      { error: parsed.error.issues.map((i) => i.message).join(", ") },
       { status: 400 }
     );
   }

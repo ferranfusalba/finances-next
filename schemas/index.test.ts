@@ -529,6 +529,37 @@ describe("CreateAccountTransactionSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts tags as string array", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      tags: ["amazon", "home-renovation"],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.tags).toEqual(["amazon", "home-renovation"]);
+  });
+
+  it("accepts empty tags array", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      tags: [],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts missing tags (optional)", () => {
+    const result = CreateAccountTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.tags).toBeUndefined();
+  });
+
+  it("rejects tags as plain string", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      tags: "amazon",
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("CreateBudgetTransactionSchema", () => {
@@ -558,6 +589,23 @@ describe("CreateBudgetTransactionSchema", () => {
   it("rejects missing budgetId", () => {
     const { budgetId: _, ...withoutBudgetId } = validTransaction;
     const result = CreateBudgetTransactionSchema.safeParse(withoutBudgetId);
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts tags as string array", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      tags: ["project-x"],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.tags).toEqual(["project-x"]);
+  });
+
+  it("rejects tags as plain string", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      tags: "project-x",
+    });
     expect(result.success).toBe(false);
   });
 });

@@ -31,6 +31,7 @@ import {
   getUserTransactionCategories,
   getUserTransactionLocations,
   getUserTransactionPayees,
+  getUserTransactionTags,
 } from "@/lib/user";
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
 
@@ -58,6 +59,7 @@ export default async function AccountLayout({
     userTransactionCategories,
     userForeignCurrencies,
     userTransactionLocations,
+    userTransactionTags,
   ] = await Promise.all([
     getAccountTransactions(account.id),
     getAccounts(userId),
@@ -65,6 +67,7 @@ export default async function AccountLayout({
     getUserTransactionCategories(userId),
     getUserForeignCurrencies(userId),
     getUserTransactionLocations(userId),
+    getUserTransactionTags(userId),
   ]);
 
   function getCountryFullName(alpha2Code: string) {
@@ -138,6 +141,7 @@ export default async function AccountLayout({
           userTransactionCategories,
           userForeignCurrencies,
           userTransactionLocations,
+          userTransactionTags,
           hasTransactions: accountTransactions.length > 0,
         }}
       >

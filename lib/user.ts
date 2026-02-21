@@ -66,6 +66,29 @@ export async function getUserTransactionLocations(userId: string) {
   return Array.from(locations).sort();
 }
 
+export async function getUserTransactionTags(userId: string) {
+  const [accountTags, budgetTags] = await Promise.all([
+    db.accountTransaction.findMany({
+      where: { Account: { userId }, tags: { isEmpty: false } },
+      select: { tags: true },
+    }),
+    db.budgetTransaction.findMany({
+      where: { Budget: { userId }, tags: { isEmpty: false } },
+      select: { tags: true },
+    }),
+  ]);
+
+  const tags = new Set<string>();
+  for (const t of accountTags) {
+    for (const tag of t.tags) tags.add(tag);
+  }
+  for (const t of budgetTags) {
+    for (const tag of t.tags) tags.add(tag);
+  }
+
+  return Array.from(tags).sort();
+}
+
 export async function getUserTransactionCategories(id: string) {
   return await db.userTransactionCategory.findMany({
     where: {
