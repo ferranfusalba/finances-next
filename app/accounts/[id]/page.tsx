@@ -7,6 +7,7 @@ import AccountTransactionAdd from "@/components/accounts/tables/transactions/Acc
 import AccountTransactionDownload from "@/components/accounts/tables/transactions/AccountTransactionDownload";
 import AccountTransactionExpandable from "@/components/accounts/tables/transactions/AccountTransactionExpandable";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
+import EditAccount from "@/components/accounts/edit/EditAccount";
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
@@ -18,6 +19,7 @@ import {
   getAccountTransactions,
 } from "@/lib/accounts";
 import { currency } from "@/lib/utils";
+import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 import { getCountryFlag, getCountryName } from "@/lib/utils/country";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
@@ -126,7 +128,8 @@ export default async function AccountLayout({
               />
             </div>
           </div>
-          <div className="col-span-2 md:col-span-1 grid justify-center content-center">
+          <div className="col-span-2 md:col-span-1 grid justify-center content-center gap-2">
+            <EditAccount account={account} accountTypes={getUniqueAccountTypes(userAccounts)} />
             <DeleteAccount id={id} />
           </div>
         </LayoutAccountBudgetHeader>

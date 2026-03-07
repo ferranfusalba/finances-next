@@ -27,6 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import AccountTypeField from "@/components/accounts/form/AccountTypeField";
+
 import countries from "@/statics/countries.json";
 import currencies from "@/statics/currencies.json";
 
@@ -35,6 +37,7 @@ import { Country } from "@/types/Country";
 
 interface Props {
   user: User;
+  accountTypes: string[];
 }
 
 export default function NewAccountForm(props: Props) {
@@ -183,23 +186,7 @@ export default function NewAccountForm(props: Props) {
             )}
           />
           {/* Type */}
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Account Type*</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Checking"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <AccountTypeField accountTypes={props.accountTypes} />
           {/* Number */}
           <FormField
             control={form.control}
