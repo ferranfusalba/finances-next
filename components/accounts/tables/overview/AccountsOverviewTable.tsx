@@ -42,9 +42,11 @@ const columnHelper = createColumnHelper<Account>();
 function SortableRow({
   row,
   children,
+  isCoarsePointer,
 }: {
   row: { id: string; original: Account };
   children: React.ReactNode;
+  isCoarsePointer: boolean;
 }) {
   const {
     attributes,
@@ -53,7 +55,7 @@ function SortableRow({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: row.original.id });
+  } = useSortable({ id: row.original.id, disabled: isCoarsePointer });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -70,7 +72,7 @@ function SortableRow({
       <td className="p-2">
         <button
           aria-label="Drag to reorder"
-          className="select-none cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity"
+          className="hidden pointer-fine:block select-none cursor-grab active:cursor-grabbing opacity-50 hover:opacity-100 transition-opacity"
           {...attributes}
           {...listeners}
         >
@@ -267,7 +269,7 @@ export default function AccountsOverviewTable({
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch pb-24">
       <DndContext
         id="accounts-table"
-        sensors={isCoarsePointer ? [] : sensors}
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
@@ -300,7 +302,7 @@ export default function AccountsOverviewTable({
           >
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <SortableRow key={row.original.id} row={row}>
+                <SortableRow key={row.original.id} row={row} isCoarsePointer={isCoarsePointer}>
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-2">
                       {flexRender(

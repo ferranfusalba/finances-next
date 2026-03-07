@@ -30,6 +30,7 @@ export const viewport: Viewport = {
   initialScale: 1.0,
   maximumScale: 1.0,
   userScalable: false,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
@@ -91,15 +92,15 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <header className="fixed top-0 w-full z-10">
+            <header className="fixed top-0 w-full z-10 bg-white dark:bg-black pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
               <TopNav />
             </header>
-            <main className="pt-16 pb-16 md:pb-12 h-screen">
+            <main className="pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-12 h-screen pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
               <Toaster />
               {children}
             </main>
             <footer
-              className={`fixed bottom-0 w-full h-auto ${!serverSession?.user ? "hidden" : ""}`}
+              className={`fixed bottom-0 w-full h-auto bg-white dark:bg-black pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${!serverSession?.user ? "hidden" : ""}`}
             >
               <BottomNav />
             </footer>

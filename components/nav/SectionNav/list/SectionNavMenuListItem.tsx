@@ -11,9 +11,11 @@ import { cn } from "@/lib/utils";
 export default function SectionNavMenuListItem({
   item,
   type,
+  isCoarsePointer,
 }: {
   item: { id: string; name: string; bankName?: string; active?: boolean };
   type: string;
+  isCoarsePointer: boolean;
 }) {
   const pathname = usePathname();
   const accountSelected = "/accounts/" + item.id === pathname;
@@ -31,7 +33,7 @@ export default function SectionNavMenuListItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id, disabled: !draggable });
+  } = useSortable({ id: item.id, disabled: !draggable || isCoarsePointer });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -72,7 +74,7 @@ export default function SectionNavMenuListItem({
     >
       {draggable && (
         <button
-          className="select-none cursor-grab active:cursor-grabbing px-1 opacity-50 hover:opacity-100 transition-opacity"
+          className="hidden pointer-fine:block select-none cursor-grab active:cursor-grabbing px-1 opacity-50 hover:opacity-100 transition-opacity"
           {...attributes}
           {...listeners}
         >

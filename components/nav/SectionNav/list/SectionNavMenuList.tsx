@@ -72,7 +72,7 @@ export default function SectionNavMenuList({
   return (
     <DndContext
       id={`nav-${type}`}
-      sensors={isCoarsePointer ? [] : sensors}
+      sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
@@ -86,6 +86,7 @@ export default function SectionNavMenuList({
               item={item}
               key={item.id}
               type={type}
+              isCoarsePointer={isCoarsePointer}
             />
           ))}
         </ol>
