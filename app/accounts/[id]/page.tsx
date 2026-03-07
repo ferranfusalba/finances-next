@@ -27,6 +27,7 @@ import countries from "@/statics/countries.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import {
+  getUserDefaultTaxRate,
   getUserForeignCurrencies,
   getUserTransactionCategories,
   getUserTransactionLocations,
@@ -58,6 +59,7 @@ export default async function AccountLayout({
     userForeignCurrencies,
     userTransactionLocations,
     userTransactionTags,
+    userDefaultTaxRate,
   ] = await Promise.all([
     getAccountTransactions(account.id),
     getAccounts(userId),
@@ -66,6 +68,7 @@ export default async function AccountLayout({
     getUserForeignCurrencies(userId),
     getUserTransactionLocations(userId),
     getUserTransactionTags(userId),
+    getUserDefaultTaxRate(userId),
   ]);
 
   function getCountryFullName(alpha2Code: string) {
@@ -141,7 +144,15 @@ export default async function AccountLayout({
           userTimezone: serverSession?.user?.userTimezone ?? "",
           userAccounts,
           userTransactionPayees,
-          userTransactionCategories,
+          userTransactionCategories: userTransactionCategories.map((cat) => ({
+            ...cat,
+            defaultTaxRate: cat.defaultTaxRate != null ? Number(String(cat.defaultTaxRate)) : null,
+            subcategories: cat.subcategories.map((sub) => ({
+              ...sub,
+              defaultTaxRate: sub.defaultTaxRate != null ? Number(String(sub.defaultTaxRate)) : null,
+            })),
+          })),
+          userDefaultTaxRate,
           userForeignCurrencies,
           userTransactionLocations,
           userTransactionTags,

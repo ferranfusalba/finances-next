@@ -65,13 +65,21 @@ export default function AccountTypeField({ accountTypes }: Props) {
             <SelectContent>
               <SelectItem value="__new__">Add a new type</SelectItem>
               <Separator className="my-2 px-2" />
-              {accountTypes
-                .sort((a, b) => a.localeCompare(b))
-                .map((type) => (
+              {(() => {
+                const sorted = accountTypes.sort((a, b) => a.localeCompare(b));
+                if (!sorted.length) {
+                  return (
+                    <p className="text-sm text-muted-foreground text-center py-2 select-none">
+                      No account types yet
+                    </p>
+                  );
+                }
+                return sorted.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
                   </SelectItem>
-                ))}
+                ));
+              })()}
             </SelectContent>
           </Select>
 

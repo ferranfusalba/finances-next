@@ -2,6 +2,29 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const categories = await db.userTransactionCategory.findMany({
+    where: { userId: user.id },
+    select: {
+      id: true,
+      name: true,
+      defaultTaxRate: true,
+      subcategories: {
+        select: { id: true, name: true, defaultTaxRate: true },
+        orderBy: { name: "asc" },
+      },
+    },
+    orderBy: { name: "asc" },
+  });
+
+  return NextResponse.json(categories);
+}
+
 export async function POST(request: Request) {
   const user = await currentUser();
   if (!user?.id) {
@@ -43,4 +66,67 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(transactionCategory);
+}
+
+export async function PATCH(request: Request) {
+  const user = await currentUser();
+  if (!user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const data = await request.json();
+  const rate =
+    data.defaultTaxRate === null || data.defaultTaxRate === ""
+      ? null
+      : data.defaultTaxRate;
+
+  // Update a subcategory
+  if (data.subcategoryId) {
+    const sub = await db.userTransactionSubcategory.findFirst({
+      where: {
+        id: data.subcategoryId,
+        category: { userId: user.id },
+      },
+    });
+
+    if (!sub) {
+      return NextResponse.json(
+        { error: "Subcategory not found" },
+        { status: 404 },
+      );
+    }
+
+    const updated = await db.userTransactionSubcategory.update({
+      where: { id: data.subcategoryId },
+      data: { defaultTaxRate: rate },
+    });
+
+    return NextResponse.json(updated);
+  }
+
+  // Update a category
+  if (!data.categoryId) {
+    return NextResponse.json(
+      { error: "categoryId or subcategoryId is required" },
+      { status: 400 },
+    );
+  }
+
+  const category = await db.userTransactionCategory.findFirst({
+    where: { id: data.categoryId, userId: user.id },
+  });
+
+  if (!category) {
+    return NextResponse.json(
+      { error: "Category not found" },
+      { status: 404 },
+    );
+  }
+
+  const updated = await db.userTransactionCategory.update({
+    where: { id: data.categoryId },
+    data: { defaultTaxRate: rate },
+  });
+
+  return NextResponse.json(updated);
 }

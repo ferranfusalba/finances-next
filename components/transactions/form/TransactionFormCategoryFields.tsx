@@ -37,13 +37,11 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
   const [newSubcategory, setNewSubcategory] = useState("");
 
   const category = useWatch({ control: form.control, name: "category" });
-  const isInitialMount = useRef(true);
+  const prevCategory = useRef(category);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
+    if (prevCategory.current === category) return;
+    prevCategory.current = category;
     if (variant === "account") {
       form.setValue("subcategory", "");
     }
@@ -139,21 +137,30 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                           Add a new category
                         </SelectItem>
                         <Separator className="my-2 px-2" />
-                        {userTransactionCategories
-                          ?.filter((cat) => cat.name)
-                          .sort((a, b) =>
-                            (a.name as string).localeCompare(
-                              b.name as string,
-                            ),
-                          )
-                          .map((cat) => (
+                        {(() => {
+                          const categories = userTransactionCategories
+                            ?.filter((cat) => cat.name)
+                            .sort((a, b) =>
+                              (a.name as string).localeCompare(
+                                b.name as string,
+                              ),
+                            );
+                          if (!categories?.length) {
+                            return (
+                              <p className="text-sm text-muted-foreground text-center py-2 select-none">
+                                No categories yet
+                              </p>
+                            );
+                          }
+                          return categories.map((cat) => (
                             <SelectItem
                               key={cat.id}
                               value={cat.name as string}
                             >
                               {cat.name}
                             </SelectItem>
-                          ))}
+                          ));
+                        })()}
                       </SelectContent>
                     </Select>
 
@@ -219,10 +226,11 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                             ? "__new__"
                             : controllerField.value || ""
                         }
+                        disabled={!category}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a subcategory" />
+                            <SelectValue placeholder={category ? "Select a subcategory" : "Select a category first"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -230,25 +238,31 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                             Add a new subcategory
                           </SelectItem>
                           <Separator className="my-2 px-2" />
-                          {userTransactionCategories
-                            ?.find(
-                              (cat) =>
-                                cat.name === category,
-                            )
-                            ?.subcategories?.filter((sub) => sub.name)
-                            .sort((a, b) =>
-                              (a.name as string).localeCompare(
-                                b.name as string,
-                              ),
-                            )
-                            .map((sub) => (
+                          {(() => {
+                            const subcategories = userTransactionCategories
+                              ?.find((cat) => cat.name === category)
+                              ?.subcategories?.filter((sub) => sub.name)
+                              .sort((a, b) =>
+                                (a.name as string).localeCompare(
+                                  b.name as string,
+                                ),
+                              );
+                            if (!subcategories?.length) {
+                              return (
+                                <p className="text-sm text-muted-foreground text-center py-2 select-none">
+                                  No subcategories yet
+                                </p>
+                              );
+                            }
+                            return subcategories.map((sub) => (
                               <SelectItem
                                 key={sub.id}
                                 value={sub.name as string}
                               >
                                 {sub.name}
                               </SelectItem>
-                            ))}
+                            ));
+                          })()}
                         </SelectContent>
                       </Select>
 

@@ -9,6 +9,14 @@ export default async function AccountsPage() {
   const userLocale = serverSession?.user?.userLocale ?? "en-US";
   const userAccounts = await getAccounts(serverSession?.user.id as string);
 
+  if (!userAccounts.length) {
+    return (
+      <div className="w-full h-full grid justify-center content-center">
+        No accounts yet, add a new one
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full p-4 md:p-8">
       <AccountsOverviewTable

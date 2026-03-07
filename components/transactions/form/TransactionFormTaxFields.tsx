@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,12 @@ import {
 import { TrashCan as Trash2 } from "@carbon/icons-react";
 
 import { computeTaxAmount, computeTotalTax } from "@/lib/utils/transaction";
+import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
 export default function TransactionFormTaxFields() {
   const form = useFormContext();
+  const { userTransactionCategories, userDefaultTaxRate } = useTransactionUser();
+  const fallbackRate = String(userDefaultTaxRate);
 
   const {
     fields: taxFields,
@@ -37,6 +40,42 @@ export default function TransactionFormTaxFields() {
     name: "amountForm",
   });
   const selectedType = useWatch({ control: form.control, name: "type" });
+  const watchedCategory = useWatch({ control: form.control, name: "category" });
+  const watchedSubcategory = useWatch({
+    control: form.control,
+    name: "subcategory",
+  });
+
+  const categoryMatch = userTransactionCategories?.find(
+    (cat) => cat.name === watchedCategory,
+  );
+  const subcategoryMatch = categoryMatch?.subcategories?.find(
+    (sub) => sub.name === watchedSubcategory,
+  );
+
+  // Resolution: subcategory > category > user default
+  const presetRate =
+    subcategoryMatch?.defaultTaxRate != null
+      ? String(subcategoryMatch.defaultTaxRate)
+      : categoryMatch?.defaultTaxRate != null
+        ? String(categoryMatch.defaultTaxRate)
+        : fallbackRate;
+
+  const isInitialMount = useRef(true);
+  const prevPresetRate = useRef(presetRate);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevPresetRate.current = presetRate;
+      return;
+    }
+    if (presetRate === prevPresetRate.current) return;
+    prevPresetRate.current = presetRate;
+    if (!watchedTaxLines?.length) return;
+    watchedTaxLines.forEach((_: unknown, index: number) => {
+      form.setValue(`taxLines.${index}.rate`, presetRate);
+    });
+  }, [presetRate]);
 
   useEffect(() => {
     if (!watchedAmount || !watchedTaxLines?.length) return;
@@ -176,7 +215,7 @@ export default function TransactionFormTaxFields() {
           size="sm"
           onClick={() =>
             appendTax({
-              rate: "21",
+              rate: presetRate,
               amount: form.getValues("amountForm") || "",
               inclusive: true,
             })

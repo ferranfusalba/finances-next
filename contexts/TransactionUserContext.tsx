@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
+import type { Decimal } from "@prisma/client/runtime/library";
 import { Account } from "@/types/Account";
 
 interface TransactionUserContextValue {
@@ -17,13 +18,16 @@ interface TransactionUserContextValue {
     id: string | null;
     userId: string | null;
     name: string | null;
+    defaultTaxRate: Decimal | number | string | null;
     subcategories: Array<{
       categoryId: string | null;
       id: string | null;
       name: string | null;
       userId: string | null;
+      defaultTaxRate?: Decimal | number | string | null;
     }>;
   }>;
+  userDefaultTaxRate: number;
   userForeignCurrencies: string[];
   userTransactionLocations: string[];
   userTransactionTags: string[];

@@ -12,7 +12,10 @@ export default async function SettingsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const defaultSettings = [{ id: "user", name: "User" }];
+  const defaultSettings = [
+    { id: "user", name: "User" },
+    { id: "tax-presets", name: "Tax Presets" },
+  ];
 
   return (
     <>

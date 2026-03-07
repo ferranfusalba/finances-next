@@ -37,6 +37,7 @@ model User {
   userLocale                String                    @default("") @map("defaultLocale")
   theme                     String                    @default("")
   preferencesSet            Boolean                   @default(false)
+  defaultTaxRate            Decimal                   @default(21)
   twoFactorEnabled          Boolean                   @default(false)
   totpSecret                String?
   twoFactorBackupCodes      TwoFactorBackupCode[]
@@ -72,9 +73,10 @@ model UserTransactionPayee {
 }
 
 model UserTransactionCategory {
-  id     String  @id @default(cuid())
-  userId String?
-  name   String
+  id             String   @id @default(cuid())
+  userId         String?
+  name           String
+  defaultTaxRate Decimal?
 
   User          User?                        @relation(fields: [userId], references: [id])
   subcategories UserTransactionSubcategory[]
@@ -83,11 +85,12 @@ model UserTransactionCategory {
 }
 
 model UserTransactionSubcategory {
-  id         String                  @id @default(cuid())
-  userId     String?
-  name       String
-  category   UserTransactionCategory @relation(fields: [categoryId], references: [id])
-  categoryId String
+  id             String                  @id @default(cuid())
+  userId         String?
+  name           String
+  defaultTaxRate Decimal?
+  category       UserTransactionCategory @relation(fields: [categoryId], references: [id])
+  categoryId     String
 
   @@unique([categoryId, name])
 }

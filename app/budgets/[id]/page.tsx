@@ -94,6 +94,7 @@ export default async function BudgetLayout({
           userAccounts: [],
           userTransactionPayees: [],
           userTransactionCategories: [],
+          userDefaultTaxRate: 21,
           userForeignCurrencies,
           userTransactionLocations,
           userTransactionTags,

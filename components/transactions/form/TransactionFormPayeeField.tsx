@@ -78,21 +78,30 @@ export default function TransactionFormPayeeField() {
                         Add a new payee
                       </SelectItem>
                       <Separator className="my-2 px-2" />
-                      {userTransactionPayees
-                        ?.filter((payee) => payee.name)
-                        .sort((a, b) =>
-                          (a.name as string).localeCompare(
-                            b.name as string,
-                          ),
-                        )
-                        .map((payee) => (
+                      {(() => {
+                        const payees = userTransactionPayees
+                          ?.filter((payee) => payee.name)
+                          .sort((a, b) =>
+                            (a.name as string).localeCompare(
+                              b.name as string,
+                            ),
+                          );
+                        if (!payees?.length) {
+                          return (
+                            <p className="text-sm text-muted-foreground text-center py-2 select-none">
+                              No payees yet
+                            </p>
+                          );
+                        }
+                        return payees.map((payee) => (
                           <SelectItem
                             key={payee.id}
                             value={payee.name as string}
                           >
                             {payee.name}
                           </SelectItem>
-                        ))}
+                        ));
+                      })()}
                     </SelectContent>
                   </Select>
 

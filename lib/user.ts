@@ -99,3 +99,11 @@ export async function getUserTransactionCategories(id: string) {
     },
   });
 }
+
+export async function getUserDefaultTaxRate(userId: string): Promise<number> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { defaultTaxRate: true },
+  });
+  return user?.defaultTaxRate != null ? Number(String(user.defaultTaxRate)) : 21;
+}

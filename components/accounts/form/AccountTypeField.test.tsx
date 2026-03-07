@@ -79,11 +79,10 @@ describe("AccountTypeField", () => {
     expect(screen.getByRole("combobox")).toHaveTextContent("Checking");
   });
 
-  it("renders empty list when no account types exist", () => {
+  it("renders only 'Add a new type' option when no account types exist", () => {
     render(<Wrapper accountTypes={[]} />);
 
     const options = screen.getAllByRole("option", { hidden: true });
-    // Only "Add a new type"
     expect(options).toHaveLength(1);
     expect(options[0]).toHaveTextContent("Add a new type");
   });
