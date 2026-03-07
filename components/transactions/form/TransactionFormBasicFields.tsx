@@ -32,10 +32,9 @@ interface Props {
 
 export default function TransactionFormBasicFields({ variant, account }: Props) {
   const form = useFormContext();
-  const { userAccounts, hasTransactions } = useTransactionUser();
+  const { userAccounts } = useTransactionUser();
 
   const selectedType = useWatch({ control: form.control, name: "type" });
-  const editType = form.getValues("type");
 
   const userAccounts4Transactions = userAccounts?.filter(
     (a) => a.name !== account?.name,
@@ -110,10 +109,9 @@ export default function TransactionFormBasicFields({ variant, account }: Props) 
                     TRANSFER
                   </SelectItem>
                 )}
-                {variant === "account" &&
-                  (!hasTransactions || editType === "OPENING") && (
-                    <SelectItem value="OPENING">OPENING</SelectItem>
-                  )}
+                {variant === "account" && (
+                  <SelectItem value="OPENING">OPENING</SelectItem>
+                )}
               </SelectContent>
             </Select>
             <FormMessage />

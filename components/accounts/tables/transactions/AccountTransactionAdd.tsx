@@ -163,8 +163,8 @@ export default function AccountTransactionAdd(props: Props) {
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate(),
-      Number(values.time.split(":")[0]) || 9,
-      Number(values.time.split(":")[1]) || 0,
+      Number(values.time.split(":")[0] ?? 9),
+      Number(values.time.split(":")[1] ?? 0),
       0,
       timezoneToOffset,
     );
@@ -191,17 +191,20 @@ export default function AccountTransactionAdd(props: Props) {
     const accountId = props.account?.id;
 
     startTransition(async () => {
-      await fetch("/api/user/transaction-payees/", {
-        method: "POST",
-        body: JSON.stringify({ name: payee }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      await fetch("/api/user/transaction-categories/", {
-        method: "POST",
-        body: JSON.stringify({ name: category }),
-        headers: { "Content-Type": "application/json" },
-      });
+      await Promise.all([
+        payee &&
+          fetch("/api/user/transaction-payees/", {
+            method: "POST",
+            body: JSON.stringify({ name: payee }),
+            headers: { "Content-Type": "application/json" },
+          }),
+        category &&
+          fetch("/api/user/transaction-categories/", {
+            method: "POST",
+            body: JSON.stringify({ name: category, subcategory }),
+            headers: { "Content-Type": "application/json" },
+          }),
+      ]);
 
       const transactionPayload = {
         payee,

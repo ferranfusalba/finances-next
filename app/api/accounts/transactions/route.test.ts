@@ -157,10 +157,13 @@ describe("POST /api/accounts/transactions", () => {
     // Should create 2 transactions
     expect(db.accountTransaction.create).toHaveBeenCalledTimes(2);
 
-    // Second call is the mirror: negated amount, destination accountId
+    // Second call is the mirror: negated amount, destination accountId, shared transferId
+    const originCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
     const mirrorCall = vi.mocked(db.accountTransaction.create).mock.calls[1][0];
     expect(mirrorCall.data.amount).toBe(-100);
     expect(mirrorCall.data.accountId).toBe("acc-2");
+    expect(originCall.data.transferId).toBeDefined();
+    expect(mirrorCall.data.transferId).toBe(originCall.data.transferId);
 
     // Should recompute both accounts' balances
     expect(db.accountTransaction.aggregate).toHaveBeenCalledTimes(2);
@@ -203,6 +206,8 @@ describe("POST /api/accounts/transactions", () => {
     await POST(makeRequest(baseTransaction));
 
     expect(db.accountTransaction.create).toHaveBeenCalledOnce();
+    const call = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+    expect(call.data.transferId).toBeUndefined();
     expect(db.accountTransaction.aggregate).toHaveBeenCalledOnce();
     expect(db.account.update).toHaveBeenCalledOnce();
   });

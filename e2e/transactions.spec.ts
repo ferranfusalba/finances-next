@@ -49,7 +49,7 @@ test.describe("Account Transactions", () => {
     ).toBeVisible();
 
     // Fill payee - select "Add a new payee"
-    await dialog.getByRole("combobox", { name: "Payee*" }).click();
+    await dialog.getByRole("combobox", { name: "Payee" }).click();
     await page.getByRole("option", { name: "Add a new payee" }).click();
     await dialog.getByPlaceholder("ZRH Duty Free").fill("E2E Income Payee");
 
@@ -70,7 +70,7 @@ test.describe("Account Transactions", () => {
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category - select "Add a new category"
-    await dialog.getByRole("combobox", { name: "Category*" }).click();
+    await dialog.getByRole("combobox", { name: "Category" }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("E2E Income Category");
 
@@ -97,7 +97,7 @@ test.describe("Account Transactions", () => {
     ).toBeVisible();
 
     // Fill payee
-    await dialog.getByRole("combobox", { name: "Payee*" }).click();
+    await dialog.getByRole("combobox", { name: "Payee" }).click();
     await page.getByRole("option", { name: "Add a new payee" }).click();
     await dialog.getByPlaceholder("ZRH Duty Free").fill("E2E Expense Payee");
 
@@ -118,7 +118,7 @@ test.describe("Account Transactions", () => {
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category
-    await dialog.getByRole("combobox", { name: "Category*" }).click();
+    await dialog.getByRole("combobox", { name: "Category" }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("E2E Expense Category");
 
@@ -152,7 +152,7 @@ test.describe("Account Transactions", () => {
     ).toBeVisible();
 
     // Fill payee
-    await dialog.getByRole("combobox", { name: "Payee*" }).click();
+    await dialog.getByRole("combobox", { name: "Payee" }).click();
     await page.getByRole("option", { name: "Add a new payee" }).click();
     await dialog.getByPlaceholder("ZRH Duty Free").fill("Transfer");
 
@@ -181,7 +181,7 @@ test.describe("Account Transactions", () => {
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category
-    await dialog.getByRole("combobox", { name: "Category*" }).click();
+    await dialog.getByRole("combobox", { name: "Category" }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("Transfers");
 

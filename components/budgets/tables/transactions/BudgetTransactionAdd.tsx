@@ -80,8 +80,8 @@ export default function BudgetTransactionAdd(props: Props) {
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate(),
-      Number(values.time.split(":")[0]) || 9,
-      Number(values.time.split(":")[1]) || 0,
+      Number(values.time.split(":")[0] ?? 9),
+      Number(values.time.split(":")[1] ?? 0),
       0,
       timezoneToOffset,
     );

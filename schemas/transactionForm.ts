@@ -44,9 +44,7 @@ export function buildAccountTransactionSchema() {
   return z
     .object({
       ...baseFields,
-      payee: z.string().min(1, {
-        message: "Payee is required.",
-      }),
+      payee: z.string(),
       typeTransferDestinationAccount: z.string(),
       taxLines: z.array(
         z.object({

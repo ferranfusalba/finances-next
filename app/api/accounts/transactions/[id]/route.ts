@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -43,7 +44,7 @@ export async function PUT(
   try {
     const existing = await db.accountTransaction.findUnique({
       where: { id },
-      select: { accountId: true },
+      select: { accountId: true, type: true, transferId: true, typeTransferDestination: true, typeTransferOrigin: true, dateTime: true },
     });
 
     if (!existing) {
@@ -83,6 +84,37 @@ export async function PUT(
         } : {}),
       },
     });
+
+    // Backfill transferId for existing transfers that don't have one
+    if (existing.type === "TRANSFER" && !existing.transferId) {
+      const newTransferId = randomUUID();
+      await db.accountTransaction.update({
+        where: { id },
+        data: { transferId: newTransferId },
+      });
+
+      // Find and update the mirror transaction
+      const mirrorAccountId = existing.typeTransferDestination === existing.accountId
+        ? existing.typeTransferOrigin
+        : existing.typeTransferDestination;
+
+      if (mirrorAccountId) {
+        const mirror = await db.accountTransaction.findFirst({
+          where: {
+            accountId: mirrorAccountId,
+            type: "TRANSFER",
+            dateTime: existing.dateTime,
+            transferId: null,
+          },
+        });
+        if (mirror) {
+          await db.accountTransaction.update({
+            where: { id: mirror.id },
+            data: { transferId: newTransferId },
+          });
+        }
+      }
+    }
 
     await recomputeBalance(existing.accountId);
 

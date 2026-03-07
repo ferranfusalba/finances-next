@@ -126,6 +126,7 @@ model AccountTransaction {
   type                        String
   typeTransferOrigin          String?  @default("")
   typeTransferDestination     String?  @default("")
+  transferId                  String?
   currency                    String
   amount                      Decimal
   foreignCurrency             String?  @default("")

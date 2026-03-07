@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -57,12 +58,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const transferId = data.type === "TRANSFER" && data.typeTransferDestination
+      ? randomUUID()
+      : undefined;
+
     const transactionData = {
       payee: data.payee,
       concept: data.concept,
       type: data.type,
       typeTransferOrigin: data.typeTransferOrigin,
       typeTransferDestination: data.typeTransferDestination,
+      transferId,
       currency: data.currency,
       amount: data.amount,
       foreignCurrency: data.foreignCurrency,

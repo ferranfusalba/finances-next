@@ -41,7 +41,7 @@ export default function TransactionFormPayeeField() {
               "border rounded-lg p-4": isAddingNewPayee,
             })}
           >
-            <FormLabel>Payee*</FormLabel>
+            <FormLabel>Payee</FormLabel>
             <Controller
               control={form.control}
               name="payee"

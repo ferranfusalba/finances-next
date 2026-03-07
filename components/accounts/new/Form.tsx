@@ -57,9 +57,7 @@ export default function NewAccountForm(props: Props) {
       message: "Account Type is required.",
     }),
     number: z.string(),
-    country: z.string().min(1, {
-      message: "Country is required.",
-    }),
+    country: z.string(),
     defaultCurrency: z.string().min(1, {
       message: "Currency is required.",
     }),
@@ -140,7 +138,7 @@ export default function NewAccountForm(props: Props) {
             name="bankName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Bank Name</FormLabel>
+                <FormLabel>Bank Name*</FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="N26" {...field} />
                 </FormControl>
@@ -154,7 +152,7 @@ export default function NewAccountForm(props: Props) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Name</FormLabel>
+                <FormLabel>Account Name*</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -172,7 +170,7 @@ export default function NewAccountForm(props: Props) {
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Code</FormLabel>
+                <FormLabel>Account Code*</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -190,7 +188,7 @@ export default function NewAccountForm(props: Props) {
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Account Type</FormLabel>
+                <FormLabel>Account Type*</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
@@ -261,7 +259,7 @@ export default function NewAccountForm(props: Props) {
             name="defaultCurrency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Currency</FormLabel>
+                <FormLabel>Currency*</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}

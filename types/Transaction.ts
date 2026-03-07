@@ -31,6 +31,7 @@ export interface AccountTransaction extends Transaction {
   accountId: string;
   payee: string;
   taxLines?: TaxLine[] | null;
+  transferId?: string | null;
   typeTransferDestination?: string | null;
   typeTransferOrigin?: string | null;
 }

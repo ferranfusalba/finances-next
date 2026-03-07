@@ -105,7 +105,7 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                 "border rounded-lg p-4": isAddingNewCategory,
               })}
             >
-              <FormLabel>Category*</FormLabel>
+              <FormLabel>Category</FormLabel>
               <Controller
                 control={form.control}
                 name="category"
@@ -233,8 +233,7 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                           {userTransactionCategories
                             ?.find(
                               (cat) =>
-                                cat.name ===
-                                form.getValues().category,
+                                cat.name === category,
                             )
                             ?.subcategories?.filter((sub) => sub.name)
                             .sort((a, b) =>

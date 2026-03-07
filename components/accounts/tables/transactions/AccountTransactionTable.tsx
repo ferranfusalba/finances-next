@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   createColumnHelper,
   flexRender,
@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { Edit as EditIcon, TrashCan } from "@carbon/icons-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
@@ -24,7 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { currency } from "@/lib/utils";
+import { cn, currency } from "@/lib/utils";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
@@ -40,14 +41,34 @@ interface Props {
 
 export default function AccountTransactionTable(props: Props) {
   const { accountTransactions } = props;
-  const { userLocale } = useTransactionUser();
+  const { userLocale, userAccounts } = useTransactionUser();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
   const [editTransactionId, setEditTransactionId] = useState<string | null>(
     null,
   );
+  const [highlightedTxId, setHighlightedTxId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    const tid = searchParams.get("transferId");
+    if (!tid) return;
+    const match = accountTransactions.find(
+      (tx) => tx.transferId === tid,
+    );
+    if (match) {
+      setHighlightedTxId(match.id);
+    }
+  }, [searchParams, accountTransactions]);
+
+  useEffect(() => {
+    if (highlightedTxId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [highlightedTxId]);
 
   const editTransaction = editTransactionId
     ? (accountTransactions.find((t) => t.id === editTransactionId) ?? null)
@@ -113,19 +134,34 @@ export default function AccountTransactionTable(props: Props) {
     columnHelper.accessor("typeTransferOrigin", {
       cell: (info) => {
         const type = info.row.original?.type;
-
-        if (type === "TRANSFER") {
-          return <>{info.getValue()}</>;
-        }
-
-        return <></>;
+        if (type !== "TRANSFER") return <></>;
+        const accountId = info.getValue();
+        const account = userAccounts.find((a) => a.id === accountId);
+        if (!account) return <>{accountId}</>;
+        const label = `${account.bankName} · ${account.name}`;
+        if (accountId === props.account?.id) return <>{label}</>;
+        const tid = info.row.original.transferId;
+        const href = tid
+          ? `/accounts/${accountId}?transferId=${tid}`
+          : `/accounts/${accountId}`;
+        return <Link href={href} className="underline">{label}</Link>;
       },
       header: "Transfer Origin Account",
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("typeTransferDestination", {
       cell: (info) => {
-        return info.getValue();
+        const accountId = info.getValue();
+        if (!accountId) return <></>;
+        const account = userAccounts.find((a) => a.id === accountId);
+        if (!account) return <>{accountId}</>;
+        const label = `${account.bankName} · ${account.name}`;
+        if (accountId === props.account?.id) return <>{label}</>;
+        const tid = info.row.original.transferId;
+        const href = tid
+          ? `/accounts/${accountId}?transferId=${tid}`
+          : `/accounts/${accountId}`;
+        return <Link href={href} className="underline">{label}</Link>;
       },
       header: "Transfer Destination Account",
       footer: (info) => info.column.id,
@@ -332,10 +368,18 @@ export default function AccountTransactionTable(props: Props) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
+          {table.getRowModel().rows.map((row) => {
+            const isHighlighted = row.original.id === highlightedTxId;
+            return (
             <tr
               key={row.id}
-              className="bg-slate-900 border-b border-b-slate-400"
+              ref={isHighlighted ? highlightRef : undefined}
+              className={cn(
+                "border-b border-b-slate-400",
+                isHighlighted
+                  ? "bg-yellow-900/40"
+                  : "bg-slate-900",
+              )}
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="px-2">
@@ -343,7 +387,8 @@ export default function AccountTransactionTable(props: Props) {
                 </td>
               ))}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
         <tfoot>
           {table.getFooterGroups().map((footerGroup) => (

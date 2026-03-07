@@ -8,6 +8,7 @@ vi.mock("@/lib/db", () => ({
     },
     accountTransaction: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
       aggregate: vi.fn(),
@@ -198,6 +199,86 @@ describe("PUT /api/accounts/transactions/[id]", () => {
 
     expect(response.status).toBe(500);
     expect(json.error).toBe("DB error");
+  });
+
+  it("backfills transferId for existing transfers without one", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+      type: "TRANSFER",
+      transferId: null,
+      typeTransferOrigin: "acc-1",
+      typeTransferDestination: "acc-2",
+      dateTime: new Date("2024-01-15T12:00:00Z"),
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(db.accountTransaction.update).mockResolvedValue({
+      id: "txn-1",
+      ...baseUpdate,
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -75 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+    vi.mocked(db.accountTransaction.findFirst).mockResolvedValue({
+      id: "mirror-txn",
+    } as never);
+
+    await PUT(makePutRequest(baseUpdate), makeParams("txn-1"));
+
+    // First update call is the normal transaction update
+    // Second update call sets transferId on the edited transaction
+    // Third update call sets transferId on the mirror transaction
+    const updateCalls = vi.mocked(db.accountTransaction.update).mock.calls;
+    expect(updateCalls).toHaveLength(3);
+
+    // Second call: backfill transferId on edited transaction
+    expect(updateCalls[1][0].where).toEqual({ id: "txn-1" });
+    const backfilledId = updateCalls[1][0].data.transferId;
+    expect(backfilledId).toBeDefined();
+
+    // Third call: same transferId on mirror transaction
+    expect(updateCalls[2][0].where).toEqual({ id: "mirror-txn" });
+    expect(updateCalls[2][0].data.transferId).toBe(backfilledId);
+
+    // Mirror lookup used correct filters
+    expect(db.accountTransaction.findFirst).toHaveBeenCalledWith({
+      where: {
+        accountId: "acc-2",
+        type: "TRANSFER",
+        dateTime: new Date("2024-01-15T12:00:00Z"),
+        transferId: null,
+      },
+    });
+  });
+
+  it("skips transferId backfill when transfer already has one", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+      type: "TRANSFER",
+      transferId: "existing-tid",
+      typeTransferOrigin: "acc-1",
+      typeTransferDestination: "acc-2",
+      dateTime: new Date("2024-01-15T12:00:00Z"),
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(db.accountTransaction.update).mockResolvedValue({
+      id: "txn-1",
+      ...baseUpdate,
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -75 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await PUT(makePutRequest(baseUpdate), makeParams("txn-1"));
+
+    // Only 1 update call (the normal transaction update), no backfill
+    expect(db.accountTransaction.update).toHaveBeenCalledOnce();
+    expect(db.accountTransaction.findFirst).not.toHaveBeenCalled();
   });
 });
 

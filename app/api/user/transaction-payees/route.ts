@@ -10,6 +10,10 @@ export async function POST(request: Request) {
 
   const data = await request.json();
 
+  if (!data.name) {
+    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+  }
+
   const transactionPayee = await db.userTransactionPayee.upsert({
     where: {
       userId_name: { userId: user.id, name: data.name },
