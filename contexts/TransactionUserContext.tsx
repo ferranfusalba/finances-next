@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { Decimal } from "@prisma/client/runtime/library";
 import { Account } from "@/types/Account";
+import type { TransactionLocation } from "@/types/TransactionLocation";
 
 interface TransactionUserContextValue {
   userId: string;
@@ -29,7 +30,7 @@ interface TransactionUserContextValue {
   }>;
   userDefaultTaxRate: number;
   userForeignCurrencies: string[];
-  userTransactionLocations: string[];
+  userTransactionLocations: TransactionLocation[];
   userTransactionTags: string[];
   hasTransactions: boolean;
 }

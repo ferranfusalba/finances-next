@@ -10,7 +10,7 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Copy, Download, Edit as EditIcon, TrashCan } from "@carbon/icons-react";
+import { ChevronDown, ChevronRight, Copy, Download, Edit as EditIcon, Launch, TrashCan } from "@carbon/icons-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
@@ -325,6 +325,21 @@ export default function AccountTransactionTable(props: Props) {
     }),
     columnHelper.accessor("location", {
       header: "Location",
+      cell: (info) => {
+        const loc = info.getValue();
+        if (!loc) return "";
+        return (
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${loc.name}, ${loc.address}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 hover:underline"
+          >
+            {loc.name}
+            <Launch className="h-3 w-3 shrink-0 text-muted-foreground" />
+          </a>
+        );
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("taxLines", {

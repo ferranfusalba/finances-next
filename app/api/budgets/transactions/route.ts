@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
         tags: data.tags,
         dateTime: data.dateTime,
         timezone: data.timezone,
-        location: data.location,
+        location: data.location ?? Prisma.DbNull,
         notes: data.notes,
         budgetId: data.budgetId,
       },

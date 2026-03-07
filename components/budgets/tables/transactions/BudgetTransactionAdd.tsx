@@ -66,7 +66,7 @@ export default function BudgetTransactionAdd(props: Props) {
       date: new Date(),
       time: "09:00",
       timezone: detectedTimezoneValue,
-      location: "",
+      location: null,
       notes: "",
     },
   });

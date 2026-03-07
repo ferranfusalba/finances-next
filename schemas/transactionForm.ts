@@ -22,7 +22,13 @@ const baseFields = {
   timezone: z.string().min(1, {
     message: "Timezone is required",
   }),
-  location: z.string(),
+  location: z.object({
+    name: z.string(),
+    address: z.string(),
+    lat: z.number(),
+    lng: z.number(),
+    placeId: z.string(),
+  }).nullable(),
   notes: z.string(),
 };
 

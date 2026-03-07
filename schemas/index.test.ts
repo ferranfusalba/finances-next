@@ -560,6 +560,50 @@ describe("CreateAccountTransactionSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts a valid location object", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      location: {
+        name: "Zürich Flughafen",
+        address: "Kloten, Switzerland",
+        lat: 47.458,
+        lng: 8.555,
+        placeId: "mapbox-123",
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null location", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      location: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts missing location (optional)", () => {
+    const result = CreateAccountTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.location).toBeUndefined();
+  });
+
+  it("rejects location as plain string", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      location: "Barcelona",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects location with missing fields", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      location: { name: "Barcelona" },
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("CreateBudgetTransactionSchema", () => {
@@ -605,6 +649,36 @@ describe("CreateBudgetTransactionSchema", () => {
     const result = CreateBudgetTransactionSchema.safeParse({
       ...validTransaction,
       tags: "project-x",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a valid location object", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      location: {
+        name: "Madrid Office",
+        address: "Madrid, Spain",
+        lat: 40.416,
+        lng: -3.703,
+        placeId: "mapbox-456",
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts null location", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      location: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects location as plain string", () => {
+    const result = CreateBudgetTransactionSchema.safeParse({
+      ...validTransaction,
+      location: "Madrid",
     });
     expect(result.success).toBe(false);
   });

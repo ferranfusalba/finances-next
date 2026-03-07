@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import type { TransactionLocation } from "@/types/TransactionLocation";
 
 export async function getAccounts(userId: string) {
   const accounts = await db.account.findMany({
@@ -46,6 +47,7 @@ export async function getAccountTransactions(id: string) {
     amount: toNumber(t.amount),
     foreignCurrencyAmount: toNumber(t.foreignCurrencyAmount),
     foreignCurrencyExchangeRate: toNumber(t.foreignCurrencyExchangeRate),
+    location: (t.location as TransactionLocation | null) ?? null,
     taxLines: t.taxLines.map((tl) => ({
       ...tl,
       rate: toNumber(tl.rate),

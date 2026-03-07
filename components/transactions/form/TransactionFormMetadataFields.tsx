@@ -3,6 +3,7 @@
 import { useFormContext } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
+import { LocationInput } from "@/components/ui/location-input";
 import { TagInput } from "@/components/ui/tag-input";
 import {
   FormControl,
@@ -16,7 +17,7 @@ import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
 export default function TransactionFormMetadataFields() {
   const form = useFormContext();
-  const { userTransactionLocations, userTransactionTags } = useTransactionUser();
+  const { userTransactionTags } = useTransactionUser();
 
   return (
     <>
@@ -45,19 +46,12 @@ export default function TransactionFormMetadataFields() {
           <FormItem>
             <FormLabel>Location</FormLabel>
             <FormControl>
-              <Input
-                id="location"
-                type="text"
-                list="locationSuggestions"
-                placeholder="Zürich Flughafen, Kloten, CH"
-                {...field}
+              <LocationInput
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Search for a place..."
               />
             </FormControl>
-            <datalist id="locationSuggestions">
-              {userTransactionLocations.map((loc) => (
-                <option key={loc} value={loc} />
-              ))}
-            </datalist>
             <FormMessage />
           </FormItem>
         )}

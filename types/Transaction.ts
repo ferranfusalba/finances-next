@@ -1,3 +1,5 @@
+import type { TransactionLocation } from "@/types/TransactionLocation";
+
 export interface TaxLine {
   id: string;
   rate: number;
@@ -18,7 +20,7 @@ interface Transaction {
   foreignCurrencyAmount?: number | null;
   foreignCurrencyExchangeRate?: number | null;
   id: string;
-  location?: string | null;
+  location?: TransactionLocation | null;
   notes: string;
   subcategory?: string | null;
   tags?: string[];

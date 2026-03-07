@@ -111,7 +111,7 @@ export default function AccountTransactionAdd(props: Props) {
       date: editDate ?? new Date(),
       time: editTime ?? "09:00",
       timezone: editTimezoneValue ?? detectedTimezoneValue,
-      location: editTx?.location ?? "",
+      location: editTx?.location ?? null,
       notes: editTx?.notes ?? "",
       taxLines:
         editTx?.taxLines?.map((tl) => ({

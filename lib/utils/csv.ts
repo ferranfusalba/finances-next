@@ -53,7 +53,7 @@ export function transactionToRow(
     t.category,
     t.subcategory,
     t.tags,
-    t.location,
+    t.location?.name ?? "",
     t.taxLines ? JSON.stringify(t.taxLines) : "",
     t.notes,
     t.id,

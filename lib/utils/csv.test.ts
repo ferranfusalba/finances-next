@@ -62,7 +62,7 @@ describe("transactionToRow", () => {
     updatedAt: new Date(),
     accountId: "acc-1",
     tags: ["weekly"],
-    location: "Barcelona",
+    location: { name: "Barcelona", address: "Barcelona, Spain", lat: 41.39, lng: 2.17, placeId: "barcelona" },
     foreignCurrency: null,
     foreignCurrencyAmount: null,
     foreignCurrencyExchangeRate: null,

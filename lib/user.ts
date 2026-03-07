@@ -1,4 +1,6 @@
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import type { TransactionLocation } from "@/types/TransactionLocation";
 
 export default async function getUser(userEmail: string) {
   return await db.user.findFirst({
@@ -41,29 +43,27 @@ export async function getUserForeignCurrencies(userId: string) {
   return Array.from(codes).sort();
 }
 
-export async function getUserTransactionLocations(userId: string) {
-  const [accountLocations, budgetLocations] = await Promise.all([
+export async function getUserTransactionLocations(userId: string): Promise<TransactionLocation[]> {
+  const [accountTransactions, budgetTransactions] = await Promise.all([
     db.accountTransaction.findMany({
-      where: { Account: { userId }, location: { not: "" } },
+      where: { Account: { userId }, location: { not: Prisma.DbNull } },
       select: { location: true },
-      distinct: ["location"],
     }),
     db.budgetTransaction.findMany({
-      where: { Budget: { userId }, location: { not: "" } },
+      where: { Budget: { userId }, location: { not: Prisma.DbNull } },
       select: { location: true },
-      distinct: ["location"],
     }),
   ]);
 
-  const locations = new Set<string>();
-  for (const t of accountLocations) {
-    if (t.location) locations.add(t.location);
-  }
-  for (const t of budgetLocations) {
-    if (t.location) locations.add(t.location);
+  const seen = new Map<string, TransactionLocation>();
+  for (const t of [...accountTransactions, ...budgetTransactions]) {
+    const loc = t.location as TransactionLocation | null;
+    if (loc?.placeId && !seen.has(loc.placeId)) {
+      seen.set(loc.placeId, loc);
+    }
   }
 
-  return Array.from(locations).sort();
+  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getUserTransactionTags(userId: string) {

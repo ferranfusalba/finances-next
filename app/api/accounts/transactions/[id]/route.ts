@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
@@ -66,12 +67,13 @@ export async function PUT(
       where: { accountTransactionId: id },
     });
 
-    const { taxLines, ...transactionData } = data;
+    const { taxLines, location, ...transactionData } = data;
 
     const updated = await db.accountTransaction.update({
       where: { id },
       data: {
         ...transactionData,
+        ...(location !== undefined ? { location: location ?? Prisma.DbNull } : {}),
         ...(taxLines?.length ? {
           taxLines: {
             create: taxLines.map((line) => ({

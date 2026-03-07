@@ -84,6 +84,16 @@ export const RegisterSchema = z.object({
   userLocale: z.optional(z.string()),
 });
 
+// --- Shared Sub-Schemas ---
+
+const TransactionLocationSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+  placeId: z.string(),
+});
+
 // --- API Route Schemas ---
 
 export const CreateAccountSchema = z.object({
@@ -151,7 +161,7 @@ export const CreateAccountTransactionSchema = z.object({
   tags: z.array(z.string()).optional(),
   dateTime: z.string().or(z.date()),
   timezone: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
+  location: TransactionLocationSchema.nullable().optional(),
   notes: z.string(),
   taxLines: z.array(z.object({
     rate: z.number(),
@@ -178,7 +188,7 @@ export const UpdateAccountTransactionSchema = z.object({
   tags: z.array(z.string()).optional(),
   dateTime: z.string().or(z.date()).optional(),
   timezone: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
+  location: TransactionLocationSchema.nullable().optional(),
   notes: z.string().optional(),
   taxLines: z.array(z.object({
     rate: z.number(),
@@ -202,7 +212,7 @@ export const CreateBudgetTransactionSchema = z.object({
   tags: z.array(z.string()).optional(),
   dateTime: z.string().or(z.date()),
   timezone: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
+  location: TransactionLocationSchema.nullable().optional(),
   notes: z.string(),
   budgetId: z.string().min(1),
 });

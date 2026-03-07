@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import type { TransactionLocation } from "@/types/TransactionLocation";
 
 export async function getBudgets(userId: string) {
   const budgets = await db.budget.findMany({
@@ -46,5 +47,6 @@ export async function getBudgetTransactions(id: string) {
     balance: toNumber(t.balance),
     foreignCurrencyAmount: toNumber(t.foreignCurrencyAmount),
     foreignCurrencyExchangeRate: toNumber(t.foreignCurrencyExchangeRate),
+    location: (t.location as TransactionLocation | null) ?? null,
   }));
 }

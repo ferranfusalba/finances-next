@@ -140,7 +140,7 @@ model AccountTransaction {
   tags                        String[]
   dateTime                    DateTime @default(now())
   timezone                    String?  @default("")
-  location                    String?  @default("")
+  location                    Json?
   notes                       String
   taxLines                    TaxLine[]
   Account                     Account? @relation(fields: [accountId], references: [id])
@@ -174,7 +174,7 @@ model BudgetTransaction {
   tags                        String[]
   dateTime                    DateTime @default(now())
   timezone                    String?  @default("")
-  location                    String?  @default("")
+  location                    Json?
   notes                       String
   Budget                      Budget?  @relation(fields: [budgetId], references: [id])
   budgetId                    String
