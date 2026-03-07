@@ -5,13 +5,11 @@ import { auth } from "@/auth";
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import AccountTransactionDownload from "@/components/accounts/tables/transactions/AccountTransactionDownload";
+import AccountTransactionExpandable from "@/components/accounts/tables/transactions/AccountTransactionExpandable";
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
-import Layout02a from "@/components/layouts/Layout02a";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
-import LayoutAccountBudgetActions from "@/components/layouts/account-budget/LayoutAccountBudgetActions";
-import LayoutAccountBudgetTable from "@/components/layouts/account-budget/LayoutAccountBudgetTable";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import {
@@ -34,16 +32,14 @@ import {
   getUserTransactionTags,
 } from "@/lib/user";
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
+import Layout02a1 from "@/components/layouts/Layout02a1";
 
 export default async function AccountLayout({
   params,
 }: AccountBudgetParamsProps) {
   const { id } = await params;
 
-  const [account, serverSession] = await Promise.all([
-    getAccount(id),
-    auth(),
-  ]);
+  const [account, serverSession] = await Promise.all([getAccount(id), auth()]);
 
   if (!account) {
     notFound();
@@ -84,53 +80,57 @@ export default async function AccountLayout({
   }
 
   return (
-    <Layout02a>
-      <LayoutAccountBudgetHeader>
-        <div className="col-span-2 md:col-span-1 grid justify-center content-center">
-          <Avatar>
-            <AvatarFallback>{account.bankName[0]}</AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="col-span-8 md:col-span-10 grid gap-2">
-          <span className="text-2xl">{account.bankName}</span>
-          <div>
-            <span className="font-mono p-1 bg-slate-100 rounded-md text-stone-900">
-              {account.code}
-            </span>
-            <span> </span>
-            <span>{account.name}</span>
+    <>
+      <Layout02a1>
+        <LayoutAccountBudgetHeader>
+          <div className="col-span-2 md:col-span-1 grid justify-center content-center">
+            <Avatar>
+              <AvatarFallback>{account.bankName[0]}</AvatarFallback>
+            </Avatar>
           </div>
-          <div>
-            <span>
-              {getCountryFlag(account.country)}
-              {"  "}
-              {account.country} - {getCountryName(account.country)}{" "}
-              {getCountryFullName(account.country)}
-            </span>
-            <span> - </span>
-            <span className="font-mono">{account.number}</span>
+          <div className="col-span-8 md:col-span-10 grid gap-2">
+            <span className="text-2xl">{account.bankName}</span>
+            <div>
+              <span className="font-mono p-1 bg-slate-100 rounded-md text-stone-900">
+                {account.code}
+              </span>
+              <span> </span>
+              <span>{account.name}</span>
+            </div>
+            <div>
+              <span>
+                {getCountryFlag(account.country)}
+                {"  "}
+                {account.country} - {getCountryName(account.country)}{" "}
+                {getCountryFullName(account.country)}
+              </span>
+              <span> - </span>
+              <span className="font-mono">{account.number}</span>
+            </div>
+            <div>
+              <BackgroundChip
+                data={account.defaultCurrency}
+                backgroundColor={
+                  getCurrencyColor0(account.defaultCurrency) ?? ""
+                }
+                textColor={getCurrencyColor1(account.defaultCurrency) ?? ""}
+              />
+              <span> </span>
+              <span>{account.type}</span>
+              <span> </span>
+              <BorderChip
+                data={currency(userLocale, account.defaultCurrency).format(
+                  account.currentBalance,
+                )}
+                borderColor={getCurrencyColor0(account.defaultCurrency) ?? ""}
+              />
+            </div>
           </div>
-          <div>
-            <BackgroundChip
-              data={account.defaultCurrency}
-              backgroundColor={getCurrencyColor0(account.defaultCurrency) ?? ""}
-              textColor={getCurrencyColor1(account.defaultCurrency) ?? ""}
-            />
-            <span> </span>
-            <span>{account.type}</span>
-            <span> </span>
-            <BorderChip
-              data={currency(userLocale, account.defaultCurrency).format(
-                account.currentBalance,
-              )}
-              borderColor={getCurrencyColor0(account.defaultCurrency) ?? ""}
-            />
+          <div className="col-span-2 md:col-span-1 grid justify-center content-center">
+            <DeleteAccount id={id} />
           </div>
-        </div>
-        <div className="col-span-2 md:col-span-1 grid justify-center content-center">
-          <DeleteAccount id={id} />
-        </div>
-      </LayoutAccountBudgetHeader>
+        </LayoutAccountBudgetHeader>
+      </Layout02a1>
       <TransactionUserProvider
         value={{
           userId,
@@ -145,20 +145,23 @@ export default async function AccountLayout({
           hasTransactions: accountTransactions.length > 0,
         }}
       >
-        <LayoutAccountBudgetActions>
-          <AccountTransactionAdd account={account} />
-          <AccountTransactionDownload
-            accountTransactions={accountTransactions}
-            accountName={account.name}
-          />
-        </LayoutAccountBudgetActions>
-        <LayoutAccountBudgetTable>
+        <AccountTransactionExpandable
+          actions={
+            <>
+              <AccountTransactionAdd account={account} />
+              <AccountTransactionDownload
+                accountTransactions={accountTransactions}
+                accountName={account.name}
+              />
+            </>
+          }
+        >
           <AccountTransactionTable
             accountTransactions={accountTransactions}
             account={account}
           />
-        </LayoutAccountBudgetTable>
+        </AccountTransactionExpandable>
       </TransactionUserProvider>
-    </Layout02a>
+    </>
   );
 }

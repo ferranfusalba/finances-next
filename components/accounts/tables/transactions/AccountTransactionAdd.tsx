@@ -6,6 +6,9 @@ import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { AddAlt } from "@carbon/icons-react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,6 +45,7 @@ import timezones from "@/statics/timezones.json";
 interface Props {
   account: Account | null;
   editTransaction?: AccountTransaction;
+  copyTransaction?: AccountTransaction;
   editOpen?: boolean;
   onEditOpenChange?: (open: boolean) => void;
 }
@@ -60,7 +64,8 @@ export default function AccountTransactionAdd(props: Props) {
   const timeCounterRef = useRef(540);
 
   const isEditing = !!props.editTransaction;
-  const editTx = props.editTransaction ?? null;
+  const isCopying = !!props.copyTransaction;
+  const editTx = props.editTransaction ?? props.copyTransaction ?? null;
 
   const detectedTimezone = detectTimezone(userTimezone || undefined);
   const detectedTimezoneValue = detectedTimezone
@@ -241,7 +246,7 @@ export default function AccountTransactionAdd(props: Props) {
           });
 
       if (res.ok) {
-        if (isEditing) {
+        if (isEditing || isCopying) {
           props.onEditOpenChange?.(false);
         } else {
           setOpen(false);
@@ -267,9 +272,9 @@ export default function AccountTransactionAdd(props: Props) {
     });
   };
 
-  const dialogOpen = isEditing ? (props.editOpen ?? false) : open;
+  const dialogOpen = isEditing || isCopying ? (props.editOpen ?? false) : open;
   const handleDialogOpenChange = (isOpen: boolean) => {
-    if (isEditing) {
+    if (isEditing || isCopying) {
       props.onEditOpenChange?.(isOpen);
     } else {
       setOpen(isOpen);
@@ -284,15 +289,16 @@ export default function AccountTransactionAdd(props: Props) {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-      {!isEditing && (
+      {!isEditing && !isCopying && (
         <DialogTrigger asChild>
-          <Button>Add Transaction</Button>
+          <Button variant="outline" className="gap-2"><AddAlt /> Add Transaction</Button>
         </DialogTrigger>
       )}
       <DialogContent className="max-lg:max-h-margins-y-mobile max-lg:h-screen max-lg:overflow-y-scroll sm:max-w-250 overflow-y-auto max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
             {isEditing ? "Edit Transaction" : "New Transaction"}
+            {isCopying && <Badge variant="secondary">Copying</Badge>}
           </DialogTitle>
           <DialogDescription>
             {isEditing ? "Edit" : "Add a new"} transaction

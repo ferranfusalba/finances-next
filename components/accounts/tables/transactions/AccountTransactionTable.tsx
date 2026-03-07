@@ -10,7 +10,7 @@ import {
   useReactTable,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { Edit as EditIcon, TrashCan } from "@carbon/icons-react";
+import { ChevronDown, ChevronRight, Copy, Download, Edit as EditIcon, TrashCan } from "@carbon/icons-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { cn, currency } from "@/lib/utils";
+import { downloadTransactionsCsv } from "@/lib/utils/csv";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
@@ -50,6 +51,10 @@ export default function AccountTransactionTable(props: Props) {
   const [editTransactionId, setEditTransactionId] = useState<string | null>(
     null,
   );
+  const [copyTransactionId, setCopyTransactionId] = useState<string | null>(
+    null,
+  );
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [highlightedTxId, setHighlightedTxId] = useState<string | null>(null);
   const highlightRef = useRef<HTMLTableRowElement>(null);
 
@@ -74,6 +79,10 @@ export default function AccountTransactionTable(props: Props) {
     ? (accountTransactions.find((t) => t.id === editTransactionId) ?? null)
     : null;
 
+  const copyTransaction = copyTransactionId
+    ? (accountTransactions.find((t) => t.id === copyTransactionId) ?? null)
+    : null;
+
   const handleDeleteTransaction = async (transactionId: string) => {
     startTransition(async () => {
       const res = await fetch(`/api/accounts/transactions/${transactionId}`, {
@@ -93,6 +102,52 @@ export default function AccountTransactionTable(props: Props) {
     });
   };
 
+  const hasSelection = selectedIds.size > 0;
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === accountTransactions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(accountTransactions.map((t) => t.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    startTransition(async () => {
+      const results = await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          fetch(`/api/accounts/transactions/${id}`, { method: "DELETE" }),
+        ),
+      );
+      const failed = results.filter((r) => !r.ok).length;
+      if (failed === 0) {
+        toast(`${selectedIds.size} transaction(s) deleted successfully`);
+        setSelectedIds(new Set());
+        router.refresh();
+      } else {
+        toast(`Failed to delete ${failed} transaction(s)`);
+      }
+    });
+  };
+
+  const handleBulkDownload = () => {
+    const selected = accountTransactions.filter((t) => selectedIds.has(t.id));
+    const date = new Date().toISOString().split("T")[0];
+    downloadTransactionsCsv(selected, `transactions-selected-${date}.csv`);
+  };
+
   const balanceByTransactionId = useMemo(() => {
     const map = new Map<string, number>();
     let running = 0;
@@ -104,6 +159,29 @@ export default function AccountTransactionTable(props: Props) {
   }, [accountTransactions]);
 
   const columns = [
+    columnHelper.display({
+      id: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          checked={
+            accountTransactions.length > 0 &&
+            selectedIds.size === accountTransactions.length
+          }
+          onChange={toggleSelectAll}
+          className="cursor-pointer accent-slate-300"
+        />
+      ),
+      cell: (info) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(info.row.original.id)}
+          onChange={() => toggleSelect(info.row.original.id)}
+          className="cursor-pointer accent-slate-300"
+        />
+      ),
+      footer: () => null,
+    }),
     columnHelper.accessor((row) => row.dateTime, {
       id: "dateTime",
       cell: (info) => {
@@ -279,8 +357,17 @@ export default function AccountTransactionTable(props: Props) {
             {transactionId}
             <Button
               variant="outline"
+              aria-label="Copy transaction"
+              onClick={() => setCopyTransactionId(transactionId)}
+              disabled={hasSelection}
+            >
+              <Copy />
+            </Button>
+            <Button
+              variant="outline"
               aria-label="Edit transaction"
               onClick={() => setEditTransactionId(transactionId)}
+              disabled={hasSelection}
             >
               <EditIcon />
             </Button>
@@ -331,6 +418,21 @@ export default function AccountTransactionTable(props: Props) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "dateTime", desc: false },
   ]);
+  const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const toggleMonth = (monthKey: string) => {
+    setCollapsedMonths((prev) => {
+      const next = new Set(prev);
+      if (next.has(monthKey)) {
+        next.delete(monthKey);
+      } else {
+        next.add(monthKey);
+      }
+      return next;
+    });
+  };
 
   const table = useReactTable({
     data,
@@ -345,6 +447,50 @@ export default function AccountTransactionTable(props: Props) {
 
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch">
+      {hasSelection && (
+        <div className="flex items-center gap-2 px-2 py-2 bg-slate-800 rounded-t-md">
+          <span className="text-sm select-none">
+            {selectedIds.size} selected
+          </span>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="gap-1">
+                <TrashCan /> Delete
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete {selectedIds.size} Transaction(s)</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={handleBulkDelete}
+              >
+                Confirm
+              </Button>
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={handleBulkDownload}
+          >
+            <Download /> Download CSV
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
       <table>
         <caption className="sr-only">Account transactions</caption>
         <thead>
@@ -368,27 +514,65 @@ export default function AccountTransactionTable(props: Props) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => {
-            const isHighlighted = row.original.id === highlightedTxId;
-            return (
-            <tr
-              key={row.id}
-              ref={isHighlighted ? highlightRef : undefined}
-              className={cn(
-                "border-b border-b-slate-400",
-                isHighlighted
-                  ? "bg-yellow-900/40"
-                  : "bg-slate-900",
-              )}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-            );
-          })}
+          {(() => {
+            const rows = table.getRowModel().rows;
+            const elements: React.ReactNode[] = [];
+            let lastMonthKey = "";
+            const colCount = table.getAllColumns().length;
+
+            for (const row of rows) {
+              const dt = row.original.dateTime;
+              const monthKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+
+              if (monthKey !== lastMonthKey) {
+                lastMonthKey = monthKey;
+                const isCollapsed = collapsedMonths.has(monthKey);
+                const label = dt.toLocaleString(userLocale, {
+                  year: "numeric",
+                  month: "long",
+                });
+
+                elements.push(
+                  <tr
+                    key={`month-${monthKey}`}
+                    className="bg-slate-700 cursor-pointer select-none"
+                    onClick={() => toggleMonth(monthKey)}
+                  >
+                    <td colSpan={colCount} className="px-2 py-1 font-semibold">
+                      <span className="inline-flex items-center gap-1">
+                        {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+                        {label}
+                      </span>
+                    </td>
+                  </tr>,
+                );
+              }
+
+              if (!collapsedMonths.has(monthKey)) {
+                const isHighlighted = row.original.id === highlightedTxId;
+                elements.push(
+                  <tr
+                    key={row.id}
+                    ref={isHighlighted ? highlightRef : undefined}
+                    className={cn(
+                      "border-b border-b-slate-400",
+                      isHighlighted
+                        ? "bg-yellow-900/40"
+                        : "bg-slate-900",
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-2">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>,
+                );
+              }
+            }
+
+            return elements;
+          })()}
         </tbody>
         <tfoot>
           {table.getFooterGroups().map((footerGroup) => (
@@ -415,6 +599,17 @@ export default function AccountTransactionTable(props: Props) {
           editOpen={!!editTransactionId}
           onEditOpenChange={(open) => {
             if (!open) setEditTransactionId(null);
+          }}
+        />
+      )}
+      {copyTransaction && (
+        <AccountTransactionAdd
+          key={`copy-${copyTransaction.id}`}
+          account={props.account}
+          copyTransaction={copyTransaction}
+          editOpen={!!copyTransactionId}
+          onEditOpenChange={(open) => {
+            if (!open) setCopyTransactionId(null);
           }}
         />
       )}
