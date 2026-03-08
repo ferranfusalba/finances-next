@@ -11,14 +11,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+
+import { AddAlt } from "@carbon/icons-react";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { cn } from "@/lib/utils";
@@ -26,6 +21,8 @@ import { cn } from "@/lib/utils";
 interface Props {
   variant: "account" | "budget";
 }
+
+const ADD_NEW_VALUE = "__new__";
 
 export default function TransactionFormCategoryFields({ variant }: Props) {
   const form = useFormContext();
@@ -90,209 +87,151 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
     );
   }
 
+  const categories = userTransactionCategories
+    ?.filter((cat) => cat.name)
+    .sort((a, b) =>
+      (a.name as string).localeCompare(b.name as string),
+    );
+
+  const categoryOptions: ComboboxOption[] = [
+    {
+      value: ADD_NEW_VALUE,
+      label: "Add a new category",
+      icon: <AddAlt className="mr-2 h-4 w-4" />,
+    },
+    ...(categories?.map((cat) => ({
+      value: cat.name as string,
+      label: cat.name as string,
+    })) ?? []),
+  ];
+
+  const subcategories = userTransactionCategories
+    ?.find((cat) => cat.name === category)
+    ?.subcategories?.filter((sub) => sub.name)
+    .sort((a, b) =>
+      (a.name as string).localeCompare(b.name as string),
+    );
+
+  const subcategoryOptions: ComboboxOption[] = [
+    {
+      value: ADD_NEW_VALUE,
+      label: "Add a new subcategory",
+      icon: <AddAlt className="mr-2 h-4 w-4" />,
+    },
+    ...(subcategories?.map((sub) => ({
+      value: sub.name as string,
+      label: sub.name as string,
+    })) ?? []),
+  ];
+
   return (
     <>
       {/* Category */}
-      <FormField
+      <Controller
         control={form.control}
         name="category"
-        render={() => {
-          return (
-            <FormItem
-              className={cn({
-                "border rounded-lg p-4": isAddingNewCategory,
-              })}
-            >
-              <FormLabel>Category</FormLabel>
-              <Controller
-                control={form.control}
-                name="category"
-                render={({ field: controllerField }) => (
-                  <>
-                    <Select
-                      onValueChange={(value) => {
-                        if (value === "__new__") {
-                          setIsAddingNewCategory(true);
-                          setNewCategory("");
-                          controllerField.onChange("");
-                        } else {
-                          setIsAddingNewCategory(false);
-                          setNewCategory("");
-                          controllerField.onChange(value);
-                        }
-                      }}
-                      value={
-                        isAddingNewCategory
-                          ? "__new__"
-                          : controllerField.value || ""
-                      }
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__new__">
-                          Add a new category
-                        </SelectItem>
-                        <Separator className="my-2 px-2" />
-                        {(() => {
-                          const categories = userTransactionCategories
-                            ?.filter((cat) => cat.name)
-                            .sort((a, b) =>
-                              (a.name as string).localeCompare(
-                                b.name as string,
-                              ),
-                            );
-                          if (!categories?.length) {
-                            return (
-                              <p className="text-sm text-muted-foreground text-center py-2 select-none">
-                                No categories yet
-                              </p>
-                            );
-                          }
-                          return categories.map((cat) => (
-                            <SelectItem
-                              key={cat.id}
-                              value={cat.name as string}
-                            >
-                              {cat.name}
-                            </SelectItem>
-                          ));
-                        })()}
-                      </SelectContent>
-                    </Select>
+        render={({ field: controllerField }) => (
+          <FormItem
+            className={cn({
+              "border rounded-lg p-4": isAddingNewCategory,
+            })}
+          >
+            <FormLabel>Category</FormLabel>
+            <Combobox
+              options={categoryOptions}
+              value={isAddingNewCategory ? ADD_NEW_VALUE : controllerField.value || ""}
+              onValueChange={(value) => {
+                if (value === ADD_NEW_VALUE) {
+                  setIsAddingNewCategory(true);
+                  setNewCategory("");
+                  controllerField.onChange("");
+                } else {
+                  setIsAddingNewCategory(false);
+                  setNewCategory("");
+                  controllerField.onChange(value);
+                }
+              }}
+              placeholder="Select a category"
+              searchPlaceholder="Search categories..."
+              emptyText="No categories found."
+            />
 
-                    {isAddingNewCategory && (
-                      <div className="mt-2">
-                        <FormLabel htmlFor="new-category">
-                          New Category
-                        </FormLabel>
-                        <Input
-                          id="new-category"
-                          type="text"
-                          placeholder="Groceries"
-                          value={newCategory}
-                          className="mt-2"
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setNewCategory(value);
-                            controllerField.onChange(value);
-                          }}
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-              />
-              <FormMessage aria-live="polite" />
-            </FormItem>
-          );
-        }}
+            {isAddingNewCategory && (
+              <div className="mt-2">
+                <FormLabel htmlFor="new-category">
+                  New Category
+                </FormLabel>
+                <Input
+                  id="new-category"
+                  type="text"
+                  placeholder="Groceries"
+                  value={newCategory}
+                  className="mt-2"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setNewCategory(value);
+                    controllerField.onChange(value);
+                  }}
+                />
+              </div>
+            )}
+            <FormMessage aria-live="polite" />
+          </FormItem>
+        )}
       />
       {/* Subcategory */}
-      <FormField
+      <Controller
         control={form.control}
         name="subcategory"
-        render={() => {
-          return (
-            <FormItem
-              className={cn({
-                "border rounded-lg p-4": isAddingNewSubcategory,
-              })}
-            >
-              <FormLabel>Subcategory</FormLabel>
-              <Controller
-                control={form.control}
-                name="subcategory"
-                render={({ field: controllerField }) => {
-                  return (
-                    <>
-                      <Select
-                        onValueChange={(value) => {
-                          if (value === "__new__") {
-                            setIsAddingNewSubcategory(true);
-                            setNewSubcategory("");
-                            controllerField.onChange("");
-                          } else {
-                            setIsAddingNewSubcategory(false);
-                            setNewSubcategory("");
-                            controllerField.onChange(value);
-                          }
-                        }}
-                        value={
-                          isAddingNewSubcategory
-                            ? "__new__"
-                            : controllerField.value || ""
-                        }
-                        disabled={!category}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={category ? "Select a subcategory" : "Select a category first"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="__new__">
-                            Add a new subcategory
-                          </SelectItem>
-                          <Separator className="my-2 px-2" />
-                          {(() => {
-                            const subcategories = userTransactionCategories
-                              ?.find((cat) => cat.name === category)
-                              ?.subcategories?.filter((sub) => sub.name)
-                              .sort((a, b) =>
-                                (a.name as string).localeCompare(
-                                  b.name as string,
-                                ),
-                              );
-                            if (!subcategories?.length) {
-                              return (
-                                <p className="text-sm text-muted-foreground text-center py-2 select-none">
-                                  No subcategories yet
-                                </p>
-                              );
-                            }
-                            return subcategories.map((sub) => (
-                              <SelectItem
-                                key={sub.id}
-                                value={sub.name as string}
-                              >
-                                {sub.name}
-                              </SelectItem>
-                            ));
-                          })()}
-                        </SelectContent>
-                      </Select>
+        render={({ field: controllerField }) => (
+          <FormItem
+            className={cn({
+              "border rounded-lg p-4": isAddingNewSubcategory,
+            })}
+          >
+            <FormLabel>Subcategory</FormLabel>
+            <Combobox
+              options={subcategoryOptions}
+              value={isAddingNewSubcategory ? ADD_NEW_VALUE : controllerField.value || ""}
+              onValueChange={(value) => {
+                if (value === ADD_NEW_VALUE) {
+                  setIsAddingNewSubcategory(true);
+                  setNewSubcategory("");
+                  controllerField.onChange("");
+                } else {
+                  setIsAddingNewSubcategory(false);
+                  setNewSubcategory("");
+                  controllerField.onChange(value);
+                }
+              }}
+              disabled={!category}
+              placeholder={category ? "Select a subcategory" : "Select a category first"}
+              searchPlaceholder="Search subcategories..."
+              emptyText="No subcategories found."
+            />
 
-                      {isAddingNewSubcategory && (
-                        <div className="mt-2">
-                          <FormLabel htmlFor="new-subcategory">
-                            New Subcategory
-                          </FormLabel>
-                          <Input
-                            id="new-subcategory"
-                            type="text"
-                            placeholder="Cookies, Swiss Chocolate"
-                            value={newSubcategory}
-                            className="mt-2"
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setNewSubcategory(value);
-                              controllerField.onChange(value);
-                            }}
-                          />
-                        </div>
-                      )}
-                    </>
-                  );
-                }}
-              />
-              <FormMessage aria-live="polite" />
-            </FormItem>
-          );
-        }}
+            {isAddingNewSubcategory && (
+              <div className="mt-2">
+                <FormLabel htmlFor="new-subcategory">
+                  New Subcategory
+                </FormLabel>
+                <Input
+                  id="new-subcategory"
+                  type="text"
+                  placeholder="Cookies, Swiss Chocolate"
+                  value={newSubcategory}
+                  className="mt-2"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setNewSubcategory(value);
+                    controllerField.onChange(value);
+                  }}
+                />
+              </div>
+            )}
+            <FormMessage aria-live="polite" />
+          </FormItem>
+        )}
       />
     </>
   );

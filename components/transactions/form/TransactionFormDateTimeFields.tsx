@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
 import { Calendar as CalendarIcon } from "@carbon/icons-react";
 
@@ -39,6 +33,16 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 export default function TransactionFormDateTimeFields() {
   const form = useFormContext();
   const user = useCurrentUser();
+
+  const timezoneOptions: ComboboxOption[] = useMemo(
+    () =>
+      timezones.map((timezone: Timezone) => ({
+        value: timezone.offset.toString() + "|" + timezone.text,
+        label: `${timezone.text} - ${timezone.value}`,
+        searchLabel: `${timezone.text} ${timezone.value} ${timezone.offset}`,
+      })),
+    []
+  );
 
   return (
     <>
@@ -106,32 +110,14 @@ export default function TransactionFormDateTimeFields() {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Timezone*</FormLabel>
-            <Select
+            <Combobox
+              options={timezoneOptions}
+              value={field.value || ""}
               onValueChange={field.onChange}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a timezone" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectGroup>
-                  {timezones.map((timezone: Timezone) => (
-                    <SelectItem
-                      value={
-                        timezone.offset.toString() +
-                        "|" +
-                        timezone.text
-                      }
-                      key={timezone.id}
-                    >
-                      {timezone.text} - {timezone.value}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              placeholder="Select a timezone"
+              searchPlaceholder="Search timezones..."
+              emptyText="No timezones found."
+            />
             <FormMessage />
           </FormItem>
         )}

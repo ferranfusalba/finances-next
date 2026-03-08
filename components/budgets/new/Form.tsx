@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -17,15 +17,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
 import currencies from "@/statics/currencies.json";
 
@@ -71,6 +65,16 @@ export default function NewBudgetForm(props: Props) {
       initialBalance: "",
     },
   });
+
+  const currencyOptions: ComboboxOption[] = useMemo(
+    () =>
+      currencies.map((currency: Currency) => ({
+        value: currency.code,
+        label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+        searchLabel: `${currency.code} ${currency.name}`,
+      })),
+    [],
+  );
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const name = values.name;
@@ -181,24 +185,14 @@ export default function NewBudgetForm(props: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Currency</FormLabel>
-                <Select
+                <Combobox
+                  options={currencyOptions}
+                  value={field.value || ""}
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a currency" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {currencies.map((currency: Currency) => (
-                      <SelectItem value={currency.code} key={currency.code}>
-                        {currency.code} - {currency.name} (
-                        {currency.symbol_native})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select a currency"
+                  searchPlaceholder="Search currencies..."
+                  emptyText="No currencies found."
+                />
                 <FormMessage />
               </FormItem>
             )}

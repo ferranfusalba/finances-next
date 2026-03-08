@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState } from "react";
+import { useMemo, useTransition } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 
@@ -72,6 +73,42 @@ const UserPage = () => {
       weekStartsOn: user?.weekStartsOn ?? 0,
     },
   });
+
+  const countryOptions: ComboboxOption[] = useMemo(
+    () =>
+      countries.map((country: Country) => ({
+        value: country["alpha-2"],
+        label: `${country["alpha-2"]} ${country["emoji-flag"]}  ${country.name}${country["full-name"] ? ` (${country["full-name"]})` : ""}`,
+        searchLabel: `${country["alpha-2"]} ${country.name} ${country["full-name"] ?? ""}`,
+      })),
+    [],
+  );
+
+  const currencyOptions: ComboboxOption[] = useMemo(
+    () =>
+      currencies.map((currency: Currency) => ({
+        value: currency.code,
+        label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+        searchLabel: `${currency.code} ${currency.name}`,
+      })),
+    [],
+  );
+
+  const timezoneOptions: ComboboxOption[] = useMemo(
+    () =>
+      timezones
+        .filter(
+          (tz: Timezone, i: number, arr: Timezone[]) =>
+            tz.utc.length > 0 &&
+            arr.findIndex((t) => t.utc[0] === tz.utc[0]) === i,
+        )
+        .map((timezone: Timezone) => ({
+          value: timezone.utc[0],
+          label: `${timezone.text} - ${timezone.value}`,
+          searchLabel: `${timezone.text} ${timezone.value} ${timezone.utc[0]}`,
+        })),
+    [],
+  );
 
   const onSubmit = (values: z.infer<typeof SettingsSchema>) => {
     startTransition(() => {
@@ -241,32 +278,15 @@ const UserPage = () => {
                           <Badge variant="secondary">Detected</Badge>
                         )}
                       </div>
-                      <Select
-                        disabled={isPending}
+                      <Combobox
+                        options={countryOptions}
+                        value={field.value || ""}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a country" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {countries.map((country: Country) => (
-                            <SelectItem
-                              value={country["alpha-2"]}
-                              key={country["alpha-2"]}
-                            >
-                              {country["alpha-2"]} {country["emoji-flag"]}{" "}
-                              {"  "}
-                              {country.name}
-                              {"  "}
-                              {country["full-name"] &&
-                                "(" + country["full-name"] + ")"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        disabled={isPending}
+                        placeholder="Select a country"
+                        searchPlaceholder="Search countries..."
+                        emptyText="No countries found."
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -282,28 +302,15 @@ const UserPage = () => {
                           <Badge variant="secondary">Default</Badge>
                         )}
                       </div>
-                      <Select
-                        disabled={isPending}
+                      <Combobox
+                        options={currencyOptions}
+                        value={field.value || ""}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {currencies.map((currency: Currency) => (
-                            <SelectItem
-                              value={currency.code}
-                              key={currency.code}
-                            >
-                              {currency.code} - {currency.name} (
-                              {currency.symbol_native})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        disabled={isPending}
+                        placeholder="Select a currency"
+                        searchPlaceholder="Search currencies..."
+                        emptyText="No currencies found."
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -319,34 +326,15 @@ const UserPage = () => {
                           <Badge variant="secondary">Detected</Badge>
                         )}
                       </div>
-                      <Select
-                        disabled={isPending}
+                      <Combobox
+                        options={timezoneOptions}
+                        value={field.value || ""}
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a timezone" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {timezones
-                            .filter(
-                              (tz: Timezone, i: number, arr: Timezone[]) =>
-                                tz.utc.length > 0 &&
-                                arr.findIndex((t) => t.utc[0] === tz.utc[0]) ===
-                                  i
-                            )
-                            .map((timezone: Timezone) => (
-                              <SelectItem
-                                value={timezone.utc[0]}
-                                key={timezone.utc[0]}
-                              >
-                                {timezone.text} - {timezone.value}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
+                        disabled={isPending}
+                        placeholder="Select a timezone"
+                        searchPlaceholder="Search timezones..."
+                        emptyText="No timezones found."
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

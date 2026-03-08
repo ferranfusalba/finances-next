@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -11,15 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox, ComboboxGroup } from "@/components/ui/combobox";
 
 import { Close as X } from "@carbon/icons-react";
 
@@ -62,6 +55,29 @@ export default function TransactionFormForeignCurrencyFields({
     (c) => !commonCurrencyCodes.includes(c.code),
   );
 
+  const currencyGroups: ComboboxGroup[] = useMemo(
+    () => [
+      {
+        heading:
+          userForeignCurrencies.length > 0 ? "Previously used" : "Common",
+        options: commonCurrencies.map((currency: Currency) => ({
+          value: currency.code,
+          label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+          searchLabel: `${currency.code} ${currency.name}`,
+        })),
+      },
+      {
+        heading: "All currencies",
+        options: remainingCurrencies.map((currency: Currency) => ({
+          value: currency.code,
+          label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+          searchLabel: `${currency.code} ${currency.name}`,
+        })),
+      },
+    ],
+    [commonCurrencies, remainingCurrencies, userForeignCurrencies.length],
+  );
+
   const watchedForeignCurrency = useWatch({
     control: form.control,
     name: "foreignCurrency",
@@ -89,49 +105,20 @@ export default function TransactionFormForeignCurrencyFields({
           <FormItem>
             <FormLabel>Foreign Currency</FormLabel>
             <div className="flex gap-2">
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                value={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a foreign currency" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>
-                      {userForeignCurrencies.length > 0
-                        ? "Previously used"
-                        : "Common"}
-                    </SelectLabel>
-                    {commonCurrencies.map((currency: Currency) => (
-                      <SelectItem
-                        value={currency.code}
-                        key={currency.code}
-                      >
-                        {currency.code} - {currency.name} (
-                        {currency.symbol_native})
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                  <SelectGroup>
-                    <SelectLabel>All currencies</SelectLabel>
-                    {remainingCurrencies.map(
-                      (currency: Currency) => (
-                        <SelectItem
-                          value={currency.code}
-                          key={currency.code}
-                        >
-                          {currency.code} - {currency.name} (
-                          {currency.symbol_native})
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <Combobox
+                groups={currencyGroups}
+                value={field.value || ""}
+                onValueChange={(val) => {
+                  if (val) {
+                    field.onChange(val);
+                  } else {
+                    handleResetFC();
+                  }
+                }}
+                placeholder="Select a foreign currency"
+                searchPlaceholder="Search currencies..."
+                emptyText="No currencies found."
+              />
               {watchedForeignCurrency && (
                 <Button
                   type="button"
