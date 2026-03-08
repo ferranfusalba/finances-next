@@ -36,6 +36,7 @@ model User {
   userTimezone              String                    @default("") @map("defaultTimezone")
   userLocale                String                    @default("") @map("defaultLocale")
   theme                     String                    @default("")
+  weekStartsOn              Int                       @default(0)
   preferencesSet            Boolean                   @default(false)
   defaultTaxRate            Decimal                   @default(21)
   twoFactorEnabled          Boolean                   @default(false)

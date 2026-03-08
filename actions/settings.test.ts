@@ -48,6 +48,7 @@ const validValues = {
   userCurrency: "USD",
   userTimezone: "America/New_York",
   userLocale: "en-US",
+  weekStartsOn: 0,
 };
 
 describe("settings", () => {
@@ -224,5 +225,26 @@ describe("settings", () => {
       where: { id: "user-1" },
       data: expect.objectContaining({ name: "New Name", preferencesSet: true }),
     });
+  });
+
+  it("persists weekStartsOn preference", async () => {
+    vi.mocked(currentUser).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
+    vi.mocked(getUserById).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
+    vi.mocked(db.user.update).mockResolvedValue({} as never);
+
+    const result = await settings({
+      ...validValues,
+      weekStartsOn: 1,
+    });
+
+    expect(result).toEqual({ success: "Settings Updated" });
+    const updateData = vi.mocked(db.user.update).mock.calls[0][0].data as Record<string, unknown>;
+    expect(updateData.weekStartsOn).toBe(1);
   });
 });

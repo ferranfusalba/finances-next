@@ -12,6 +12,7 @@ export const SettingsSchema = z
     userCurrency: z.string(),
     userTimezone: z.string(),
     userLocale: z.string(),
+    weekStartsOn: z.coerce.number().min(0).max(6),
   })
   .refine(
     (data) => {

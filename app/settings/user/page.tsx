@@ -69,6 +69,7 @@ const UserPage = () => {
       userCurrency: user?.userCurrency || undefined,
       userTimezone: user?.userTimezone || undefined,
       userLocale: user?.userLocale || undefined,
+      weekStartsOn: user?.weekStartsOn ?? 0,
     },
   });
 
@@ -368,6 +369,32 @@ const UserPage = () => {
                           disabled={isPending}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="weekStartsOn"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Week starts on</FormLabel>
+                      <Select
+                        disabled={isPending}
+                        onValueChange={(v) => field.onChange(Number(v))}
+                        defaultValue={String(field.value)}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a day" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="0">Sunday</SelectItem>
+                          <SelectItem value="1">Monday</SelectItem>
+                          <SelectItem value="6">Saturday</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

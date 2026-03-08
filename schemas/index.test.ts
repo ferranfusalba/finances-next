@@ -124,6 +124,7 @@ describe("SettingsSchema", () => {
     userCurrency: "USD",
     userTimezone: "America/New_York",
     userLocale: "en-US",
+    weekStartsOn: 0,
   };
 
   it("accepts valid settings without password change", () => {
@@ -183,6 +184,31 @@ describe("SettingsSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts weekStartsOn values 0 through 6", () => {
+    for (const day of [0, 1, 2, 3, 4, 5, 6]) {
+      const result = SettingsSchema.safeParse({ ...validBase, weekStartsOn: day });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("rejects weekStartsOn below 0", () => {
+    const result = SettingsSchema.safeParse({ ...validBase, weekStartsOn: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects weekStartsOn above 6", () => {
+    const result = SettingsSchema.safeParse({ ...validBase, weekStartsOn: 7 });
+    expect(result.success).toBe(false);
+  });
+
+  it("coerces weekStartsOn from string", () => {
+    const result = SettingsSchema.safeParse({ ...validBase, weekStartsOn: "1" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.weekStartsOn).toBe(1);
+    }
+  });
 });
 
 describe("boundary cases", () => {
@@ -229,6 +255,7 @@ describe("boundary cases", () => {
       userCurrency: "USD",
       userTimezone: "America/New_York",
       userLocale: "en-US",
+      weekStartsOn: 0,
       password: "short",
       newPassword: "abcdef",
     });
@@ -242,6 +269,7 @@ describe("boundary cases", () => {
       userCurrency: "USD",
       userTimezone: "America/New_York",
       userLocale: "en-US",
+      weekStartsOn: 0,
       password: "abcdef",
       newPassword: "short",
     });

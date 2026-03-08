@@ -34,8 +34,11 @@ import { Timezone } from "@/types/Timezone";
 
 import timezones from "@/statics/timezones.json";
 
+import { useCurrentUser } from "@/hooks/use-current-user";
+
 export default function TransactionFormDateTimeFields() {
   const form = useFormContext();
+  const user = useCurrentUser();
 
   return (
     <>
@@ -74,6 +77,7 @@ export default function TransactionFormDateTimeFields() {
                   defaultMonth={field.value}
                   onSelect={field.onChange}
                   disabled={(date) => date > new Date()}
+                  weekStartsOn={(user?.weekStartsOn ?? 0) as 0 | 1 | 2 | 3 | 4 | 5 | 6}
                 />
               </PopoverContent>
             </Popover>
