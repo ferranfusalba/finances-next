@@ -5,6 +5,7 @@ import {
   computeTaxAmount,
   computeTotalTax,
   convertFormTaxLines,
+  getNextTimeForDate,
   nextTimeIncrement,
 } from "./transaction";
 
@@ -236,5 +237,61 @@ describe("nextTimeIncrement", () => {
     const result = nextTimeIncrement(750); // 12*60 + 30
     expect(result.time).toBe("12:30");
     expect(result.nextCounter).toBe(751);
+  });
+});
+
+describe("getNextTimeForDate", () => {
+  it("returns 09:00 when no transactions exist on the date", () => {
+    const date = new Date(2026, 2, 8); // March 8, 2026
+    expect(getNextTimeForDate(date, [])).toBe("09:00");
+  });
+
+  it("returns 09:00 when no transactions match the date", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [
+      { dateTime: new Date(2026, 2, 7, 10, 30) }, // different day
+      { dateTime: new Date(2026, 2, 9, 14, 0) },  // different day
+    ];
+    expect(getNextTimeForDate(date, txs)).toBe("09:00");
+  });
+
+  it("returns 1 minute after the latest transaction on that date", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [
+      { dateTime: new Date(2026, 2, 8, 9, 0) },
+      { dateTime: new Date(2026, 2, 8, 10, 30) },
+      { dateTime: new Date(2026, 2, 8, 9, 45) },
+    ];
+    expect(getNextTimeForDate(date, txs)).toBe("10:31");
+  });
+
+  it("returns 1 minute after a single transaction", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [{ dateTime: new Date(2026, 2, 8, 14, 22) }];
+    expect(getNextTimeForDate(date, txs)).toBe("14:23");
+  });
+
+  it("wraps to 09:00 when latest transaction is at 23:59", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [{ dateTime: new Date(2026, 2, 8, 23, 59) }];
+    expect(getNextTimeForDate(date, txs)).toBe("09:00");
+  });
+
+  it("handles string dateTime values", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [
+      { dateTime: new Date(2026, 2, 8, 11, 15).toISOString() },
+    ];
+    expect(getNextTimeForDate(date, txs)).toBe("11:16");
+  });
+
+  it("ignores transactions from other dates", () => {
+    const date = new Date(2026, 2, 8);
+    const txs = [
+      { dateTime: new Date(2026, 2, 7, 23, 0) },
+      { dateTime: new Date(2026, 2, 8, 12, 0) },
+      { dateTime: new Date(2026, 2, 9, 8, 0) },
+    ];
+    expect(getNextTimeForDate(date, txs)).toBe("12:01");
   });
 });

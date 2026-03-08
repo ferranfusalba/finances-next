@@ -150,6 +150,7 @@ export default async function AccountLayout({
             <>
               <AccountTransactionAdd
                 account={account}
+                accountTransactions={accountTransactions}
                 hasOpeningTransaction={accountTransactions.some(
                   (t) => t.type === "OPENING",
                 )}

@@ -71,6 +71,7 @@ export default function TransactionFormDateTimeFields() {
                 <Calendar
                   mode="single"
                   selected={field.value}
+                  defaultMonth={field.value}
                   onSelect={field.onChange}
                   disabled={(date) => date > new Date()}
                 />

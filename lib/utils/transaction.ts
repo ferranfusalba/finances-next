@@ -108,3 +108,44 @@ export function nextTimeIncrement(currentMinutes: number): {
     time: `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`,
   };
 }
+
+/**
+ * Computes the next time for a new transaction on a given date.
+ * If no transactions exist on that date, returns "09:00".
+ * Otherwise, takes the latest transaction time on that date and adds 1 minute.
+ */
+export function getNextTimeForDate(
+  date: Date,
+  transactions: Array<{ dateTime: Date | string }>
+): string {
+  const targetYear = date.getFullYear();
+  const targetMonth = date.getMonth();
+  const targetDay = date.getDate();
+
+  const sameDayTxs = transactions.filter((t) => {
+    const d = t.dateTime instanceof Date ? t.dateTime : new Date(t.dateTime);
+    return (
+      d.getFullYear() === targetYear &&
+      d.getMonth() === targetMonth &&
+      d.getDate() === targetDay
+    );
+  });
+
+  if (sameDayTxs.length === 0) {
+    return "09:00";
+  }
+
+  let latestMinutes = 0;
+  for (const t of sameDayTxs) {
+    const d = t.dateTime instanceof Date ? t.dateTime : new Date(t.dateTime);
+    const minutes = d.getHours() * 60 + d.getMinutes();
+    if (minutes > latestMinutes) {
+      latestMinutes = minutes;
+    }
+  }
+
+  const next = latestMinutes + 1 >= 1440 ? 540 : latestMinutes + 1;
+  const h = Math.floor(next / 60);
+  const m = next % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+}

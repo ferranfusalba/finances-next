@@ -366,26 +366,35 @@ export default function AccountTransactionTable(props: Props) {
     columnHelper.accessor("id", {
       cell: (info) => {
         const transactionId = info.row.original?.id;
+        const row = info.row.original;
+        const isTransferDestination =
+          row?.type === "TRANSFER" &&
+          !!row.typeTransferOrigin &&
+          row.typeTransferOrigin !== props.account?.id;
 
         return (
           <div style={{ display: "flex", gap: "4px" }}>
             {transactionId}
-            <Button
-              variant="outline"
-              aria-label="Copy transaction"
-              onClick={() => setCopyTransactionId(transactionId)}
-              disabled={hasSelection}
-            >
-              <Copy />
-            </Button>
-            <Button
-              variant="outline"
-              aria-label="Edit transaction"
-              onClick={() => setEditTransactionId(transactionId)}
-              disabled={hasSelection}
-            >
-              <EditIcon />
-            </Button>
+            <span title={isTransferDestination ? "Manage this transfer from the origin account" : undefined}>
+              <Button
+                variant="outline"
+                aria-label="Copy transaction"
+                onClick={() => setCopyTransactionId(transactionId)}
+                disabled={hasSelection || isTransferDestination}
+              >
+                <Copy />
+              </Button>
+            </span>
+            <span title={isTransferDestination ? "Manage this transfer from the origin account" : undefined}>
+              <Button
+                variant="outline"
+                aria-label="Edit transaction"
+                onClick={() => setEditTransactionId(transactionId)}
+                disabled={hasSelection || isTransferDestination}
+              >
+                <EditIcon />
+              </Button>
+            </span>
             <Dialog
               open={deleteDialogOpen === transactionId}
               onOpenChange={(open) =>
@@ -401,7 +410,9 @@ export default function AccountTransactionTable(props: Props) {
                 <DialogHeader>
                   <DialogTitle>Delete Transaction</DialogTitle>
                   <DialogDescription>
-                    This action cannot be undone.
+                    {row?.type === "TRANSFER"
+                      ? "This will also delete the corresponding transaction on the other account. This action cannot be undone."
+                      : "This action cannot be undone."}
                   </DialogDescription>
                 </DialogHeader>
                 <Button
@@ -477,7 +488,9 @@ export default function AccountTransactionTable(props: Props) {
               <DialogHeader>
                 <DialogTitle>Delete {selectedIds.size} Transaction(s)</DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone.
+                  {accountTransactions.some((t) => selectedIds.has(t.id) && t.type === "TRANSFER")
+                    ? "Selected transfers will also delete their corresponding transactions on the other account. This action cannot be undone."
+                    : "This action cannot be undone."}
                 </DialogDescription>
               </DialogHeader>
               <Button
@@ -610,6 +623,7 @@ export default function AccountTransactionTable(props: Props) {
         <AccountTransactionAdd
           key={editTransaction.id}
           account={props.account}
+          accountTransactions={accountTransactions}
           editTransaction={editTransaction}
           editOpen={!!editTransactionId}
           onEditOpenChange={(open) => {
@@ -626,6 +640,7 @@ export default function AccountTransactionTable(props: Props) {
         <AccountTransactionAdd
           key={`copy-${copyTransaction.id}`}
           account={props.account}
+          accountTransactions={accountTransactions}
           copyTransaction={copyTransaction}
           editOpen={!!copyTransactionId}
           onEditOpenChange={(open) => {

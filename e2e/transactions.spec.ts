@@ -201,4 +201,187 @@ test.describe("Account Transactions", () => {
       page.getByRole("cell", { name: "E2E Transfer Test", exact: true })
     ).toBeVisible({ timeout: 10_000 });
   });
+
+  test("edit a transaction", async ({ page }) => {
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
+    await page.goto(`/accounts/${accountId}`);
+
+    // Find the row with "E2E Income Test" and click its edit button
+    const row = page.getByRole("row").filter({ hasText: "E2E Income Test" });
+    await row.getByRole("button", { name: "Edit transaction" }).click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(
+      dialog.getByRole("heading", { name: "Edit Transaction" })
+    ).toBeVisible();
+
+    // Update the concept
+    const conceptInput = dialog.getByPlaceholder(/1x Basler/);
+    await conceptInput.clear();
+    await conceptInput.fill("E2E Income Edited");
+
+    // Submit
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      page.getByText("Transaction for E2E Income Edited has been updated")
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Verify updated concept appears in the table
+    await expect(
+      page.getByRole("cell", { name: "E2E Income Edited", exact: true })
+    ).toBeVisible();
+  });
+});
+
+test.describe("Transfer Sync", () => {
+  let userId: string;
+  let originAccountId: string;
+  let destAccountId: string;
+
+  test.beforeAll(async () => {
+    await resetTestData();
+    const user = await seedVerifiedUser(
+      testEmail("transfer-sync"),
+      USER_PASSWORD
+    );
+    userId = user.id;
+    const origin = await createTestAccount(userId, {
+      name: "Origin Account",
+      code: "E2E.ORIG",
+      bankName: "Origin Bank",
+      defaultCurrency: "EUR",
+    });
+    originAccountId = origin.id;
+    const dest = await createTestAccount(userId, {
+      name: "Dest Account",
+      code: "E2E.DST",
+      bankName: "Dest Bank",
+      defaultCurrency: "EUR",
+    });
+    destAccountId = dest.id;
+  });
+
+  test.afterAll(async () => {
+    await resetTestData();
+  });
+
+  test("edit transfer from origin syncs mirror on destination", async ({
+    page,
+  }) => {
+    await loginAs(page, testEmail("transfer-sync"), USER_PASSWORD);
+    await page.goto(`/accounts/${originAccountId}`);
+
+    // Create a transfer
+    await page.getByRole("button", { name: "Add Transaction" }).click();
+    const addDialog = page.getByRole("dialog");
+    await expect(
+      addDialog.getByRole("heading", { name: "New Transaction" })
+    ).toBeVisible();
+
+    await addDialog.getByRole("combobox", { name: "Payee" }).click();
+    await page.getByRole("option", { name: "Add a new payee" }).click();
+    await addDialog.getByPlaceholder("ZRH Duty Free").fill("Sync Transfer");
+
+    await addDialog.getByPlaceholder(/1x Basler/).fill("Sync Test Original");
+
+    await addDialog.getByRole("combobox", { name: "Type*" }).click();
+    await page.getByRole("option", { name: "TRANSFER" }).click();
+
+    await addDialog
+      .getByRole("combobox", { name: /Transfer to Destination/ })
+      .click();
+    await page.getByRole("option", { name: /Dest Account/ }).click();
+
+    await addDialog.getByPlaceholder("Amount").fill("50.00");
+
+    await addDialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await page.getByRole("option", { name: /UTC/ }).first().click();
+
+    await addDialog.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.getByText("Transaction for Sync Test Original has been added")
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Edit the transfer from origin: change concept and amount
+    const originRow = page
+      .getByRole("row")
+      .filter({ hasText: "Sync Test Original" });
+    await originRow.getByRole("button", { name: "Edit transaction" }).click();
+
+    const editDialog = page.getByRole("dialog");
+    await expect(
+      editDialog.getByRole("heading", { name: "Edit Transaction" })
+    ).toBeVisible();
+
+    const conceptInput = editDialog.getByPlaceholder(/1x Basler/);
+    await conceptInput.clear();
+    await conceptInput.fill("Sync Test Updated");
+
+    const amountInput = editDialog.getByPlaceholder("Amount");
+    await amountInput.clear();
+    await amountInput.fill("75.00");
+
+    await editDialog.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.getByText("Transaction for Sync Test Updated has been updated")
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Navigate to destination and verify the mirror was updated
+    await page.goto(`/accounts/${destAccountId}`);
+    await expect(
+      page.getByRole("cell", { name: "Sync Test Updated", exact: true })
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("destination-side transfer has disabled edit and copy buttons", async ({
+    page,
+  }) => {
+    await loginAs(page, testEmail("transfer-sync"), USER_PASSWORD);
+    await page.goto(`/accounts/${destAccountId}`);
+
+    // Find the mirror transfer row
+    const row = page
+      .getByRole("row")
+      .filter({ hasText: "Sync Test Updated" });
+    await expect(row).toBeVisible({ timeout: 10_000 });
+
+    // Edit and copy buttons should be disabled
+    const editButton = row.getByRole("button", { name: "Edit transaction" });
+    const copyButton = row.getByRole("button", { name: "Copy transaction" });
+    await expect(editButton).toBeDisabled();
+    await expect(copyButton).toBeDisabled();
+  });
+
+  test("delete transfer from origin removes mirror on destination", async ({
+    page,
+  }) => {
+    await loginAs(page, testEmail("transfer-sync"), USER_PASSWORD);
+    await page.goto(`/accounts/${originAccountId}`);
+
+    // Find the transfer row and delete it
+    const row = page
+      .getByRole("row")
+      .filter({ hasText: "Sync Test Updated" });
+    await row.getByRole("button", { name: "Delete transaction" }).click();
+
+    // Confirm in the delete dialog
+    const deleteDialog = page.getByRole("dialog");
+    await expect(
+      deleteDialog.getByText(
+        "This will also delete the corresponding transaction on the other account."
+      )
+    ).toBeVisible();
+    await deleteDialog.getByRole("button", { name: "Confirm" }).click();
+
+    await expect(
+      page.getByText("Transaction deleted successfully")
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Navigate to destination and verify the mirror is gone
+    await page.goto(`/accounts/${destAccountId}`);
+    await expect(
+      page.getByRole("cell", { name: "Sync Test Updated", exact: true })
+    ).not.toBeVisible({ timeout: 10_000 });
+  });
 });

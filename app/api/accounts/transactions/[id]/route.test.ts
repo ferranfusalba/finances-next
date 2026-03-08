@@ -201,7 +201,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     expect(json.error).toBe("DB error");
   });
 
-  it("backfills transferId for existing transfers without one", async () => {
+  it("backfills transferId for existing transfers without one and syncs mirror", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
@@ -227,11 +227,9 @@ describe("PUT /api/accounts/transactions/[id]", () => {
 
     await PUT(makePutRequest(baseUpdate), makeParams("txn-1"));
 
-    // First update call is the normal transaction update
-    // Second update call sets transferId on the edited transaction
-    // Third update call sets transferId on the mirror transaction
     const updateCalls = vi.mocked(db.accountTransaction.update).mock.calls;
-    expect(updateCalls).toHaveLength(3);
+    // 1: normal update, 2: backfill transferId on origin, 3: backfill transferId on mirror, 4: sync mirror fields
+    expect(updateCalls).toHaveLength(4);
 
     // Second call: backfill transferId on edited transaction
     expect(updateCalls[1][0].where).toEqual({ id: "txn-1" });
@@ -242,7 +240,11 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     expect(updateCalls[2][0].where).toEqual({ id: "mirror-txn" });
     expect(updateCalls[2][0].data.transferId).toBe(backfilledId);
 
-    // Mirror lookup used correct filters
+    // Fourth call: sync mirror fields with inverted amount
+    expect(updateCalls[3][0].where).toEqual({ id: "mirror-txn" });
+    expect(updateCalls[3][0].data.amount).toBe(75);
+
+    // Mirror lookup for backfill used dateTime-based filter
     expect(db.accountTransaction.findFirst).toHaveBeenCalledWith({
       where: {
         accountId: "acc-2",
@@ -251,9 +253,24 @@ describe("PUT /api/accounts/transactions/[id]", () => {
         transferId: null,
       },
     });
+
+    // Mirror lookup for sync used transferId-based filter
+    expect(db.accountTransaction.findFirst).toHaveBeenCalledWith({
+      where: {
+        accountId: "acc-2",
+        type: "TRANSFER",
+        transferId: backfilledId,
+      },
+    });
+
+    // Destination account balance recomputed
+    expect(db.accountTransaction.aggregate).toHaveBeenCalledWith({
+      where: { accountId: "acc-2" },
+      _sum: { amount: true },
+    });
   });
 
-  it("skips transferId backfill when transfer already has one", async () => {
+  it("syncs mirror transaction when transfer already has transferId", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
@@ -273,12 +290,29 @@ describe("PUT /api/accounts/transactions/[id]", () => {
       _sum: { amount: -75 },
     } as never);
     vi.mocked(db.account.update).mockResolvedValue({} as never);
+    vi.mocked(db.accountTransaction.findFirst).mockResolvedValue({
+      id: "mirror-txn",
+    } as never);
 
     await PUT(makePutRequest(baseUpdate), makeParams("txn-1"));
 
-    // Only 1 update call (the normal transaction update), no backfill
-    expect(db.accountTransaction.update).toHaveBeenCalledOnce();
-    expect(db.accountTransaction.findFirst).not.toHaveBeenCalled();
+    // 1: normal update, 2: sync mirror fields (no backfill needed)
+    const updateCalls = vi.mocked(db.accountTransaction.update).mock.calls;
+    expect(updateCalls).toHaveLength(2);
+
+    // Second call: sync mirror with inverted amount
+    expect(updateCalls[1][0].where).toEqual({ id: "mirror-txn" });
+    expect(updateCalls[1][0].data.amount).toBe(75);
+    expect(updateCalls[1][0].data.concept).toBe("Updated Groceries");
+
+    // Used transferId to find mirror
+    expect(db.accountTransaction.findFirst).toHaveBeenCalledWith({
+      where: {
+        accountId: "acc-2",
+        type: "TRANSFER",
+        transferId: "existing-tid",
+      },
+    });
   });
 });
 
@@ -366,6 +400,68 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       where: { id: "acc-1" },
       data: { currentBalance: 0 },
     });
+  });
+
+  it("deletes mirror transaction for transfers", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+      amount: -100,
+      type: "TRANSFER",
+      transferId: "tid-1",
+      typeTransferOrigin: "acc-1",
+      typeTransferDestination: "acc-2",
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: 0 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+    vi.mocked(db.accountTransaction.findFirst).mockResolvedValue({
+      id: "mirror-txn",
+    } as never);
+
+    const response = await DELETE(new Request("http://localhost") as never, makeParams("txn-1"));
+    const json = await response.json();
+
+    expect(json).toEqual({ deleted: "txn-1" });
+
+    // Both origin and mirror deleted
+    const deleteCalls = vi.mocked(db.accountTransaction.delete).mock.calls;
+    expect(deleteCalls).toHaveLength(2);
+    expect(deleteCalls[0][0].where).toEqual({ id: "txn-1" });
+    expect(deleteCalls[1][0].where).toEqual({ id: "mirror-txn" });
+
+    // Both account balances recomputed
+    expect(db.accountTransaction.aggregate).toHaveBeenCalledWith({
+      where: { accountId: "acc-1" },
+      _sum: { amount: true },
+    });
+    expect(db.accountTransaction.aggregate).toHaveBeenCalledWith({
+      where: { accountId: "acc-2" },
+      _sum: { amount: true },
+    });
+  });
+
+  it("skips mirror deletion for non-transfer transactions", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+      amount: 100,
+      type: "EXPENSE",
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: 250 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await DELETE(new Request("http://localhost") as never, makeParams("txn-1"));
+
+    expect(db.accountTransaction.delete).toHaveBeenCalledOnce();
+    expect(db.accountTransaction.findFirst).not.toHaveBeenCalled();
   });
 
   it("returns 500 on error", async () => {

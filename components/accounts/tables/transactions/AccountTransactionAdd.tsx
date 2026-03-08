@@ -26,7 +26,7 @@ import TransactionFormContent from "@/components/transactions/form/TransactionFo
 import {
   computeTransactionAmount,
   convertFormTaxLines,
-  nextTimeIncrement,
+  getNextTimeForDate,
 } from "@/lib/utils/transaction";
 import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
 
@@ -44,6 +44,7 @@ import timezones from "@/statics/timezones.json";
 
 interface Props {
   account: Account | null;
+  accountTransactions?: AccountTransaction[];
   editTransaction?: AccountTransaction;
   copyTransaction?: AccountTransaction;
   editOpen?: boolean;
@@ -62,7 +63,6 @@ export default function AccountTransactionAdd(props: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const timeCounterRef = useRef(540);
 
   const isEditing = !!props.editTransaction;
   const isCopying = !!props.copyTransaction;
@@ -284,6 +284,23 @@ export default function AccountTransactionAdd(props: Props) {
     });
   };
 
+  // When the date changes on a new transaction, compute the time based on existing transactions
+  const watchedDate = useWatch({ control: form.control, name: "date" });
+
+  const isDateInitRef = useRef(true);
+
+  useEffect(() => {
+    if (isEditing || isCopying) return;
+    if (isDateInitRef.current) {
+      isDateInitRef.current = false;
+      return;
+    }
+    if (watchedDate && props.accountTransactions) {
+      const time = getNextTimeForDate(watchedDate, props.accountTransactions);
+      form.setValue("time", time);
+    }
+  }, [watchedDate, isEditing, isCopying, props.accountTransactions, form]);
+
   const dialogOpen = isEditing || isCopying ? (props.editOpen ?? false) : open;
   const handleDialogOpenChange = (isOpen: boolean) => {
     if (isEditing || isCopying) {
@@ -292,9 +309,13 @@ export default function AccountTransactionAdd(props: Props) {
       setOpen(isOpen);
       if (isOpen) {
         form.reset();
-        const { nextCounter, time } = nextTimeIncrement(timeCounterRef.current);
+        isDateInitRef.current = true;
+        const date = form.getValues("date") ?? new Date();
+        const time = getNextTimeForDate(
+          date,
+          props.accountTransactions ?? []
+        );
         form.setValue("time", time);
-        timeCounterRef.current = nextCounter;
       }
     }
   };

@@ -87,33 +87,72 @@ export async function PUT(
       },
     });
 
-    // Backfill transferId for existing transfers that don't have one
-    if (existing.type === "TRANSFER" && !existing.transferId) {
-      const newTransferId = randomUUID();
-      await db.accountTransaction.update({
-        where: { id },
-        data: { transferId: newTransferId },
-      });
+    // Sync mirror transaction for transfers
+    if (existing.type === "TRANSFER") {
+      let activeTransferId = existing.transferId;
 
-      // Find and update the mirror transaction
+      // Backfill transferId for existing transfers that don't have one
+      if (!activeTransferId) {
+        activeTransferId = randomUUID();
+        await db.accountTransaction.update({
+          where: { id },
+          data: { transferId: activeTransferId },
+        });
+
+        const mirrorAccountId = existing.typeTransferDestination === existing.accountId
+          ? existing.typeTransferOrigin
+          : existing.typeTransferDestination;
+
+        if (mirrorAccountId) {
+          const mirror = await db.accountTransaction.findFirst({
+            where: {
+              accountId: mirrorAccountId,
+              type: "TRANSFER",
+              dateTime: existing.dateTime,
+              transferId: null,
+            },
+          });
+          if (mirror) {
+            await db.accountTransaction.update({
+              where: { id: mirror.id },
+              data: { transferId: activeTransferId },
+            });
+          }
+        }
+      }
+
+      // Update the mirror transaction with synced fields
       const mirrorAccountId = existing.typeTransferDestination === existing.accountId
         ? existing.typeTransferOrigin
         : existing.typeTransferDestination;
 
-      if (mirrorAccountId) {
+      if (mirrorAccountId && activeTransferId) {
         const mirror = await db.accountTransaction.findFirst({
           where: {
             accountId: mirrorAccountId,
             type: "TRANSFER",
-            dateTime: existing.dateTime,
-            transferId: null,
+            transferId: activeTransferId,
           },
         });
         if (mirror) {
           await db.accountTransaction.update({
             where: { id: mirror.id },
-            data: { transferId: newTransferId },
+            data: {
+              payee: transactionData.payee,
+              concept: transactionData.concept,
+              amount: transactionData.amount !== undefined ? -transactionData.amount : undefined,
+              currency: transactionData.currency,
+              dateTime: transactionData.dateTime,
+              timezone: transactionData.timezone,
+              notes: transactionData.notes,
+              category: transactionData.category,
+              subcategory: transactionData.subcategory,
+              tags: transactionData.tags,
+              typeTransferOrigin: transactionData.typeTransferOrigin,
+              typeTransferDestination: transactionData.typeTransferDestination,
+            },
           });
+          await recomputeBalance(mirrorAccountId);
         }
       }
     }
@@ -140,7 +179,7 @@ export async function DELETE(
   try {
     const transaction = await db.accountTransaction.findUnique({
       where: { id },
-      select: { accountId: true, amount: true },
+      select: { accountId: true, amount: true, type: true, transferId: true, typeTransferOrigin: true, typeTransferDestination: true },
     });
 
     if (!transaction) {
@@ -161,17 +200,30 @@ export async function DELETE(
       where: { id },
     });
 
-    const remaining = await db.accountTransaction.aggregate({
-      where: { accountId: transaction.accountId },
-      _sum: { amount: true },
-    });
+    await recomputeBalance(transaction.accountId);
 
-    await db.account.update({
-      where: { id: transaction.accountId },
-      data: {
-        currentBalance: remaining._sum.amount ?? 0,
-      },
-    });
+    // Delete mirror transaction for transfers
+    if (transaction.type === "TRANSFER" && transaction.transferId) {
+      const mirrorAccountId = transaction.typeTransferDestination === transaction.accountId
+        ? transaction.typeTransferOrigin
+        : transaction.typeTransferDestination;
+
+      if (mirrorAccountId) {
+        const mirror = await db.accountTransaction.findFirst({
+          where: {
+            accountId: mirrorAccountId,
+            type: "TRANSFER",
+            transferId: transaction.transferId,
+          },
+        });
+        if (mirror) {
+          await db.accountTransaction.delete({
+            where: { id: mirror.id },
+          });
+          await recomputeBalance(mirrorAccountId);
+        }
+      }
+    }
 
     return NextResponse.json({ deleted: id });
   } catch (error) {
