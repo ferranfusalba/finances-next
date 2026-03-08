@@ -146,6 +146,19 @@ export default function TaxPresetsForm({
     setError(undefined);
 
     const [type, id] = value.split(":");
+
+    // Capture current rate before updating (used in success message on removal)
+    let previousRate: number | null = null;
+    if (rate === null) {
+      for (const cat of categories) {
+        if (type === "cat" && cat.id === id) { previousRate = cat.defaultTaxRate; break; }
+        for (const sub of cat.subcategories) {
+          if (type === "sub" && sub.id === id) { previousRate = sub.defaultTaxRate; break; }
+        }
+        if (previousRate !== null) break;
+      }
+    }
+
     const body =
       type === "sub"
         ? { subcategoryId: id, defaultTaxRate: rate }
@@ -192,7 +205,7 @@ export default function TaxPresetsForm({
         if (rate !== null) {
           setSuccess(`Added ${label} to ${rate}% preset`);
         } else {
-          setSuccess(`Removed ${label} from preset`);
+          setSuccess(`Removed ${label} from ${previousRate}% preset`);
         }
       } catch {
         setError("Failed to update");
@@ -414,7 +427,7 @@ export default function TaxPresetsForm({
                     aria-label={`Remove ${item.label}`}
                     disabled={isPending}
                     onClick={() =>
-                      updateItem(`${item.type}:${item.id}`, null)
+                      updateItem(`${item.type === "subcategory" ? "sub" : "cat"}:${item.id}`, null)
                     }
                     className="rounded-full hover:bg-muted-foreground/20"
                   >

@@ -1,7 +1,6 @@
 "use client";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { User } from "@/types/User";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -17,15 +16,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox } from "@/components/ui/combobox";
 
 import AccountTypeField from "@/components/accounts/form/AccountTypeField";
 
@@ -35,14 +28,25 @@ import currencies from "@/statics/currencies.json";
 import { Currency } from "@/types/Currency";
 import { Country } from "@/types/Country";
 
+const countryOptions = countries.map((country: Country) => ({
+  value: country["alpha-2"],
+  label: `${country["alpha-2"]} ${country["emoji-flag"]}  ${country.name}${country["full-name"] ? " (" + country["full-name"] + ")" : ""}`,
+  searchLabel: `${country["alpha-2"]} ${country.name} ${country["full-name"] ?? ""}`,
+}));
+
+const currencyOptions = currencies.map((currency: Currency) => ({
+  value: currency.code,
+  label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+  searchLabel: `${currency.code} ${currency.name}`,
+}));
+
 interface Props {
-  user: User;
+  defaultCurrency: string;
   accountTypes: string[];
 }
 
 export default function NewAccountForm(props: Props) {
-  const userCountry = props.user.userCountry || "";
-  const userCurrency = props.user.userCurrency || "";
+  const userCurrency = props.defaultCurrency;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -75,7 +79,7 @@ export default function NewAccountForm(props: Props) {
       code: "",
       type: "",
       number: "",
-      country: userCountry,
+      country: "",
       defaultCurrency: userCurrency,
       description: "",
     },
@@ -205,41 +209,6 @@ export default function NewAccountForm(props: Props) {
               </FormItem>
             )}
           />
-          {/* Country */}
-          <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a country" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {countries.map((country: Country) => (
-                      <SelectItem
-                        value={country["alpha-2"]}
-                        key={country["alpha-2"]}
-                      >
-                        {country["alpha-2"]} {country["emoji-flag"]} {"  "}
-                        {country.name}
-                        {"  "}
-                        {country["full-name"] &&
-                          "(" + country["full-name"] + ")"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           {/* Currency */}
           <FormField
             control={form.control}
@@ -247,24 +216,34 @@ export default function NewAccountForm(props: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Currency*</FormLabel>
-                <Select
+                <Combobox
+                  options={currencyOptions}
+                  value={field.value}
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a currency" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {currencies.map((currency: Currency) => (
-                      <SelectItem value={currency.code} key={currency.code}>
-                        {currency.code} - {currency.name} (
-                        {currency.symbol_native})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select a currency"
+                  searchPlaceholder="Search currencies..."
+                  emptyText="No currency found."
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Country */}
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <Combobox
+                  options={countryOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Select a country"
+                  searchPlaceholder="Search countries..."
+                  emptyText="No country found."
+                />
+                <FormDescription>Optional field</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

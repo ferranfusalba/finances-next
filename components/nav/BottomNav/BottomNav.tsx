@@ -20,7 +20,10 @@ const routes: Array<Section> = [
 
 export default function BottomNav() {
   return (
-    <nav aria-label="Sections" className="h-16 md:h-12 items-center bg-white dark:bg-black border-t border-t-gray-400 shadow-gray-400">
+    <nav
+      aria-label="Sections"
+      className="h-12 items-center bg-white dark:bg-black border-t border-t-gray-400 shadow-gray-400"
+    >
       <ul className="grid grid-cols-3 md:flex w-full h-full">
         {routes.map((route) => {
           return <BottomNavSection key={route.path} section={route} />;

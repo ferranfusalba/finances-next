@@ -18,17 +18,14 @@ export default function BottomNavSection({ section }: { section: Section }) {
 
   return (
     <li
-      className={cn(
-        "flex items-center justify-center gap-2 md:px-6 flex-col md:flex-row h-full",
-        {
-          "bg-black text-white dark:bg-white dark:text-black": active,
-        }
-      )}
+      className={cn("flex items-center justify-center gap-2 md:px-6 h-full", {
+        "bg-black text-white dark:bg-white dark:text-black": active,
+      })}
     >
       <Link
         href={section.path}
         aria-current={active ? "page" : undefined}
-        className="flex items-center justify-center gap-2 flex-col md:flex-row w-full h-full"
+        className="flex items-center justify-center gap-2 w-full h-full"
       >
         <div className="self-center">{section.icon}</div>
         <span className="text-xs md:text-base">{section.name}</span>

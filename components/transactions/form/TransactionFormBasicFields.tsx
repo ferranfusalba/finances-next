@@ -28,9 +28,12 @@ import { Account } from "@/types/Account";
 interface Props {
   variant: "account" | "budget";
   account?: Account | null;
+  hasOpeningTransaction?: boolean;
+  isTransferDestination?: boolean;
+  transferOriginAccountId?: string;
 }
 
-export default function TransactionFormBasicFields({ variant, account }: Props) {
+export default function TransactionFormBasicFields({ variant, account, hasOpeningTransaction, isTransferDestination, transferOriginAccountId }: Props) {
   const form = useFormContext();
   const { userAccounts } = useTransactionUser();
 
@@ -83,6 +86,7 @@ export default function TransactionFormBasicFields({ variant, account }: Props) 
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
+              disabled={isTransferDestination}
             >
               <FormControl>
                 <SelectTrigger>
@@ -109,7 +113,7 @@ export default function TransactionFormBasicFields({ variant, account }: Props) 
                     TRANSFER
                   </SelectItem>
                 )}
-                {variant === "account" && (
+                {variant === "account" && !hasOpeningTransaction && (
                   <SelectItem value="OPENING">OPENING</SelectItem>
                 )}
               </SelectContent>
@@ -119,58 +123,74 @@ export default function TransactionFormBasicFields({ variant, account }: Props) 
         )}
       />
       {variant === "account" && selectedType === "TRANSFER" && (
-        <FormField
-          control={form.control}
-          name="typeTransferDestinationAccount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Transfer to Destination Account</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select destination account" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectGroup>
-                    {userAccounts4Transactions.map(
-                      (acct: Account) => (
-                        <SelectItem
-                          value={acct.id}
-                          key={acct.id}
-                        >
-                          {acct.bankName} - {acct.name}{" "}
-                          {account?.defaultCurrency !==
-                          acct.defaultCurrency ? (
-                            <BackgroundChip
-                              data={acct.defaultCurrency as string}
-                              backgroundColor={
-                                getCurrencyColor0(
-                                  acct.defaultCurrency as string,
-                                ) as string
-                              }
-                              textColor={
-                                getCurrencyColor1(
-                                  acct.defaultCurrency as string,
-                                ) as string
-                              }
-                            />
-                          ) : (
-                            ""
-                          )}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        isTransferDestination ? (
+          <FormItem>
+            <FormLabel>Transfer from Origin Account</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                disabled
+                value={(() => {
+                  const origin = userAccounts.find((a) => a.id === transferOriginAccountId);
+                  return origin ? `${origin.bankName} - ${origin.name}` : "";
+                })()}
+              />
+            </FormControl>
+          </FormItem>
+        ) : (
+          <FormField
+            control={form.control}
+            name="typeTransferDestinationAccount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Transfer to Destination Account</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select destination account" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      {userAccounts4Transactions.map(
+                        (acct: Account) => (
+                          <SelectItem
+                            value={acct.id}
+                            key={acct.id}
+                          >
+                            {acct.bankName} - {acct.name}{" "}
+                            {account?.defaultCurrency !==
+                            acct.defaultCurrency ? (
+                              <BackgroundChip
+                                data={acct.defaultCurrency as string}
+                                backgroundColor={
+                                  getCurrencyColor0(
+                                    acct.defaultCurrency as string,
+                                  ) as string
+                                }
+                                textColor={
+                                  getCurrencyColor1(
+                                    acct.defaultCurrency as string,
+                                  ) as string
+                                }
+                              />
+                            ) : (
+                              ""
+                            )}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )
       )}
       {/* Currency */}
       <FormField

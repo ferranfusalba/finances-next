@@ -162,7 +162,10 @@ export default async function AccountLayout({
         <AccountTransactionExpandable
           actions={
             <>
-              <AccountTransactionAdd account={account} />
+              <AccountTransactionAdd
+                account={account}
+                hasOpeningTransaction={accountTransactions.some((t) => t.type === "OPENING")}
+              />
               <AccountTransactionDownload
                 accountTransactions={accountTransactions}
                 accountName={account.name}

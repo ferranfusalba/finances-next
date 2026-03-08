@@ -48,6 +48,7 @@ interface Props {
   copyTransaction?: AccountTransaction;
   editOpen?: boolean;
   onEditOpenChange?: (open: boolean) => void;
+  hasOpeningTransaction?: boolean;
 }
 
 const formSchema = buildAccountTransactionSchema();
@@ -66,6 +67,13 @@ export default function AccountTransactionAdd(props: Props) {
   const isEditing = !!props.editTransaction;
   const isCopying = !!props.copyTransaction;
   const editTx = props.editTransaction ?? props.copyTransaction ?? null;
+
+  // When editing a transfer from the destination account, lock type and destination fields
+  const isTransferDestination =
+    isEditing &&
+    editTx?.type === "TRANSFER" &&
+    !!editTx.typeTransferOrigin &&
+    editTx.typeTransferOrigin !== props.account?.id;
 
   const detectedTimezone = detectTimezone(userTimezone || undefined);
   const detectedTimezoneValue = detectedTimezone
@@ -215,8 +223,12 @@ export default function AccountTransactionAdd(props: Props) {
         payee,
         concept,
         type,
-        typeTransferOrigin: accountId,
-        typeTransferDestination: selectedTransferAccountId,
+        typeTransferOrigin: isTransferDestination
+          ? editTx!.typeTransferOrigin
+          : accountId,
+        typeTransferDestination: isTransferDestination
+          ? editTx!.typeTransferDestination
+          : selectedTransferAccountId,
         currency,
         amount: amountForm,
         foreignCurrency,
@@ -312,6 +324,9 @@ export default function AccountTransactionAdd(props: Props) {
             <TransactionFormContent
               variant="account"
               account={props.account}
+              hasOpeningTransaction={props.hasOpeningTransaction}
+              isTransferDestination={isTransferDestination}
+              transferOriginAccountId={isTransferDestination ? editTx?.typeTransferOrigin ?? undefined : undefined}
             />
             <DialogFooter>
               <Button variant="secondary" type="submit" disabled={isPending}>

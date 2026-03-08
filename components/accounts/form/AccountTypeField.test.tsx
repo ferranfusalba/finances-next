@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,41 +31,11 @@ function Wrapper({
 }
 
 describe("AccountTypeField", () => {
-  it("renders the select trigger with label", () => {
+  it("renders the combobox trigger with label", () => {
     render(<Wrapper accountTypes={["Checking", "Savings"]} />);
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
     expect(screen.getByText("Account Type*")).toBeInTheDocument();
-  });
-
-  it("renders existing account types as hidden native options", () => {
-    render(<Wrapper accountTypes={["Checking", "Savings"]} />);
-
-    const options = screen.getAllByRole("option", { hidden: true });
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).toContain("Checking");
-    expect(optionTexts).toContain("Savings");
-  });
-
-  it("includes 'Add a new type' as a native option", () => {
-    render(<Wrapper accountTypes={["Checking"]} />);
-
-    const options = screen.getAllByRole("option", { hidden: true });
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).toContain("Add a new type");
-  });
-
-  it("renders options sorted alphabetically", () => {
-    render(
-      <Wrapper accountTypes={["Savings", "Checking", "Investment"]} />,
-    );
-
-    const options = screen.getAllByRole("option", { hidden: true });
-    // First option is "Add a new type", then sorted types
-    expect(options[0]).toHaveTextContent("Add a new type");
-    expect(options[1]).toHaveTextContent("Checking");
-    expect(options[2]).toHaveTextContent("Investment");
-    expect(options[3]).toHaveTextContent("Savings");
   });
 
   it("shows placeholder when no default type", () => {
@@ -79,19 +50,51 @@ describe("AccountTypeField", () => {
     expect(screen.getByRole("combobox")).toHaveTextContent("Checking");
   });
 
-  it("renders only 'Add a new type' option when no account types exist", () => {
-    render(<Wrapper accountTypes={[]} />);
+  it("opens dropdown and shows options when clicked", async () => {
+    const user = userEvent.setup();
+    render(<Wrapper accountTypes={["Checking", "Savings"]} />);
 
-    const options = screen.getAllByRole("option", { hidden: true });
-    expect(options).toHaveLength(1);
-    expect(options[0]).toHaveTextContent("Add a new type");
+    await user.click(screen.getByRole("combobox"));
+
+    expect(screen.getByText("Add a new type")).toBeInTheDocument();
+    expect(screen.getByText("Checking")).toBeInTheDocument();
+    expect(screen.getByText("Savings")).toBeInTheDocument();
   });
 
-  it("renders combobox in closed state initially", () => {
+  it("shows options sorted alphabetically with 'Add a new type' first", async () => {
+    const user = userEvent.setup();
+    render(
+      <Wrapper accountTypes={["Savings", "Checking", "Investment"]} />,
+    );
+
+    await user.click(screen.getByRole("combobox"));
+
+    const items = screen.getAllByRole("option");
+    expect(items[0]).toHaveTextContent("Add a new type");
+    expect(items[1]).toHaveTextContent("Checking");
+    expect(items[2]).toHaveTextContent("Investment");
+    expect(items[3]).toHaveTextContent("Savings");
+  });
+
+  it("shows only 'Add a new type' when no account types exist", async () => {
+    const user = userEvent.setup();
+    render(<Wrapper accountTypes={[]} />);
+
+    await user.click(screen.getByRole("combobox"));
+
+    const items = screen.getAllByRole("option");
+    expect(items).toHaveLength(1);
+    expect(items[0]).toHaveTextContent("Add a new type");
+  });
+
+  it("has search input in dropdown", async () => {
+    const user = userEvent.setup();
     render(<Wrapper accountTypes={["Checking"]} />);
 
-    const combobox = screen.getByRole("combobox");
-    expect(combobox).toHaveAttribute("data-state", "closed");
-    expect(combobox).toHaveAttribute("type", "button");
+    await user.click(screen.getByRole("combobox"));
+
+    expect(
+      screen.getByPlaceholderText("Search account types..."),
+    ).toBeInTheDocument();
   });
 });

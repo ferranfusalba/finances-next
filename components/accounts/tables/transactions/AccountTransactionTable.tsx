@@ -102,6 +102,8 @@ export default function AccountTransactionTable(props: Props) {
     });
   };
 
+  const hasOpeningTransaction = accountTransactions.some((t) => t.type === "OPENING");
+
   const hasSelection = selectedIds.size > 0;
 
   const toggleSelect = (id: string) => {
@@ -161,17 +163,15 @@ export default function AccountTransactionTable(props: Props) {
   const columns = [
     columnHelper.display({
       id: "select",
-      header: () => (
-        <input
-          type="checkbox"
-          checked={
-            accountTransactions.length > 0 &&
-            selectedIds.size === accountTransactions.length
-          }
-          onChange={toggleSelectAll}
-          className="cursor-pointer accent-slate-300"
-        />
-      ),
+      header: () =>
+        accountTransactions.length > 0 ? (
+          <input
+            type="checkbox"
+            checked={selectedIds.size === accountTransactions.length}
+            onChange={toggleSelectAll}
+            className="cursor-pointer accent-slate-300"
+          />
+        ) : null,
       cell: (info) => (
         <input
           type="checkbox"
@@ -615,6 +615,11 @@ export default function AccountTransactionTable(props: Props) {
           onEditOpenChange={(open) => {
             if (!open) setEditTransactionId(null);
           }}
+          hasOpeningTransaction={
+            editTransaction.type === "OPENING"
+              ? accountTransactions.some((t) => t.type === "OPENING" && t.id !== editTransaction.id)
+              : hasOpeningTransaction
+          }
         />
       )}
       {copyTransaction && (
@@ -626,6 +631,7 @@ export default function AccountTransactionTable(props: Props) {
           onEditOpenChange={(open) => {
             if (!open) setCopyTransactionId(null);
           }}
+          hasOpeningTransaction={hasOpeningTransaction}
         />
       )}
     </div>

@@ -14,12 +14,18 @@ interface Props {
   variant: "account" | "budget";
   account?: Account | null;
   defaultCurrency?: string;
+  hasOpeningTransaction?: boolean;
+  isTransferDestination?: boolean;
+  transferOriginAccountId?: string;
 }
 
 export default function TransactionFormContent({
   variant,
   account,
   defaultCurrency,
+  hasOpeningTransaction,
+  isTransferDestination,
+  transferOriginAccountId,
 }: Props) {
   const currency = account?.defaultCurrency ?? defaultCurrency;
 
@@ -27,7 +33,7 @@ export default function TransactionFormContent({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
       <div className="space-y-4">
         {variant === "account" && <TransactionFormPayeeField />}
-        <TransactionFormBasicFields variant={variant} account={account} />
+        <TransactionFormBasicFields variant={variant} account={account} hasOpeningTransaction={hasOpeningTransaction} isTransferDestination={isTransferDestination} transferOriginAccountId={transferOriginAccountId} />
         <TransactionFormDateTimeFields />
       </div>
       <div className="space-y-4">

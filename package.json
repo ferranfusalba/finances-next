@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -37,6 +37,7 @@
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.6",

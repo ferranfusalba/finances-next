@@ -7,8 +7,6 @@ import { getAccounts } from "@/lib/accounts";
 import getUser from "@/lib/user";
 import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 
-import { User } from "@/types/User";
-
 export default async function NewAccount() {
   const serverSession = await auth();
 
@@ -23,7 +21,10 @@ export default async function NewAccount() {
   return (
     <Layout02a>
       <h2 className="text-center py-6">New Account</h2>
-      <NewAccountForm user={user as User} accountTypes={accountTypes} />
+      <NewAccountForm
+        defaultCurrency={user?.userCurrency || ""}
+        accountTypes={accountTypes}
+      />
     </Layout02a>
   );
 }

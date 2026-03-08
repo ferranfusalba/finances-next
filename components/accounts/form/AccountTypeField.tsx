@@ -5,19 +5,12 @@ import { Controller, useFormContext } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import {
-  FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+import { AddAlt } from "@carbon/icons-react";
 
 import { cn } from "@/lib/utils";
 
@@ -25,10 +18,19 @@ interface Props {
   accountTypes: string[];
 }
 
+const ADD_NEW_VALUE = "__new__";
+
 export default function AccountTypeField({ accountTypes }: Props) {
   const form = useFormContext();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newType, setNewType] = useState("");
+
+  const options: ComboboxOption[] = [
+    { value: ADD_NEW_VALUE, label: "Add a new type", icon: <AddAlt className="mr-2 h-4 w-4" /> },
+    ...accountTypes
+      .sort((a, b) => a.localeCompare(b))
+      .map((type) => ({ value: type, label: type })),
+  ];
 
   return (
     <Controller
@@ -41,9 +43,11 @@ export default function AccountTypeField({ accountTypes }: Props) {
           })}
         >
           <FormLabel>Account Type*</FormLabel>
-          <Select
+          <Combobox
+            options={options}
+            value={isAddingNew ? ADD_NEW_VALUE : controllerField.value || ""}
             onValueChange={(value) => {
-              if (value === "__new__") {
+              if (value === ADD_NEW_VALUE) {
                 setIsAddingNew(true);
                 setNewType("");
                 controllerField.onChange("");
@@ -53,35 +57,10 @@ export default function AccountTypeField({ accountTypes }: Props) {
                 controllerField.onChange(value);
               }
             }}
-            value={
-              isAddingNew ? "__new__" : controllerField.value || ""
-            }
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an account type" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="__new__">Add a new type</SelectItem>
-              <Separator className="my-2 px-2" />
-              {(() => {
-                const sorted = accountTypes.sort((a, b) => a.localeCompare(b));
-                if (!sorted.length) {
-                  return (
-                    <p className="text-sm text-muted-foreground text-center py-2 select-none">
-                      No account types yet
-                    </p>
-                  );
-                }
-                return sorted.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ));
-              })()}
-            </SelectContent>
-          </Select>
+            placeholder="Select an account type"
+            searchPlaceholder="Search account types..."
+            emptyText="No account types found."
+          />
 
           {isAddingNew && (
             <div className="mt-2">
