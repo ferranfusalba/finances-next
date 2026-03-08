@@ -1085,5 +1085,14 @@
     "rounding": 0,
     "code": "ZWL",
     "name_plural": "Zimbabwean Dollar"
+  },
+  {
+    "symbol": "₿",
+    "name": "Bitcoin",
+    "symbol_native": "₿",
+    "decimal_digits": 8,
+    "rounding": 0,
+    "code": "BTC",
+    "name_plural": "Bitcoins"
   }
 ]

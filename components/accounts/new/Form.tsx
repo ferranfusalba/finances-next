@@ -119,12 +119,12 @@ export default function NewAccountForm(props: Props) {
 
       if (res.ok) {
         const data = await res.json();
-        toast("Account created successfully");
+        toast.success("Account created successfully");
         router.push("/accounts/" + data.id);
         router.refresh();
       } else {
         const data = await res.json();
-        toast("Failed to create account", {
+        toast.error("Failed to create account", {
           description: data.error ?? "Unknown error",
         });
       }
@@ -191,24 +191,6 @@ export default function NewAccountForm(props: Props) {
           />
           {/* Type */}
           <AccountTypeField accountTypes={props.accountTypes} />
-          {/* Number */}
-          <FormField
-            control={form.control}
-            name="number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Account Number</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="ES12 3456 7890"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           {/* Currency */}
           <FormField
             control={form.control}
@@ -224,6 +206,25 @@ export default function NewAccountForm(props: Props) {
                   searchPlaceholder="Search currencies..."
                   emptyText="No currency found."
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Number */}
+          <FormField
+            control={form.control}
+            name="number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Number</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="ES12 3456 7890"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>Optional field</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

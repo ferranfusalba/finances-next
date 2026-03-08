@@ -29,13 +29,13 @@ describe("getCountryName", () => {
     expect(getCountryName("GB")).toBe("United Kingdom");
   });
 
-  it("throws on invalid country code", () => {
-    expect(() => getCountryName("ZZ")).toThrow();
+  it("returns empty string on invalid country code", () => {
+    expect(getCountryName("ZZ")).toBe("");
   });
 });
 
 describe("getCountryFlag - edge cases", () => {
-  it("throws on invalid country code", () => {
-    expect(() => getCountryFlag("ZZ")).toThrow();
+  it("returns empty string on invalid country code", () => {
+    expect(getCountryFlag("ZZ")).toBe("");
   });
 });

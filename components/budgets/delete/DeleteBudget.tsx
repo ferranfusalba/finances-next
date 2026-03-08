@@ -27,12 +27,12 @@ export default function DeleteBudget({ id }: { id: string }) {
       });
 
       if (res.ok) {
-        toast("Budget deleted successfully");
+        toast.success("Budget deleted successfully");
         router.push("/budgets/");
         router.refresh();
       } else {
         const json = await res.json();
-        toast("Failed to delete budget", {
+        toast.error("Failed to delete budget", {
           description: json.error ?? "Unknown error",
         });
       }

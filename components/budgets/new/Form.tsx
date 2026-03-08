@@ -100,12 +100,12 @@ export default function NewBudgetForm(props: Props) {
 
       if (res.ok) {
         const data = await res.json();
-        toast("Budget created successfully");
+        toast.success("Budget created successfully");
         router.push("/budgets/" + data.id);
         router.refresh();
       } else {
         const data = await res.json();
-        toast("Failed to create budget", {
+        toast.error("Failed to create budget", {
           description: data.error ?? "Unknown error",
         });
       }

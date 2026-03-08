@@ -132,13 +132,13 @@ export default function BudgetTransactionAdd(props: Props) {
 
       if (res.ok) {
         setOpen(false);
-        toast(`Transaction for ${concept} has been added`, {
+        toast.success(`Transaction for ${concept} has been added`, {
           description: `${amountForm + " " + currency}`,
         });
         router.refresh();
       } else {
         const json = await res.json();
-        toast("Failed to add transaction", {
+        toast.error("Failed to add transaction", {
           description: json.error ?? "Unknown error",
         });
       }

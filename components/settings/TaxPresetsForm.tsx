@@ -19,9 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FormSuccess } from "@/components/form-success";
-import { FormError } from "@/components/form-error";
-
+import { toast } from "sonner";
 import { Add, Close, TrashCan } from "@carbon/icons-react";
 
 interface SubcategoryPreset {
@@ -60,8 +58,6 @@ export default function TaxPresetsForm({
   );
   const [categories, setCategories] = useState(initialCategories);
   const [isPending, startTransition] = useTransition();
-  const [success, setSuccess] = useState<string | undefined>();
-  const [error, setError] = useState<string | undefined>();
   const [newRate, setNewRate] = useState("");
 
   // Build flat list of all assigned items grouped by rate
@@ -142,9 +138,6 @@ export default function TaxPresetsForm({
   }, [categories]);
 
   function updateItem(value: string, rate: number | null) {
-    setSuccess(undefined);
-    setError(undefined);
-
     const [type, id] = value.split(":");
 
     // Capture current rate before updating (used in success message on removal)
@@ -174,7 +167,7 @@ export default function TaxPresetsForm({
 
         if (!res.ok) {
           const data = await res.json();
-          setError(data.error || "Failed to update");
+          toast.error(data.error || "Failed to update");
           return;
         }
 
@@ -203,12 +196,12 @@ export default function TaxPresetsForm({
 
         const label = findLabel(type, id);
         if (rate !== null) {
-          setSuccess(`Added ${label} to ${rate}% preset`);
+          toast.success(`Added ${label} to ${rate}% preset`);
         } else {
-          setSuccess(`Removed ${label} from ${previousRate}% preset`);
+          toast.success(`Removed ${label} from ${previousRate}% preset`);
         }
       } catch {
-        setError("Failed to update");
+        toast.error("Failed to update");
       }
     });
   }
@@ -227,11 +220,11 @@ export default function TaxPresetsForm({
   function handleAddPresetGroup() {
     const parsed = parseFloat(newRate);
     if (isNaN(parsed) || parsed < 0 || parsed > 100) {
-      setError("Enter a valid rate between 0 and 100");
+      toast.error("Enter a valid rate between 0 and 100");
       return;
     }
     if (presetGroups.some(([rate]) => rate === parsed)) {
-      setError(`A preset for ${parsed}% already exists`);
+      toast.error(`A preset for ${parsed}% already exists`);
       return;
     }
     setCategories((prev) => [
@@ -244,13 +237,9 @@ export default function TaxPresetsForm({
       },
     ]);
     setNewRate("");
-    setError(undefined);
   }
 
   function handleRemovePresetGroup(rate: number) {
-    setSuccess(undefined);
-    setError(undefined);
-
     // Collect all real items in this group
     const itemsToRemove: { type: string; id: string }[] = [];
     for (const cat of categories) {
@@ -291,7 +280,7 @@ export default function TaxPresetsForm({
           });
           if (!res.ok) {
             const data = await res.json();
-            setError(data.error || "Failed to remove preset group");
+            toast.error(data.error || "Failed to remove preset group");
             return;
           }
         }
@@ -315,19 +304,17 @@ export default function TaxPresetsForm({
               })),
             })),
         );
-        setSuccess(`Removed ${rate}% preset group`);
+        toast.success(`Removed ${rate}% preset group`);
       } catch {
-        setError("Failed to remove preset group");
+        toast.error("Failed to remove preset group");
       }
     });
   }
 
   function handleSaveDefaultRate() {
-    setSuccess(undefined);
-    setError(undefined);
     const parsed = parseFloat(defaultRateInput);
     if (isNaN(parsed) || parsed < 0 || parsed > 100) {
-      setError("Enter a valid rate between 0 and 100");
+      toast.error("Enter a valid rate between 0 and 100");
       return;
     }
 
@@ -340,13 +327,13 @@ export default function TaxPresetsForm({
         });
         if (!res.ok) {
           const data = await res.json();
-          setError(data.error || "Failed to update");
+          toast.error(data.error || "Failed to update");
           return;
         }
         setDefaultTaxRate(parsed);
-        setSuccess(`Default tax rate set to ${parsed}%`);
+        toast.success(`Default tax rate set to ${parsed}%`);
       } catch {
-        setError("Failed to update default rate");
+        toast.error("Failed to update default rate");
       }
     });
   }
@@ -492,9 +479,6 @@ export default function TaxPresetsForm({
             Add preset
           </Button>
         </div>
-
-        <FormSuccess message={success} />
-        <FormError message={error} />
       </CardContent>
     </Card>
   );

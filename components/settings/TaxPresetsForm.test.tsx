@@ -1,6 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
+
+vi.mock("sonner", () => {
+  const t = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
+  return { toast: t };
+});
 
 import TaxPresetsForm from "./TaxPresetsForm";
 
@@ -100,7 +106,7 @@ describe("TaxPresetsForm", () => {
     );
   });
 
-  it("shows success message with rate when removing a chip", async () => {
+  it("shows success toast with rate when removing a chip", async () => {
     const user = userEvent.setup();
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ id: "cat2", defaultTaxRate: null }), {
@@ -114,12 +120,12 @@ describe("TaxPresetsForm", () => {
 
     await user.click(screen.getByLabelText("Remove Food"));
 
-    expect(
-      await screen.findByText("Removed Food from 21% preset"),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Removed Food from 21% preset");
+    });
   });
 
-  it("validates new preset rate", async () => {
+  it("shows error toast for duplicate preset rate", async () => {
     const user = userEvent.setup();
     render(
       <TaxPresetsForm categories={mockCategories} defaultTaxRate={21} />,
@@ -130,8 +136,6 @@ describe("TaxPresetsForm", () => {
     await user.type(rateInput, "21");
     await user.click(screen.getByText("Add preset"));
 
-    expect(
-      screen.getByText("A preset for 21% already exists"),
-    ).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalledWith("A preset for 21% already exists");
   });
 });

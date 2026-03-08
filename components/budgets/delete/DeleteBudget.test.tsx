@@ -10,9 +10,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: vi.fn(),
-}));
+vi.mock("sonner", () => {
+  const t = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
+  return { toast: t };
+});
 
 const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
   new Response(JSON.stringify({}), { status: 200 })
@@ -69,7 +70,7 @@ describe("DeleteBudget", () => {
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith("Budget deleted successfully");
+      expect(toast.success).toHaveBeenCalledWith("Budget deleted successfully");
     });
   });
 
@@ -85,7 +86,7 @@ describe("DeleteBudget", () => {
     await user.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith("Failed to delete budget", {
+      expect(toast.error).toHaveBeenCalledWith("Failed to delete budget", {
         description: "Budget not found",
       });
     });

@@ -90,12 +90,12 @@ export default function AccountTransactionTable(props: Props) {
       });
 
       if (res.ok) {
-        toast("Transaction deleted successfully");
+        toast.success("Transaction deleted successfully");
         setDeleteDialogOpen(null);
         router.refresh();
       } else {
         const json = await res.json();
-        toast("Failed to delete transaction", {
+        toast.error("Failed to delete transaction", {
           description: json.error ?? "Unknown error",
         });
       }
@@ -135,11 +135,11 @@ export default function AccountTransactionTable(props: Props) {
       );
       const failed = results.filter((r) => !r.ok).length;
       if (failed === 0) {
-        toast(`${selectedIds.size} transaction(s) deleted successfully`);
+        toast.success(`${selectedIds.size} transaction(s) deleted successfully`);
         setSelectedIds(new Set());
         router.refresh();
       } else {
-        toast(`Failed to delete ${failed} transaction(s)`);
+        toast.error(`Failed to delete ${failed} transaction(s)`);
       }
     });
   };

@@ -1,8 +1,13 @@
 import Layout02b from "@/components/layouts/Layout02b";
+import { PlaygroundToastButtons } from "./PlaygroundToastButtons";
 
 const PlaygroundServerPage = async () => {
   return (
     <Layout02b>
+      {/* Toast Notifications */}
+      <div className="m-2 flex flex-wrap gap-2">
+        <PlaygroundToastButtons />
+      </div>
       <div className="m-2">
         <span className="font-mono p-1 mx-2 rounded-md bg-sky-300 text-yellow-400">
           ARS

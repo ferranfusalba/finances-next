@@ -96,12 +96,12 @@ export default function EditAccount({ account, accountTypes }: Props) {
       });
 
       if (res.ok) {
-        toast("Account updated successfully");
+        toast.success("Account updated successfully");
         setOpen(false);
         router.refresh();
       } else {
         const data = await res.json();
-        toast("Failed to update account", {
+        toast.error("Failed to update account", {
           description: data.error ?? "Unknown error",
         });
       }

@@ -20,10 +20,7 @@ import {
 } from "@/lib/accounts";
 import { currency } from "@/lib/utils";
 import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
-import { getCountryFlag, getCountryName } from "@/lib/utils/country";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
-
-import countries from "@/statics/countries.json";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import {
@@ -71,19 +68,6 @@ export default async function AccountLayout({
     getUserDefaultTaxRate(userId),
   ]);
 
-  function getCountryFullName(alpha2Code: string) {
-    const country = countries.filter(
-      (country) => country["alpha-2"] === alpha2Code,
-    )[0];
-    if (country && country["full-name"]) {
-      return "(" + country["full-name"] + ")";
-    } else if (country) {
-      return "";
-    } else {
-      return "Country not found";
-    }
-  }
-
   return (
     <>
       <Layout02a1>
@@ -103,13 +87,6 @@ export default async function AccountLayout({
               <span>{account.name}</span>
             </div>
             <div>
-              <span>
-                {getCountryFlag(account.country)}
-                {"  "}
-                {account.country} - {getCountryName(account.country)}{" "}
-                {getCountryFullName(account.country)}
-              </span>
-              <span> - </span>
               <span className="font-mono">{account.number}</span>
             </div>
             <div>
@@ -132,7 +109,10 @@ export default async function AccountLayout({
             </div>
           </div>
           <div className="col-span-2 md:col-span-1 grid justify-center content-center gap-2">
-            <EditAccount account={account} accountTypes={getUniqueAccountTypes(userAccounts)} />
+            <EditAccount
+              account={account}
+              accountTypes={getUniqueAccountTypes(userAccounts)}
+            />
             <DeleteAccount id={id} />
           </div>
         </LayoutAccountBudgetHeader>
@@ -146,10 +126,16 @@ export default async function AccountLayout({
           userTransactionPayees,
           userTransactionCategories: userTransactionCategories.map((cat) => ({
             ...cat,
-            defaultTaxRate: cat.defaultTaxRate != null ? Number(String(cat.defaultTaxRate)) : null,
+            defaultTaxRate:
+              cat.defaultTaxRate != null
+                ? Number(String(cat.defaultTaxRate))
+                : null,
             subcategories: cat.subcategories.map((sub) => ({
               ...sub,
-              defaultTaxRate: sub.defaultTaxRate != null ? Number(String(sub.defaultTaxRate)) : null,
+              defaultTaxRate:
+                sub.defaultTaxRate != null
+                  ? Number(String(sub.defaultTaxRate))
+                  : null,
             })),
           })),
           userDefaultTaxRate,
@@ -164,7 +150,9 @@ export default async function AccountLayout({
             <>
               <AccountTransactionAdd
                 account={account}
-                hasOpeningTransaction={accountTransactions.some((t) => t.type === "OPENING")}
+                hasOpeningTransaction={accountTransactions.some(
+                  (t) => t.type === "OPENING",
+                )}
               />
               <AccountTransactionDownload
                 accountTransactions={accountTransactions}

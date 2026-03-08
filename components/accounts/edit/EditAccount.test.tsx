@@ -11,9 +11,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: mockRefresh }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: vi.fn(),
-}));
+vi.mock("sonner", () => {
+  const t = Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() });
+  return { toast: t };
+});
 
 const fetchSpy = vi
   .spyOn(globalThis, "fetch")
@@ -115,7 +116,7 @@ describe("EditAccount", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith("Account updated successfully");
+      expect(toast.success).toHaveBeenCalledWith("Account updated successfully");
       expect(mockRefresh).toHaveBeenCalled();
     });
   });
@@ -136,7 +137,7 @@ describe("EditAccount", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith("Failed to update account", {
+      expect(toast.error).toHaveBeenCalledWith("Failed to update account", {
         description: "Duplicate code",
       });
     });

@@ -27,12 +27,12 @@ export default function DeleteAccount({ id }: { id: string }) {
       });
 
       if (res.ok) {
-        toast("Account deleted successfully");
+        toast.success("Account deleted successfully");
         router.push("/accounts/");
         router.refresh();
       } else {
         const json = await res.json();
-        toast("Failed to delete account", {
+        toast.error("Failed to delete account", {
           description: json.error ?? "Unknown error",
         });
       }

@@ -8,8 +8,7 @@ import { signOut, useSession } from "next-auth/react";
 
 import { settings } from "@/actions/settings";
 
-import { FormError } from "@/components/form-error";
-import { FormSuccess } from "@/components/form-success";
+import { toast } from "sonner";
 import Layout02b from "@/components/layouts/Layout02b";
 import {
   Form,
@@ -55,8 +54,6 @@ import { Timezone } from "@/types/Timezone";
 const UserPage = () => {
   const user = useCurrentUser();
 
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
   const { update } = useSession();
   const [isPending, startTransition] = useTransition();
 
@@ -80,7 +77,7 @@ const UserPage = () => {
       settings(values)
         .then((data) => {
           if (data.error) {
-            setError(data.error);
+            toast.error("Failed to save settings", { description: data.error });
           }
 
           if (data.success) {
@@ -89,10 +86,10 @@ const UserPage = () => {
               return;
             }
             update();
-            setSuccess(data.success);
+            toast.success(data.success);
           }
         })
-        .catch(() => setError("Something went wrong"));
+        .catch(() => toast.error("Something went wrong"));
     });
   };
 
@@ -388,9 +385,7 @@ const UserPage = () => {
               </CardContent>
             </Card>
 
-            <div className="md:col-span-2 space-y-6">
-              <FormError message={error} />
-              <FormSuccess message={success} />
+            <div className="md:col-span-2">
               <Button disabled={isPending} type="submit">
                 Save
               </Button>

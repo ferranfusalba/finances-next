@@ -263,7 +263,7 @@ export default function AccountTransactionAdd(props: Props) {
         } else {
           setOpen(false);
         }
-        toast(
+        toast.success(
           isEditing
             ? `Transaction for ${concept} has been updated`
             : `Transaction for ${concept} has been added`,
@@ -272,7 +272,7 @@ export default function AccountTransactionAdd(props: Props) {
         router.refresh();
       } else {
         const json = await res.json();
-        toast(
+        toast.error(
           isEditing
             ? "Failed to update transaction"
             : "Failed to add transaction",
