@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
 
     const transactionData = {
       payee: data.payee,
+      recurring: data.recurring,
       concept: data.concept,
       type: data.type,
       typeTransferOrigin: data.typeTransferOrigin,

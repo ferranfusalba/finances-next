@@ -14,7 +14,7 @@ export default async function SettingsLayout({
 }) {
   const defaultSettings = [
     { id: "user", name: "User" },
-    { id: "tax-presets", name: "Tax Presets" },
+    { id: "presets", name: "Presets" },
   ];
 
   return (

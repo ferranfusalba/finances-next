@@ -20,12 +20,14 @@ interface TransactionUserContextValue {
     userId: string | null;
     name: string | null;
     defaultTaxRate: Decimal | number | string | null;
+    recurring: string | null;
     subcategories: Array<{
       categoryId: string | null;
       id: string | null;
       name: string | null;
       userId: string | null;
       defaultTaxRate?: Decimal | number | string | null;
+      recurring?: string | null;
     }>;
   }>;
   userDefaultTaxRate: number;

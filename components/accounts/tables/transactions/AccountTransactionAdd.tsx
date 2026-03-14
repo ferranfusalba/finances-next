@@ -101,6 +101,7 @@ export default function AccountTransactionAdd(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       payee: editTx?.payee ?? "",
+      recurring: editTx?.recurring ?? "",
       concept: editTx?.concept ?? "",
       type: editTx?.type ?? "",
       typeTransferDestinationAccount: editTx?.typeTransferDestination ?? "",
@@ -183,6 +184,7 @@ export default function AccountTransactionAdd(props: Props) {
     );
 
     const payee = values.payee;
+    const recurring = values.recurring || null;
     const concept = values.concept;
     const type = values.type;
     const currency = values.currency;
@@ -221,6 +223,7 @@ export default function AccountTransactionAdd(props: Props) {
 
       const transactionPayload = {
         payee,
+        recurring,
         concept,
         type,
         typeTransferOrigin: isTransferDestination

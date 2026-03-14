@@ -149,6 +149,7 @@ export const UpdateBudgetSchema = z.object({
 export const CreateAccountTransactionSchema = z.object({
   payee: z.string().default(""),
   concept: z.string().default(""),
+  recurring: z.string().nullable().optional(),
   type: z.string().min(1),
   typeTransferOrigin: z.string().nullable().optional(),
   typeTransferDestination: z.string().nullable().optional(),
@@ -176,6 +177,7 @@ export const CreateAccountTransactionSchema = z.object({
 export const UpdateAccountTransactionSchema = z.object({
   payee: z.string().optional(),
   concept: z.string().optional(),
+  recurring: z.string().nullable().optional(),
   type: z.string().min(1).optional(),
   typeTransferOrigin: z.string().nullable().optional(),
   typeTransferDestination: z.string().nullable().optional(),

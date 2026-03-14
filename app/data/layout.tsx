@@ -14,36 +14,12 @@ export default async function DataLayout({
 }) {
   const defaultData = [
     {
-      id: "asset-allocation",
-      name: "Asset Allocation",
-    },
-    {
-      id: "entities-allocation",
-      name: "Financial Entities Allocation",
-    },
-    {
       id: "salaries",
       name: "Salaries",
     },
     {
-      id: "subscriptions",
-      name: "Subscriptions",
-    },
-    {
-      id: "income-expenses-year",
-      name: "Income & Expenses 2024",
-    },
-    {
-      id: "income-expenses",
-      name: "Income & Expenses Inception",
-    },
-    {
-      id: "net-worth-year",
-      name: "Net Worth 2024",
-    },
-    {
-      id: "net-worth",
-      name: "Net Worth Inception",
+      id: "recurring-payments",
+      name: "Recurring Payments",
     },
   ];
 

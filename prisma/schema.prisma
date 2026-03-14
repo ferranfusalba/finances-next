@@ -78,6 +78,7 @@ model UserTransactionCategory {
   userId         String?
   name           String
   defaultTaxRate Decimal?
+  recurring      String?
 
   User          User?                        @relation(fields: [userId], references: [id])
   subcategories UserTransactionSubcategory[]
@@ -90,6 +91,7 @@ model UserTransactionSubcategory {
   userId         String?
   name           String
   defaultTaxRate Decimal?
+  recurring      String?
   category       UserTransactionCategory @relation(fields: [categoryId], references: [id])
   categoryId     String
 
@@ -143,6 +145,7 @@ model AccountTransaction {
   timezone                    String?  @default("")
   location                    Json?
   notes                       String
+  recurring                   String?
   taxLines                    TaxLine[]
   Account                     Account? @relation(fields: [accountId], references: [id])
   accountId                   String

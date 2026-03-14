@@ -11,6 +11,7 @@ import {
   CreateBudgetSchema,
   UpdateBudgetSchema,
   CreateAccountTransactionSchema,
+  UpdateAccountTransactionSchema,
   CreateBudgetTransactionSchema,
 } from "./index";
 
@@ -632,6 +633,47 @@ describe("CreateAccountTransactionSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts recurring as null when omitted", () => {
+    const result = CreateAccountTransactionSchema.safeParse(validTransaction);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBeUndefined();
+    }
+  });
+
+  it("accepts recurring as MONTHLY", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      recurring: "MONTHLY",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBe("MONTHLY");
+    }
+  });
+
+  it("accepts recurring as YEARLY", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      recurring: "YEARLY",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBe("YEARLY");
+    }
+  });
+
+  it("accepts recurring as null", () => {
+    const result = CreateAccountTransactionSchema.safeParse({
+      ...validTransaction,
+      recurring: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBeNull();
+    }
+  });
 });
 
 describe("CreateBudgetTransactionSchema", () => {
@@ -709,5 +751,47 @@ describe("CreateBudgetTransactionSchema", () => {
       location: "Madrid",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("UpdateAccountTransactionSchema", () => {
+  it("accepts empty object (all fields optional)", () => {
+    const result = UpdateAccountTransactionSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts recurring as MONTHLY", () => {
+    const result = UpdateAccountTransactionSchema.safeParse({
+      recurring: "MONTHLY",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBe("MONTHLY");
+    }
+  });
+
+  it("accepts recurring as YEARLY", () => {
+    const result = UpdateAccountTransactionSchema.safeParse({
+      recurring: "YEARLY",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBe("YEARLY");
+    }
+  });
+
+  it("accepts recurring as null to clear it", () => {
+    const result = UpdateAccountTransactionSchema.safeParse({
+      recurring: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.recurring).toBeNull();
+    }
+  });
+
+  it("accepts partial update with just amount", () => {
+    const result = UpdateAccountTransactionSchema.safeParse({ amount: -100 });
+    expect(result.success).toBe(true);
   });
 });

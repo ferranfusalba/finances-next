@@ -51,6 +51,7 @@ export function buildAccountTransactionSchema() {
     .object({
       ...baseFields,
       payee: z.string(),
+      recurring: z.string(),
       typeTransferDestinationAccount: z.string(),
       taxLines: z.array(
         z.object({

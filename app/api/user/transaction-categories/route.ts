@@ -14,8 +14,9 @@ export async function GET() {
       id: true,
       name: true,
       defaultTaxRate: true,
+      recurring: true,
       subcategories: {
-        select: { id: true, name: true, defaultTaxRate: true },
+        select: { id: true, name: true, defaultTaxRate: true, recurring: true },
         orderBy: { name: "asc" },
       },
     },
@@ -96,9 +97,14 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const subUpdateData: Record<string, unknown> = { defaultTaxRate: rate };
+    if ("recurring" in data) {
+      subUpdateData.recurring = data.recurring;
+    }
+
     const updated = await db.userTransactionSubcategory.update({
       where: { id: data.subcategoryId },
-      data: { defaultTaxRate: rate },
+      data: subUpdateData,
     });
 
     return NextResponse.json(updated);
@@ -123,9 +129,14 @@ export async function PATCH(request: Request) {
     );
   }
 
+  const updateData: Record<string, unknown> = { defaultTaxRate: rate };
+  if ("recurring" in data) {
+    updateData.recurring = data.recurring;
+  }
+
   const updated = await db.userTransactionCategory.update({
     where: { id: data.categoryId },
-    data: { defaultTaxRate: rate },
+    data: updateData,
   });
 
   return NextResponse.json(updated);

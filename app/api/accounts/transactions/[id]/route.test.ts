@@ -184,6 +184,28 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     expect(updateCall.data.taxLines).toBeUndefined();
   });
 
+  it("passes recurring flag in update", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(db.accountTransaction.update).mockResolvedValue({
+      id: "txn-1",
+      ...baseUpdate,
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -75 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await PUT(makePutRequest({ ...baseUpdate, recurring: "YEARLY" }), makeParams("txn-1"));
+
+    const updateCall = vi.mocked(db.accountTransaction.update).mock.calls[0][0];
+    expect(updateCall.data.recurring).toBe("YEARLY");
+  });
+
   it("returns 500 on error", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({

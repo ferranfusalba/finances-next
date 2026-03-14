@@ -16,10 +16,10 @@ const sections = [
       "Profile, security, preferences, and appearance settings.",
   },
   {
-    href: "/settings/tax-presets",
-    title: "Tax Presets",
+    href: "/settings/presets",
+    title: "Presets",
     description:
-      "Default tax rates for categories and subcategories.",
+      "Default tax rates and recurring payment categories.",
   },
 ];
 

@@ -59,14 +59,12 @@ export default function AccountTransactionTable(props: Props) {
   const highlightRef = useRef<HTMLTableRowElement>(null);
 
   useEffect(() => {
-    const tid = searchParams.get("transferId");
-    if (!tid) return;
+    const hid = searchParams.get("highlightId");
+    if (!hid) return;
     const match = accountTransactions.find(
-      (tx) => tx.transferId === tid,
+      (tx) => tx.id === hid || tx.transferId === hid,
     );
-    if (match) {
-      setHighlightedTxId(match.id);
-    }
+    if (match) setHighlightedTxId(match.id);
   }, [searchParams, accountTransactions]);
 
   useEffect(() => {
@@ -209,6 +207,19 @@ export default function AccountTransactionTable(props: Props) {
       header: "Type",
       footer: (info) => info.column.id,
     }),
+    columnHelper.accessor("recurring", {
+      cell: (info) => {
+        const value = info.getValue();
+        if (!value) return null;
+        return (
+          <Badge variant="secondary" className="select-none">
+            {value === "YEARLY" ? "Yearly" : "Monthly"}
+          </Badge>
+        );
+      },
+      header: "Recurring",
+      footer: (info) => info.column.id,
+    }),
     columnHelper.accessor("typeTransferOrigin", {
       cell: (info) => {
         const type = info.row.original?.type;
@@ -220,7 +231,7 @@ export default function AccountTransactionTable(props: Props) {
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
         const href = tid
-          ? `/accounts/${accountId}?transferId=${tid}`
+          ? `/accounts/${accountId}?highlightId=${tid}`
           : `/accounts/${accountId}`;
         return <Link href={href} className="underline">{label}</Link>;
       },
@@ -237,7 +248,7 @@ export default function AccountTransactionTable(props: Props) {
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
         const href = tid
-          ? `/accounts/${accountId}?transferId=${tid}`
+          ? `/accounts/${accountId}?highlightId=${tid}`
           : `/accounts/${accountId}`;
         return <Link href={href} className="underline">{label}</Link>;
       },

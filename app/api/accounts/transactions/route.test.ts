@@ -264,6 +264,47 @@ describe("POST /api/accounts/transactions", () => {
     expect(createCall.data.taxLines).toBeUndefined();
   });
 
+  it("passes recurring frequency to the database", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
+      ...baseTransaction,
+      recurring: "MONTHLY",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -50 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await POST(makeRequest({ ...baseTransaction, recurring: "MONTHLY" }));
+
+    const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+    expect(createCall.data.recurring).toBe("MONTHLY");
+  });
+
+  it("omits recurring when not provided", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.accountTransaction.create).mockResolvedValue({
+      id: "txn-1",
+      ...baseTransaction,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+    vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+      _sum: { amount: -50 },
+    } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    await POST(makeRequest(baseTransaction));
+
+    const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+    expect(createCall.data.recurring).toBeUndefined();
+  });
+
   it("returns 500 when create fails", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);

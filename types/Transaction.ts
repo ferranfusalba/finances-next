@@ -32,6 +32,7 @@ interface Transaction {
 export interface AccountTransaction extends Transaction {
   accountId: string;
   payee: string;
+  recurring: string | null;
   taxLines?: TaxLine[] | null;
   transferId?: string | null;
   typeTransferDestination?: string | null;

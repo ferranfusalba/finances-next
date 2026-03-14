@@ -70,6 +70,7 @@ describe("transactionToRow", () => {
     typeTransferDestination: null,
     taxLines: null,
     transferId: null,
+    recurring: null,
   };
 
   it("produces a row with the correct number of fields", () => {

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getUserDefaultTaxRate, getUserTransactionCategories } from "@/lib/user";
 import Layout02b from "@/components/layouts/Layout02b";
+import RecurringPresetsForm from "@/components/settings/RecurringPresetsForm";
 import TaxPresetsForm from "@/components/settings/TaxPresetsForm";
 
 function toRate(raw: unknown): number | null {
@@ -38,13 +39,29 @@ export default async function TaxPresetsPage() {
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const recurringCategories = categories
+    .map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      recurring: cat.recurring as string | null,
+      subcategories: cat.subcategories
+        .map((sub) => ({
+          id: sub.id,
+          name: sub.name,
+          recurring: sub.recurring as string | null,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <Layout02b>
-      <div className="w-full h-full p-4 md:p-8">
+      <div className="w-full h-full p-4 md:p-8 space-y-8">
         <TaxPresetsForm
           categories={serialized}
           defaultTaxRate={defaultTaxRate}
         />
+        <RecurringPresetsForm categories={recurringCategories} />
       </div>
     </Layout02b>
   );
