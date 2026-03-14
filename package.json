@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -33,6 +33,8 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-toggle": "^1.1.10",
+    "@radix-ui/react-toggle-group": "^1.1.11",
     "@tanstack/react-table": "^8.21.3",
     "@types/qrcode": "^1.5.6",
     "bcryptjs": "^2.4.3",
