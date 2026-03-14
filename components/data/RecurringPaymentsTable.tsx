@@ -127,7 +127,7 @@ export default function RecurringPaymentsTable({
 
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch w-full">
-      <div className="pb-2">
+      <div className="flex items-center justify-between pb-2">
         <ToggleGroup
           type="single"
           value={groupMode}
@@ -143,6 +143,12 @@ export default function RecurringPaymentsTable({
             By Month
           </ToggleGroupItem>
         </ToggleGroup>
+        <Link
+          href="/settings/presets"
+          className="text-sm text-muted-foreground underline select-none"
+        >
+          Manage recurring presets
+        </Link>
       </div>
       <table className="w-full">
         <caption className="sr-only">Recurring payments</caption>
@@ -201,7 +207,11 @@ function PayeeGroupedBody({
   const grouped = useMemo(() => {
     const map = new Map<
       string,
-      { label: string; recurring: string | null; transactions: RecurringPayment[] }
+      {
+        label: string;
+        recurring: string | null;
+        transactions: RecurringPayment[];
+      }
     >();
     for (const t of transactions) {
       const label = t.payee || t.concept || "Unknown";
@@ -295,7 +305,8 @@ function PayeeGroup({
           </span>
         </td>
         <td className="px-2 py-1 text-sm text-slate-300">
-          {count} payments · avg {formatCurrency(userLocale, cur).format(avgAmount)}
+          {count} payments · avg{" "}
+          {formatCurrency(userLocale, cur).format(avgAmount)}
         </td>
         <td className="px-2 py-1 font-semibold">
           {formatCurrency(userLocale, cur).format(totalAmount)}
@@ -303,10 +314,7 @@ function PayeeGroup({
       </tr>
       {!isCollapsed &&
         rows.map((row) => (
-          <tr
-            key={row.id}
-            className="border-b border-b-slate-400 bg-slate-900"
-          >
+          <tr key={row.id} className="border-b border-b-slate-400 bg-slate-900">
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id} className="px-2">
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -375,10 +383,7 @@ function MonthGroupedBody({
           className="bg-slate-700 cursor-pointer select-none"
           onClick={() => toggleGroup(monthKey)}
         >
-          <td
-            colSpan={colCount - 1}
-            className="px-2 py-1 font-semibold"
-          >
+          <td colSpan={colCount - 1} className="px-2 py-1 font-semibold">
             <span className="inline-flex items-center gap-1">
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
               {label}
@@ -393,10 +398,7 @@ function MonthGroupedBody({
 
     if (!collapsedGroups.has(monthKey)) {
       elements.push(
-        <tr
-          key={row.id}
-          className="border-b border-b-slate-400 bg-slate-900"
-        >
+        <tr key={row.id} className="border-b border-b-slate-400 bg-slate-900">
           {row.getVisibleCells().map((cell) => (
             <td key={cell.id} className="px-2">
               {flexRender(cell.column.columnDef.cell, cell.getContext())}

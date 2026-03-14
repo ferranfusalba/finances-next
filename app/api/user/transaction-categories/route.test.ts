@@ -12,6 +12,9 @@ vi.mock("@/lib/db", () => ({
       findFirst: vi.fn(),
       update: vi.fn(),
     },
+    accountTransaction: {
+      updateMany: vi.fn(),
+    },
   },
 }));
 
@@ -143,13 +146,14 @@ describe("PATCH /api/user/transaction-categories", () => {
     expect(response.status).toBe(401);
   });
 
-  it("updates recurring frequency on a category", async () => {
+  it("updates recurring frequency on a category and its transactions", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
       id: "cat-1",
       userId: "user-1",
       name: "Digital Subscriptions",
     } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 4 } as never);
     vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
       id: "cat-1",
       name: "Digital Subscriptions",
@@ -167,6 +171,15 @@ describe("PATCH /api/user/transaction-categories", () => {
     const updateCall = vi.mocked(db.userTransactionCategory.update).mock.calls[0][0];
     expect(updateCall.where).toEqual({ id: "cat-1" });
     expect(updateCall.data.recurring).toBe("MONTHLY");
+
+    // Should update existing transactions
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Digital Subscriptions",
+      },
+      data: { recurring: "MONTHLY" },
+    });
   });
 
   it("does not include recurring in update when not provided", async () => {
@@ -209,6 +222,7 @@ describe("PATCH /api/user/transaction-categories", () => {
       userId: "user-1",
       name: "Digital Subscriptions",
     } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 4 } as never);
     vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
       id: "cat-1",
       name: "Digital Subscriptions",
@@ -226,13 +240,18 @@ describe("PATCH /api/user/transaction-categories", () => {
     expect(updateCall.data.recurring).toBeNull();
   });
 
-  it("updates recurring on a subcategory", async () => {
+  it("updates recurring on a subcategory and its transactions", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.userTransactionSubcategory.findFirst).mockResolvedValue({
       id: "sub-1",
       categoryId: "cat-1",
       name: "WSJ",
     } as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
+      id: "cat-1",
+      name: "Digital Subscriptions",
+    } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 2 } as never);
     vi.mocked(db.userTransactionSubcategory.update).mockResolvedValue({
       id: "sub-1",
       name: "WSJ",
@@ -248,6 +267,16 @@ describe("PATCH /api/user/transaction-categories", () => {
     expect(json.recurring).toBe("YEARLY");
     const updateCall = vi.mocked(db.userTransactionSubcategory.update).mock.calls[0][0];
     expect(updateCall.data.recurring).toBe("YEARLY");
+
+    // Should update existing transactions matching category + subcategory
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Digital Subscriptions",
+        subcategory: "WSJ",
+      },
+      data: { recurring: "YEARLY" },
+    });
   });
 
   it("returns 404 when subcategory not found", async () => {

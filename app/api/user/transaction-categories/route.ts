@@ -100,6 +100,22 @@ export async function PATCH(request: Request) {
     const subUpdateData: Record<string, unknown> = { defaultTaxRate: rate };
     if ("recurring" in data) {
       subUpdateData.recurring = data.recurring;
+
+      // Update existing transactions matching this category + subcategory
+      const category = await db.userTransactionCategory.findFirst({
+        where: { id: sub.categoryId },
+        select: { name: true },
+      });
+      if (category) {
+        await db.accountTransaction.updateMany({
+          where: {
+            Account: { userId: user.id },
+            category: category.name,
+            subcategory: sub.name,
+          },
+          data: { recurring: data.recurring },
+        });
+      }
     }
 
     const updated = await db.userTransactionSubcategory.update({
@@ -132,6 +148,15 @@ export async function PATCH(request: Request) {
   const updateData: Record<string, unknown> = { defaultTaxRate: rate };
   if ("recurring" in data) {
     updateData.recurring = data.recurring;
+
+    // Update existing transactions matching this category
+    await db.accountTransaction.updateMany({
+      where: {
+        Account: { userId: user.id },
+        category: category.name,
+      },
+      data: { recurring: data.recurring },
+    });
   }
 
   const updated = await db.userTransactionCategory.update({

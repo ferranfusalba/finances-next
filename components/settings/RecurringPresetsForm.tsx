@@ -80,12 +80,20 @@ export default function RecurringPresetsForm({
           }),
         );
 
+        let itemName = "";
+        for (const c of categories) {
+          if (type === "category" && c.id === id) { itemName = c.name; break; }
+          for (const s of c.subcategories) {
+            if (type === "subcategory" && s.id === id) { itemName = s.name; break; }
+          }
+          if (itemName) break;
+        }
         const label = recurring
           ? recurring === "YEARLY"
             ? "yearly"
             : "monthly"
           : "not recurring";
-        toast.success(`Updated to ${label}`);
+        toast.success(`${itemName} updated to ${label}`);
       } catch {
         toast.error("Failed to update");
       }
@@ -98,8 +106,9 @@ export default function RecurringPresetsForm({
         <CardTitle>Recurring Payment Presets</CardTitle>
         <CardDescription>
           Set which categories or subcategories should auto-mark transactions as
-          recurring. Subcategory presets override category presets. You can still
-          change it per transaction.
+          recurring. Subcategory presets override category presets. Changing a
+          preset will update all existing transactions in that category. You can
+          still override individual transactions.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
