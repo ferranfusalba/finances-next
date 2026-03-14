@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -44,7 +44,7 @@
     "otpauth": "^9.5.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
-    "react-day-picker": "^9.13.1",
+    "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.1",
     "react-icons": "^5.4.0",
