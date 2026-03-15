@@ -10,11 +10,17 @@ import {
 import { ChevronDown, ChevronRight } from "@carbon/icons-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { currency as formatCurrency } from "@/lib/utils";
 
-interface RecurringPayment {
+interface TaxLine {
+  rate: number;
+  amount: number;
+  inclusive: boolean;
+  taxAmount: number;
+}
+
+interface SalesTaxTransaction {
   id: string;
   dateTime: Date;
   payee: string;
@@ -22,18 +28,19 @@ interface RecurringPayment {
   accountId: string;
   amount: number;
   currency: string;
-  recurring: string | null;
+  taxLines: TaxLine[];
+  totalTax: number;
 }
 
 interface Props {
-  transactions: RecurringPayment[];
+  transactions: SalesTaxTransaction[];
   accountMap: Record<string, string>;
   userLocale?: string;
 }
 
-type GroupMode = "payee" | "month";
+type GroupMode = "percentage" | "month";
 
-const columnHelper = createColumnHelper<RecurringPayment>();
+const columnHelper = createColumnHelper<SalesTaxTransaction>();
 
 function buildColumns(
   groupMode: GroupMode,
@@ -63,7 +70,7 @@ function buildColumns(
     },
   });
 
-  const conceptColumn = columnHelper.accessor("payee", {
+  const payeeColumn = columnHelper.accessor("payee", {
     header: "Payee",
     cell: (info) => info.getValue() || info.row.original.concept || "—",
   });
@@ -82,13 +89,29 @@ function buildColumns(
     },
   });
 
+  const taxColumn = columnHelper.display({
+    id: "tax",
+    header: "Tax",
+    cell: (info) => {
+      const row = info.row.original;
+      const cur = row.currency;
+      return formatCurrency(userLocale, cur).format(row.totalTax);
+    },
+  });
+
   if (groupMode === "month") {
-    return [dateColumn, conceptColumn, paymentMethodColumn, amountColumn];
+    return [dateColumn, payeeColumn, paymentMethodColumn, amountColumn, taxColumn];
   }
 
-  const payeeDateColumn = columnHelper.accessor("dateTime", {
-    id: "payeeDate",
-    header: "Payee & Date",
+  const percentagePayeeColumn = columnHelper.accessor("payee", {
+    id: "percentagePayee",
+    header: "Payee",
+    cell: (info) => info.getValue() || info.row.original.concept || "—",
+  });
+
+  const percentageDateColumn = columnHelper.accessor("dateTime", {
+    id: "percentageDate",
+    header: "Percentage & Date",
     cell: (info) => {
       const dt = new Date(info.getValue());
       const row = info.row.original;
@@ -110,15 +133,15 @@ function buildColumns(
     },
   });
 
-  return [payeeDateColumn, paymentMethodColumn, amountColumn];
+  return [percentageDateColumn, percentagePayeeColumn, paymentMethodColumn, amountColumn, taxColumn];
 }
 
-export default function RecurringPaymentsTable({
+export default function SalesTaxTable({
   transactions,
   accountMap,
   userLocale = "en-US",
 }: Props) {
-  const [groupMode, setGroupMode] = useState<GroupMode>("payee");
+  const [groupMode, setGroupMode] = useState<GroupMode>("percentage");
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
   );
@@ -147,8 +170,8 @@ export default function RecurringPaymentsTable({
 
   const headers =
     groupMode === "month"
-      ? ["Date", "Payee", "Payment Method", "Amount"]
-      : ["Payee & Date", "Payment Method", "Amount"];
+      ? ["Date", "Payee", "Payment Method", "Amount", "Tax"]
+      : ["Percentage & Date", "Payee", "Payment Method", "Amount", "Tax"];
 
   return (
     <div className="flex flex-col overflow-auto flex-nowrap scroll-touch w-full">
@@ -161,22 +184,16 @@ export default function RecurringPaymentsTable({
           }}
           className="select-none"
         >
-          <ToggleGroupItem value="payee" size="sm">
-            By Payee
+          <ToggleGroupItem value="percentage" size="sm">
+            By Percentage
           </ToggleGroupItem>
           <ToggleGroupItem value="month" size="sm">
             By Month
           </ToggleGroupItem>
         </ToggleGroup>
-        <Link
-          href="/settings/presets"
-          className="text-sm text-muted-foreground underline select-none"
-        >
-          Manage recurring presets
-        </Link>
       </div>
       <table className="w-full">
-        <caption className="sr-only">Recurring payments</caption>
+        <caption className="sr-only">Sales tax</caption>
         <thead>
           <tr className="bg-slate-400">
             {headers.map((header) => (
@@ -197,11 +214,11 @@ export default function RecurringPaymentsTable({
                 colSpan={headers.length}
                 className="px-2 py-8 text-center text-slate-400"
               >
-                No recurring payments found
+                No transactions with sales tax found
               </td>
             </tr>
-          ) : groupMode === "payee" ? (
-            <PayeeGroupedBody
+          ) : groupMode === "percentage" ? (
+            <PercentageGroupedBody
               transactions={transactions}
               columns={columns}
               collapsedGroups={collapsedGroups}
@@ -223,16 +240,16 @@ export default function RecurringPaymentsTable({
   );
 }
 
-// --- Payee grouping ---
+// --- Percentage grouping ---
 
-function PayeeGroupedBody({
+function PercentageGroupedBody({
   transactions,
   columns,
   collapsedGroups,
   toggleGroup,
   userLocale,
 }: {
-  transactions: RecurringPayment[];
+  transactions: SalesTaxTransaction[];
   columns: ReturnType<typeof buildColumns>;
   collapsedGroups: Set<string>;
   toggleGroup: (key: string) => void;
@@ -243,24 +260,28 @@ function PayeeGroupedBody({
       string,
       {
         label: string;
-        recurring: string | null;
-        transactions: RecurringPayment[];
+        rate: number;
+        transactions: SalesTaxTransaction[];
       }
     >();
     for (const t of transactions) {
-      const label = t.payee || t.concept || "Unknown";
-      if (!map.has(label)) {
-        map.set(label, { label, recurring: t.recurring, transactions: [] });
+      // Group by the primary (first) tax rate
+      const rate = t.taxLines[0]?.rate ?? 0;
+      const key = `${rate}%`;
+      if (!map.has(key)) {
+        map.set(key, { label: key, rate, transactions: [] });
       }
-      map.get(label)!.transactions.push(t);
+      map.get(key)!.transactions.push(t);
     }
-    return Array.from(map.values()).sort((a, b) =>
-      a.label.localeCompare(b.label),
-    );
+    return Array.from(map.values()).sort((a, b) => a.rate - b.rate);
   }, [transactions]);
 
-  const grandTotal = useMemo(
+  const grandTotalAmount = useMemo(
     () => transactions.reduce((sum, t) => sum + t.amount, 0),
+    [transactions],
+  );
+  const grandTotalTax = useMemo(
+    () => transactions.reduce((sum, t) => sum + t.totalTax, 0),
     [transactions],
   );
   const cur = transactions[0]?.currency ?? "EUR";
@@ -268,12 +289,14 @@ function PayeeGroupedBody({
   return (
     <>
       <tr className="bg-slate-600 select-none">
-        <td className="px-2 py-1 font-bold text-lg">
+        <td colSpan={3} className="px-2 py-1 font-bold text-lg">
           Total
         </td>
-        <td />
         <td className="px-2 py-1 font-bold text-lg">
-          {formatCurrency(userLocale, cur).format(grandTotal)}
+          {formatCurrency(userLocale, cur).format(grandTotalAmount)}
+        </td>
+        <td className="px-2 py-1 font-bold text-lg">
+          {formatCurrency(userLocale, cur).format(grandTotalTax)}
         </td>
       </tr>
       {grouped.map((group) => {
@@ -282,23 +305,23 @@ function PayeeGroupedBody({
           (sum, t) => sum + t.amount,
           0,
         );
+        const totalTax = group.transactions.reduce(
+          (sum, t) => sum + t.totalTax,
+          0,
+        );
         const count = group.transactions.length;
-        const avgAmount = totalAmount / count;
-        const payeeCur = group.transactions[0]?.currency ?? "EUR";
-        const frequencyLabel =
-          group.recurring === "YEARLY" ? "Yearly" : "Monthly";
+        const groupCur = group.transactions[0]?.currency ?? "EUR";
 
         return (
-          <PayeeGroup
+          <PercentageGroup
             key={group.label}
             group={group}
             isCollapsed={isCollapsed}
             onToggle={() => toggleGroup(group.label)}
             count={count}
-            avgAmount={avgAmount}
             totalAmount={totalAmount}
-            frequencyLabel={frequencyLabel}
-            cur={payeeCur}
+            totalTax={totalTax}
+            cur={groupCur}
             userLocale={userLocale}
             columns={columns}
           />
@@ -308,25 +331,23 @@ function PayeeGroupedBody({
   );
 }
 
-function PayeeGroup({
+function PercentageGroup({
   group,
   isCollapsed,
   onToggle,
   count,
-  avgAmount,
   totalAmount,
-  frequencyLabel,
+  totalTax,
   cur,
   userLocale,
   columns,
 }: {
-  group: { label: string; transactions: RecurringPayment[] };
+  group: { label: string; transactions: SalesTaxTransaction[] };
   isCollapsed: boolean;
   onToggle: () => void;
   count: number;
-  avgAmount: number;
   totalAmount: number;
-  frequencyLabel: string;
+  totalTax: number;
   cur: string;
   userLocale: string;
   columns: ReturnType<typeof buildColumns>;
@@ -348,17 +369,16 @@ function PayeeGroup({
           <span className="inline-flex items-center gap-2">
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
             {group.label}
-            <Badge variant="secondary" className="select-none">
-              {frequencyLabel}
-            </Badge>
           </span>
         </td>
-        <td className="px-2 py-1 text-sm text-slate-300">
-          {count} payments · avg{" "}
-          {formatCurrency(userLocale, cur).format(avgAmount)}
+        <td className="px-2 py-1 text-sm text-slate-300" colSpan={2}>
+          {count} transactions
         </td>
         <td className="px-2 py-1 font-semibold">
           {formatCurrency(userLocale, cur).format(totalAmount)}
+        </td>
+        <td className="px-2 py-1 font-semibold">
+          {formatCurrency(userLocale, cur).format(totalTax)}
         </td>
       </tr>
       {!isCollapsed &&
@@ -384,7 +404,7 @@ function MonthGroupedBody({
   toggleGroup,
   userLocale,
 }: {
-  transactions: RecurringPayment[];
+  transactions: SalesTaxTransaction[];
   columns: ReturnType<typeof buildColumns>;
   collapsedGroups: Set<string>;
   toggleGroup: (key: string) => void;
@@ -397,14 +417,22 @@ function MonthGroupedBody({
   });
 
   const { monthlyTotals, yearlyTotals } = useMemo(() => {
-    const monthly = new Map<string, number>();
-    const yearly = new Map<number, number>();
+    const monthly = new Map<string, { amount: number; tax: number }>();
+    const yearly = new Map<number, { amount: number; tax: number }>();
     for (const t of transactions) {
       const dt = new Date(t.dateTime);
       const monthKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
-      monthly.set(monthKey, (monthly.get(monthKey) ?? 0) + t.amount);
+      const prev = monthly.get(monthKey) ?? { amount: 0, tax: 0 };
+      monthly.set(monthKey, {
+        amount: prev.amount + t.amount,
+        tax: prev.tax + t.totalTax,
+      });
       const year = dt.getFullYear();
-      yearly.set(year, (yearly.get(year) ?? 0) + t.amount);
+      const prevYear = yearly.get(year) ?? { amount: 0, tax: 0 };
+      yearly.set(year, {
+        amount: prevYear.amount + t.amount,
+        tax: prevYear.tax + t.totalTax,
+      });
     }
     return { monthlyTotals: monthly, yearlyTotals: yearly };
   }, [transactions]);
@@ -423,15 +451,18 @@ function MonthGroupedBody({
 
     if (year !== lastYear) {
       lastYear = year;
-      const yearTotal = yearlyTotals.get(year) ?? 0;
+      const yearData = yearlyTotals.get(year) ?? { amount: 0, tax: 0 };
       const cur = row.original.currency;
       elements.push(
         <tr key={`year-${year}`} className="bg-slate-600 select-none">
-          <td colSpan={colCount - 1} className="px-2 py-1 font-bold text-lg">
+          <td colSpan={colCount - 2} className="px-2 py-1 font-bold text-lg">
             {year}
           </td>
           <td className="px-2 py-1 font-bold text-lg">
-            {formatCurrency(userLocale, cur).format(yearTotal)}
+            {formatCurrency(userLocale, cur).format(yearData.amount)}
+          </td>
+          <td className="px-2 py-1 font-bold text-lg">
+            {formatCurrency(userLocale, cur).format(yearData.tax)}
           </td>
         </tr>,
       );
@@ -444,7 +475,7 @@ function MonthGroupedBody({
         year: "numeric",
         month: "long",
       });
-      const total = monthlyTotals.get(monthKey) ?? 0;
+      const monthData = monthlyTotals.get(monthKey) ?? { amount: 0, tax: 0 };
       const cur = row.original.currency;
 
       elements.push(
@@ -453,14 +484,17 @@ function MonthGroupedBody({
           className="bg-slate-700 cursor-pointer select-none"
           onClick={() => toggleGroup(monthKey)}
         >
-          <td colSpan={colCount - 1} className="px-2 py-1 font-semibold">
+          <td colSpan={colCount - 2} className="px-2 py-1 font-semibold">
             <span className="inline-flex items-center gap-1">
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
               {label}
             </span>
           </td>
           <td className="px-2 py-1 font-semibold">
-            {formatCurrency(userLocale, cur).format(total)}
+            {formatCurrency(userLocale, cur).format(monthData.amount)}
+          </td>
+          <td className="px-2 py-1 font-semibold">
+            {formatCurrency(userLocale, cur).format(monthData.tax)}
           </td>
         </tr>,
       );

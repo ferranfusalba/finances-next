@@ -21,6 +21,10 @@ export default async function DataLayout({
       id: "recurring-payments",
       name: "Recurring Payments",
     },
+    {
+      id: "sales-tax",
+      name: "Sales Tax",
+    },
   ];
 
   return (
