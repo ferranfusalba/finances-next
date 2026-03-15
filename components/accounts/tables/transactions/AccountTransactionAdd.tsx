@@ -268,8 +268,8 @@ export default function AccountTransactionAdd(props: Props) {
         }
         toast.success(
           isEditing
-            ? `Transaction for ${concept} has been updated`
-            : `Transaction for ${concept} has been added`,
+            ? `Transaction for ${payee || concept} has been updated`
+            : `Transaction for ${payee || concept} has been added`,
           { description: `${amountForm + " " + currency}` },
         );
         router.refresh();
