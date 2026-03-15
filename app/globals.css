@@ -35,9 +35,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --height-screen-main-desktop: calc(100vh - 7rem);
-  --height-screen-main-mobile: calc(100vh - 8rem);
-
   --max-height-margins-y-mobile: calc(100vh - 150px);
 
   --min-width-10rem: 10rem;

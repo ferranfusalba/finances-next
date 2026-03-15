@@ -93,19 +93,21 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <header className="fixed top-0 w-full z-10 bg-white dark:bg-black pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-              <HighlightBackBanner />
-              <TopNav />
-            </header>
-            <main className="pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-12 h-screen pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-              <Toaster />
-              {children}
-            </main>
-            <footer
-              className={`fixed bottom-0 w-full h-auto bg-white dark:bg-black pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${!serverSession?.user ? "hidden" : ""}`}
-            >
-              <BottomNav />
-            </footer>
+            <div className="flex flex-col h-dvh">
+              <header className="shrink-0 w-full bg-white dark:bg-black pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+                <HighlightBackBanner />
+                <TopNav />
+              </header>
+              <main className="flex-1 min-h-0 flex flex-col overflow-y-auto pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+                <Toaster />
+                {children}
+              </main>
+              <footer
+                className={`shrink-0 w-full bg-white dark:bg-black pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${!serverSession?.user ? "hidden" : ""}`}
+              >
+                <BottomNav />
+              </footer>
+            </div>
           </ThemeProvider>
         </SessionProvider>
       </body>

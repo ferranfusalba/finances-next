@@ -11,7 +11,10 @@ const TopNav = async () => {
   const years = user?.id ? await getDistinctTransactionYears(user.id) : [];
 
   return (
-    <nav aria-label="Main" className="h-16 flex items-center px-6 py-3 justify-between bg-white dark:bg-black">
+    <nav
+      aria-label="Main"
+      className="flex items-center px-6 py-3 justify-between bg-white dark:bg-black"
+    >
       <Link href="/">
         <div className="flex gap-4">
           <h1>Finances</h1>

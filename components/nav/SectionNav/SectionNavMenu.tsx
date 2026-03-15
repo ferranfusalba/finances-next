@@ -17,12 +17,12 @@ export default async function SectionNavMenu({
       <nav
         aria-label={`${type} navigation`}
         className={cn(
-          "flex fixed top-16 w-full z-10",
+          "flex sticky top-0 z-9 w-full",
           { "bg-sky-900": type === "accounts" },
           { "bg-pink-900": type === "budgets" },
           { "bg-lime-900": type === "data" },
           { "bg-stone-900": type === "settings" },
-          { "bg-fuchsia-900": type === "playground" }
+          { "bg-fuchsia-900": type === "playground" },
         )}
       >
         {allowAdd && (

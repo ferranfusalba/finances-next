@@ -15,7 +15,7 @@ export default function HighlightBackBanner() {
   if (!highlightId || !fromLabel) return null;
 
   return (
-    <div className="fixed top-0 w-full z-20 flex items-center gap-2 bg-slate-700 px-4 py-1.5 select-none pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+    <div className="w-full flex items-center gap-2 bg-slate-700 px-4 py-1.5 select-none pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <Button
         variant="ghost"
         size="sm"
