@@ -34,6 +34,7 @@ describe("getSalesTaxTransactions", () => {
       where: {
         Account: { userId: "user-1" },
         taxLines: { some: {} },
+        dateTime: undefined,
       },
       orderBy: { dateTime: "asc" },
       select: {
@@ -54,6 +55,23 @@ describe("getSalesTaxTransactions", () => {
         },
       },
     });
+  });
+
+  it("applies year filter when year is provided", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
+
+    await getSalesTaxTransactions("user-1", 2025);
+
+    expect(db.accountTransaction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          dateTime: {
+            gte: new Date("2025-01-01T00:00:00.000Z"),
+            lt: new Date("2026-01-01T00:00:00.000Z"),
+          },
+        }),
+      }),
+    );
   });
 
   it("converts Decimal fields to numbers", async () => {
@@ -188,6 +206,7 @@ describe("getTransactionLocations", () => {
       where: {
         Account: { userId: "user-1" },
         location: { not: expect.anything() },
+        dateTime: undefined,
       },
       orderBy: { dateTime: "desc" },
       select: {
@@ -200,6 +219,23 @@ describe("getTransactionLocations", () => {
         location: true,
       },
     });
+  });
+
+  it("applies year filter when year is provided", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
+
+    await getTransactionLocations("user-1", 2025);
+
+    expect(db.accountTransaction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          dateTime: {
+            gte: new Date("2025-01-01T00:00:00.000Z"),
+            lt: new Date("2026-01-01T00:00:00.000Z"),
+          },
+        }),
+      }),
+    );
   });
 
   it("groups transactions by placeId", async () => {

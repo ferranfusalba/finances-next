@@ -2,13 +2,30 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { buildDateTimeFilter } from "@/lib/utils/yearFilter";
 import type { TransactionLocation } from "@/types/TransactionLocation";
 
-export async function getRecurringPayments(userId: string) {
+export async function getDistinctTransactionYears(
+  userId: string,
+): Promise<number[]> {
+  const results = await db.$queryRaw<Array<{ year: number }>>`
+    SELECT DISTINCT EXTRACT(YEAR FROM "dateTime")::int AS year
+    FROM "AccountTransaction"
+    WHERE "accountId" IN (SELECT id FROM "Account" WHERE "userId" = ${userId})
+    ORDER BY year DESC
+  `;
+  return results.map((r) => r.year);
+}
+
+export async function getRecurringPayments(
+  userId: string,
+  year: number | null = null,
+) {
   const transactions = await db.accountTransaction.findMany({
     where: {
       Account: { userId },
       NOT: { recurring: null },
+      dateTime: buildDateTimeFilter(year),
     },
     orderBy: {
       dateTime: "asc",
@@ -31,11 +48,15 @@ export async function getRecurringPayments(userId: string) {
   }));
 }
 
-export async function getSalesTaxTransactions(userId: string) {
+export async function getSalesTaxTransactions(
+  userId: string,
+  year: number | null = null,
+) {
   const transactions = await db.accountTransaction.findMany({
     where: {
       Account: { userId },
       taxLines: { some: {} },
+      dateTime: buildDateTimeFilter(year),
     },
     orderBy: {
       dateTime: "asc",
@@ -91,11 +112,13 @@ export interface LocationWithTransactions {
 
 export async function getTransactionLocations(
   userId: string,
+  year: number | null = null,
 ): Promise<LocationWithTransactions[]> {
   const transactions = await db.accountTransaction.findMany({
     where: {
       Account: { userId },
       location: { not: Prisma.DbNull },
+      dateTime: buildDateTimeFilter(year),
     },
     orderBy: {
       dateTime: "desc",

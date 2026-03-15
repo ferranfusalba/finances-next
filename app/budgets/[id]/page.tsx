@@ -14,6 +14,7 @@ import { auth } from "@/auth";
 import { getBudget, getBudgetTransactions } from "@/lib/budgets";
 import { currency } from "@/lib/utils";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import { parseYearParam } from "@/lib/utils/yearFilter";
 import { getUserForeignCurrencies, getUserTransactionLocations, getUserTransactionTags } from "@/lib/user";
 
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
@@ -22,8 +23,11 @@ import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 
 export default async function BudgetLayout({
   params,
+  searchParams,
 }: AccountBudgetParamsProps) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const year = parseYearParam(resolvedSearchParams.year as string | undefined);
 
   const [budget, serverSession] = await Promise.all([
     getBudget(id),
@@ -43,7 +47,7 @@ export default async function BudgetLayout({
     userTransactionLocations,
     userTransactionTags,
   ] = await Promise.all([
-    getBudgetTransactions(budget.id),
+    getBudgetTransactions(budget.id, year),
     getUserForeignCurrencies(userId),
     getUserTransactionLocations(userId),
     getUserTransactionTags(userId),

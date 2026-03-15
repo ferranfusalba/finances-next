@@ -151,6 +151,8 @@ model AccountTransaction {
   taxLines                    TaxLine[]
   Account                     Account? @relation(fields: [accountId], references: [id])
   accountId                   String
+
+  @@index([accountId, dateTime])
 }
 
 model TaxLine {
@@ -184,6 +186,8 @@ model BudgetTransaction {
   notes                       String
   Budget                      Budget?  @relation(fields: [budgetId], references: [id])
   budgetId                    String
+
+  @@index([budgetId, dateTime])
 }
 
 model Account {

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { buildDateTimeFilter } from "@/lib/utils/yearFilter";
 import type { TransactionLocation } from "@/types/TransactionLocation";
 
 export async function getBudgets(userId: string) {
@@ -32,10 +33,14 @@ export async function getBudget(id: string) {
   };
 }
 
-export async function getBudgetTransactions(id: string) {
+export async function getBudgetTransactions(
+  id: string,
+  year: number | null = null,
+) {
   const transactions = await db.budgetTransaction.findMany({
     where: {
       budgetId: id,
+      dateTime: buildDateTimeFilter(year),
     },
     orderBy: {
       dateTime: "asc",

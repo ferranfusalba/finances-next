@@ -39,6 +39,7 @@ const columnHelper = createColumnHelper<AccountTransaction>();
 interface Props {
   accountTransactions: Array<AccountTransaction>;
   account: Account | null;
+  carryForwardBalance?: number;
 }
 
 export default function AccountTransactionTable(props: Props) {
@@ -151,13 +152,13 @@ export default function AccountTransactionTable(props: Props) {
 
   const balanceByTransactionId = useMemo(() => {
     const map = new Map<string, number>();
-    let running = 0;
+    let running = props.carryForwardBalance ?? 0;
     for (const t of accountTransactions) {
       running += t.amount;
       map.set(t.id, running);
     }
     return map;
-  }, [accountTransactions]);
+  }, [accountTransactions, props.carryForwardBalance]);
 
   const columns = [
     columnHelper.display({

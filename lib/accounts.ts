@@ -1,5 +1,8 @@
+import { Prisma } from "@prisma/client";
+
 import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
+import { buildDateTimeFilter } from "@/lib/utils/yearFilter";
 import type { TransactionLocation } from "@/types/TransactionLocation";
 
 export async function getAccounts(userId: string) {
@@ -30,10 +33,28 @@ export async function getAccount(id: string) {
   };
 }
 
-export async function getAccountTransactions(id: string) {
+export async function getAccountTransactionBalanceBefore(
+  id: string,
+  beforeDate: Date,
+): Promise<number> {
+  const result = await db.accountTransaction.aggregate({
+    where: {
+      accountId: id,
+      dateTime: { lt: beforeDate },
+    },
+    _sum: { amount: true },
+  });
+  return toNumber(result._sum.amount ?? new Prisma.Decimal(0));
+}
+
+export async function getAccountTransactions(
+  id: string,
+  year: number | null = null,
+) {
   const transactions = await db.accountTransaction.findMany({
     where: {
       accountId: id,
+      dateTime: buildDateTimeFilter(year),
     },
     orderBy: {
       dateTime: "asc",

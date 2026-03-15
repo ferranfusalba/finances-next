@@ -19,7 +19,9 @@ import {
   getAccounts,
   getAccount,
   getAccountTransactions,
+  getAccountTransactionBalanceBefore,
 } from "@/lib/accounts";
+import { parseYearParam } from "@/lib/utils/yearFilter";
 import { currency } from "@/lib/utils";
 import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
@@ -39,8 +41,11 @@ import Layout02a1 from "@/components/layouts/Layout02a1";
 
 export default async function AccountLayout({
   params,
+  searchParams,
 }: AccountBudgetParamsProps) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const year = parseYearParam(resolvedSearchParams.year as string | undefined);
 
   const [account, serverSession] = await Promise.all([getAccount(id), auth()]);
 
@@ -60,8 +65,9 @@ export default async function AccountLayout({
     userTransactionLocations,
     userTransactionTags,
     userDefaultTaxRate,
+    carryForwardBalance,
   ] = await Promise.all([
-    getAccountTransactions(account.id),
+    getAccountTransactions(account.id, year),
     getAccounts(userId),
     getUserTransactionPayees(userId),
     getUserTransactionCategories(userId),
@@ -69,6 +75,12 @@ export default async function AccountLayout({
     getUserTransactionLocations(userId),
     getUserTransactionTags(userId),
     getUserDefaultTaxRate(userId),
+    year
+      ? getAccountTransactionBalanceBefore(
+          account.id,
+          new Date(`${year}-01-01T00:00:00.000Z`),
+        )
+      : Promise.resolve(0),
   ]);
 
   return (
@@ -172,6 +184,7 @@ export default async function AccountLayout({
             <AccountTransactionTable
               accountTransactions={accountTransactions}
               account={account}
+              carryForwardBalance={carryForwardBalance}
             />
           </AccountTransactionExpandable>
         </CollapseMonthsProvider>
