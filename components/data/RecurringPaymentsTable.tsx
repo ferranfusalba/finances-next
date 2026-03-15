@@ -45,7 +45,7 @@ function buildColumns(
     cell: (info) => {
       const dt = new Date(info.getValue());
       const row = info.row.original;
-      const href = `/accounts/${row.accountId}?highlightId=${row.id}`;
+      const href = `/accounts/${row.accountId}?highlightId=${row.id}&fromLabel=${encodeURIComponent("Recurring Payments")}`;
       return (
         <span className="flex items-center gap-2">
           <span>
@@ -92,7 +92,7 @@ function buildColumns(
     cell: (info) => {
       const dt = new Date(info.getValue());
       const row = info.row.original;
-      const href = `/accounts/${row.accountId}?highlightId=${row.id}`;
+      const href = `/accounts/${row.accountId}?highlightId=${row.id}&fromLabel=${encodeURIComponent("Recurring Payments")}`;
       return (
         <span className="flex items-center gap-2">
           <span>

@@ -28,6 +28,7 @@ import {
 import { cn, currency } from "@/lib/utils";
 import { downloadTransactionsCsv } from "@/lib/utils/csv";
 
+import { useCollapseMonths } from "@/contexts/CollapseMonthsContext";
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
 import { Account } from "@/types/Account";
@@ -230,8 +231,9 @@ export default function AccountTransactionTable(props: Props) {
         const label = `${account.bankName} · ${account.name}`;
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
+        const currentLabel = props.account ? `${props.account.bankName} · ${props.account.name}` : "";
         const href = tid
-          ? `/accounts/${accountId}?highlightId=${tid}`
+          ? `/accounts/${accountId}?highlightId=${tid}&fromLabel=${encodeURIComponent(currentLabel)}`
           : `/accounts/${accountId}`;
         return <Link href={href} className="underline">{label}</Link>;
       },
@@ -247,8 +249,9 @@ export default function AccountTransactionTable(props: Props) {
         const label = `${account.bankName} · ${account.name}`;
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
+        const currentLabel = props.account ? `${props.account.bankName} · ${props.account.name}` : "";
         const href = tid
-          ? `/accounts/${accountId}?highlightId=${tid}`
+          ? `/accounts/${accountId}?highlightId=${tid}&fromLabel=${encodeURIComponent(currentLabel)}`
           : `/accounts/${accountId}`;
         return <Link href={href} className="underline">{label}</Link>;
       },
@@ -455,21 +458,7 @@ export default function AccountTransactionTable(props: Props) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "dateTime", desc: false },
   ]);
-  const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(
-    new Set(),
-  );
-
-  const toggleMonth = (monthKey: string) => {
-    setCollapsedMonths((prev) => {
-      const next = new Set(prev);
-      if (next.has(monthKey)) {
-        next.delete(monthKey);
-      } else {
-        next.add(monthKey);
-      }
-      return next;
-    });
-  };
+  const { collapsedMonths, toggleMonth } = useCollapseMonths();
 
   const table = useReactTable({
     data,

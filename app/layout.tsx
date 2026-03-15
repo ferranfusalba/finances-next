@@ -7,6 +7,7 @@ import "./globals.css";
 
 import BottomNav from "@/components/nav/BottomNav/BottomNav";
 import TopNav from "@/components/nav/TopNav/TopNav";
+import HighlightBackBanner from "@/components/ui/highlight-back-banner";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -93,6 +94,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <header className="fixed top-0 w-full z-10 bg-white dark:bg-black pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+              <HighlightBackBanner />
               <TopNav />
             </header>
             <main className="pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-12 h-screen pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">

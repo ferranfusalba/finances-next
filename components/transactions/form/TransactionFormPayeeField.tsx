@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import {
+  FormDescription,
   FormItem,
   FormLabel,
   FormMessage,
@@ -24,6 +25,14 @@ export default function TransactionFormPayeeField() {
 
   const [isAddingNewPayee, setIsAddingNewPayee] = useState(false);
   const [newPayee, setNewPayee] = useState("");
+
+  const payeeAlreadyExists = useMemo(() => {
+    if (!isAddingNewPayee || !newPayee.trim()) return false;
+    return userTransactionPayees?.some(
+      (payee) =>
+        payee.name?.toLowerCase() === newPayee.trim().toLowerCase(),
+    );
+  }, [isAddingNewPayee, newPayee, userTransactionPayees]);
 
   const payees = userTransactionPayees
     ?.filter((payee) => payee.name)
@@ -90,6 +99,11 @@ export default function TransactionFormPayeeField() {
                   controllerField.onChange(value);
                 }}
               />
+              {payeeAlreadyExists && (
+                <FormDescription className="text-muted-foreground mt-2">
+                  A payee with this name already exists. The existing one will be used.
+                </FormDescription>
+              )}
             </div>
           )}
           <FormMessage aria-live="polite" />

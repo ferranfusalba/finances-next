@@ -4,8 +4,10 @@ import { auth } from "@/auth";
 
 import AccountTransactionTable from "@/components/accounts/tables/transactions/AccountTransactionTable";
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
+import AccountTransactionCollapseToggle from "@/components/accounts/tables/transactions/AccountTransactionCollapseToggle";
 import AccountTransactionDownload from "@/components/accounts/tables/transactions/AccountTransactionDownload";
 import AccountTransactionExpandable from "@/components/accounts/tables/transactions/AccountTransactionExpandable";
+
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import EditAccount from "@/components/accounts/edit/EditAccount";
 import BackgroundChip from "@/components/chips/BackgroundChip";
@@ -31,6 +33,7 @@ import {
   getUserTransactionPayees,
   getUserTransactionTags,
 } from "@/lib/user";
+import { CollapseMonthsProvider } from "@/contexts/CollapseMonthsContext";
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
 import Layout02a1 from "@/components/layouts/Layout02a1";
 
@@ -145,28 +148,33 @@ export default async function AccountLayout({
           hasTransactions: accountTransactions.length > 0,
         }}
       >
-        <AccountTransactionExpandable
-          actions={
-            <>
-              <AccountTransactionAdd
-                account={account}
-                accountTransactions={accountTransactions}
-                hasOpeningTransaction={accountTransactions.some(
-                  (t) => t.type === "OPENING",
-                )}
-              />
-              <AccountTransactionDownload
-                accountTransactions={accountTransactions}
-                accountName={account.name}
-              />
-            </>
-          }
-        >
-          <AccountTransactionTable
-            accountTransactions={accountTransactions}
-            account={account}
-          />
-        </AccountTransactionExpandable>
+        <CollapseMonthsProvider>
+          <AccountTransactionExpandable
+            actions={
+              <>
+                <AccountTransactionAdd
+                  account={account}
+                  accountTransactions={accountTransactions}
+                  hasOpeningTransaction={accountTransactions.some(
+                    (t) => t.type === "OPENING",
+                  )}
+                />
+                <AccountTransactionDownload
+                  accountTransactions={accountTransactions}
+                  accountName={account.name}
+                />
+                <AccountTransactionCollapseToggle
+                  accountTransactions={accountTransactions}
+                />
+              </>
+            }
+          >
+            <AccountTransactionTable
+              accountTransactions={accountTransactions}
+              account={account}
+            />
+          </AccountTransactionExpandable>
+        </CollapseMonthsProvider>
       </TransactionUserProvider>
     </>
   );
