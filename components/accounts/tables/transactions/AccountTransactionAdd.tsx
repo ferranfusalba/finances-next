@@ -31,6 +31,7 @@ import {
 import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
+import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
 
 import {
   buildAccountTransactionSchema,
@@ -214,9 +215,14 @@ export default function AccountTransactionAdd(props: Props) {
             headers: { "Content-Type": "application/json" },
           }),
         category &&
+          transactionTypeToCategoryType(type) &&
           fetch("/api/user/transaction-categories/", {
             method: "POST",
-            body: JSON.stringify({ name: category, subcategory }),
+            body: JSON.stringify({
+              name: category,
+              subcategory,
+              type: transactionTypeToCategoryType(type),
+            }),
             headers: { "Content-Type": "application/json" },
           }),
       ]);

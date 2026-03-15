@@ -10,6 +10,7 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -27,6 +28,7 @@ interface SubcategoryItem {
 interface CategoryItem {
   id: string;
   name: string;
+  type: string;
   recurring: string | null;
   subcategories: SubcategoryItem[];
 }
@@ -120,7 +122,12 @@ export default function RecurringPresetsForm({
         {categories.map((cat) => (
           <div key={cat.id} className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium flex-1">{cat.name}</span>
+              <span className="text-sm font-medium flex-1">
+                {cat.name}
+                <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
+                  {cat.type}
+                </Badge>
+              </span>
               <Select
                 value={cat.recurring ?? "NONE"}
                 onValueChange={(val) =>

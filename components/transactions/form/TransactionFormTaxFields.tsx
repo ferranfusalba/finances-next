@@ -85,7 +85,7 @@ export default function TransactionFormTaxFields() {
   }, [watchedAmount]);
 
   if (
-    !(selectedType === "EXPENSE" || selectedType === "EXPENSE_N") ||
+    selectedType !== "EXPENSE" ||
     !(parseFloat(watchedAmount) > 0)
   ) {
     return null;

@@ -26,6 +26,7 @@ import TransactionFormMetadataFields from "@/components/transactions/form/Transa
 import TransactionFormTaxFields from "@/components/transactions/form/TransactionFormTaxFields";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
+import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
 
 import { Account } from "@/types/Account";
 
@@ -52,9 +53,11 @@ export default function TransactionFormContent({
 
   const watchedCategory = useWatch({ control: form.control, name: "category" });
   const watchedSubcategory = useWatch({ control: form.control, name: "subcategory" });
+  const watchedType = useWatch({ control: form.control, name: "type" });
+  const categoryType = transactionTypeToCategoryType(watchedType ?? "");
 
   const categoryMatch = userTransactionCategories?.find(
-    (cat) => cat.name === watchedCategory,
+    (cat) => cat.name === watchedCategory && cat.type === categoryType,
   );
   const subcategoryMatch = categoryMatch?.subcategories?.find(
     (sub) => sub.name === watchedSubcategory,

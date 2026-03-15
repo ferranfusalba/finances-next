@@ -19,6 +19,8 @@ interface TransactionUserContextValue {
     id: string | null;
     userId: string | null;
     name: string | null;
+    type: string | null;
+    color: string | null;
     defaultTaxRate: Decimal | number | string | null;
     recurring: string | null;
     subcategories: Array<{

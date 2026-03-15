@@ -14,6 +14,7 @@ const mockCategories = [
   {
     id: "cat1",
     name: "Transport",
+    type: "EXPENSE",
     defaultTaxRate: 10,
     subcategories: [
       {
@@ -27,6 +28,7 @@ const mockCategories = [
   {
     id: "cat2",
     name: "Food",
+    type: "EXPENSE",
     defaultTaxRate: 21,
     subcategories: [],
   },
@@ -51,9 +53,9 @@ describe("TaxPresetsForm", () => {
       <TaxPresetsForm categories={mockCategories} defaultTaxRate={21} />,
     );
 
-    expect(screen.getByText("Transport")).toBeInTheDocument();
-    expect(screen.getByText("Transport › Metro")).toBeInTheDocument();
-    expect(screen.getByText("Food")).toBeInTheDocument();
+    expect(screen.getByText("Transport [E]")).toBeInTheDocument();
+    expect(screen.getByText("Transport › Metro [E]")).toBeInTheDocument();
+    expect(screen.getByText("Food [E]")).toBeInTheDocument();
   });
 
   it("sends categoryId when removing a category chip", async () => {
@@ -69,7 +71,7 @@ describe("TaxPresetsForm", () => {
     );
 
     // Click the remove button on the "Food" category chip (in the 21% group)
-    const removeButton = screen.getByLabelText("Remove Food");
+    const removeButton = screen.getByLabelText("Remove Food [E]");
     await user.click(removeButton);
 
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -94,7 +96,7 @@ describe("TaxPresetsForm", () => {
     );
 
     // Click the remove button on the "Transport › Metro" subcategory chip
-    const removeButton = screen.getByLabelText("Remove Transport › Metro");
+    const removeButton = screen.getByLabelText("Remove Transport › Metro [E]");
     await user.click(removeButton);
 
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -118,10 +120,10 @@ describe("TaxPresetsForm", () => {
       <TaxPresetsForm categories={mockCategories} defaultTaxRate={21} />,
     );
 
-    await user.click(screen.getByLabelText("Remove Food"));
+    await user.click(screen.getByLabelText("Remove Food [E]"));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Removed Food from 21% preset");
+      expect(toast.success).toHaveBeenCalledWith("Removed Food [E] from 21% preset");
     });
   });
 

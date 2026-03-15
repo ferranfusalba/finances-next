@@ -1,8 +1,6 @@
 export type TransactionType =
   | "INCOME"
-  | "INCOME_N"
   | "EXPENSE"
-  | "EXPENSE_N"
   | "TRANSFER"
   | "OPENING";
 
@@ -21,15 +19,15 @@ export interface ApiTaxLine {
 
 /**
  * Applies the correct sign to a transaction amount based on its type.
- * EXPENSE/EXPENSE_N/TRANSFER → always negative
- * INCOME/INCOME_N → always positive
+ * EXPENSE/TRANSFER → always negative
+ * INCOME → always positive
  * OPENING → raw value (user decides sign)
  */
 export function computeTransactionAmount(
   type: string,
   rawAmount: number
 ): number {
-  if (type === "EXPENSE" || type === "EXPENSE_N" || type === "TRANSFER") {
+  if (type === "EXPENSE" || type === "TRANSFER") {
     return -Math.abs(rawAmount);
   }
   if (type === "OPENING") {

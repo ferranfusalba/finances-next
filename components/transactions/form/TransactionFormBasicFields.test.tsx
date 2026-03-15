@@ -128,8 +128,6 @@ describe("TransactionFormBasicFields", () => {
     expect(optionTexts).toContain("INCOME");
     expect(optionTexts).toContain("EXPENSE");
     expect(optionTexts).toContain("TRANSFER");
-    expect(optionTexts).toContain("INCOME (Not counted as such)");
-    expect(optionTexts).toContain("EXPENSE (Not counted as such)");
     expect(optionTexts).toContain("OPENING");
   });
 
@@ -143,8 +141,6 @@ describe("TransactionFormBasicFields", () => {
     const optionTexts = options.map((o) => o.textContent);
     expect(optionTexts).toContain("INCOME");
     expect(optionTexts).toContain("EXPENSE");
-    expect(optionTexts).not.toContain("INCOME (Not counted as such)");
-    expect(optionTexts).not.toContain("EXPENSE (Not counted as such)");
     expect(optionTexts).not.toContain("OPENING");
   });
 

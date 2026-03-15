@@ -32,6 +32,7 @@ interface SubcategoryPreset {
 interface CategoryPreset {
   id: string;
   name: string;
+  type: string;
   defaultTaxRate: number | null;
   subcategories: SubcategoryPreset[];
 }
@@ -40,10 +41,17 @@ interface CategoryPreset {
 interface PresetItem {
   type: "category" | "subcategory";
   id: string;
-  label: string; // display name, e.g. "Transport" or "Transport > T-Jove"
+  label: string; // display name, e.g. "Transport [E]" or "Transport > T-Jove"
   categoryName: string;
+  categoryType: string;
   subcategoryName?: string;
 }
+
+const TYPE_SHORT: Record<string, string> = {
+  INCOME: "I",
+  EXPENSE: "E",
+  TRANSFER: "T",
+};
 
 export default function TaxPresetsForm({
   categories: initialCategories,
@@ -67,22 +75,26 @@ export default function TaxPresetsForm({
       if (cat.defaultTaxRate !== null && !cat.id.startsWith("__empty_")) {
         const rate = cat.defaultTaxRate;
         if (!groups.has(rate)) groups.set(rate, []);
+        const typeTag = TYPE_SHORT[cat.type] || cat.type;
         groups.get(rate)!.push({
           type: "category",
           id: cat.id,
-          label: cat.name,
+          label: `${cat.name} [${typeTag}]`,
           categoryName: cat.name,
+          categoryType: cat.type,
         });
       }
       for (const sub of cat.subcategories) {
         if (sub.defaultTaxRate !== null) {
           const rate = sub.defaultTaxRate;
           if (!groups.has(rate)) groups.set(rate, []);
+          const typeTag = TYPE_SHORT[cat.type] || cat.type;
           groups.get(rate)!.push({
             type: "subcategory",
             id: sub.id,
-            label: `${cat.name} \u203A ${sub.name}`,
+            label: `${cat.name} \u203A ${sub.name} [${typeTag}]`,
             categoryName: cat.name,
+            categoryType: cat.type,
             subcategoryName: sub.name,
           });
         }
@@ -117,10 +129,11 @@ export default function TaxPresetsForm({
 
     for (const cat of categories) {
       if (cat.id.startsWith("__empty_")) continue;
+      const typeTag = TYPE_SHORT[cat.type] || cat.type;
       if (!assignedCatIds.has(cat.id)) {
         items.push({
           value: `cat:${cat.id}`,
-          label: cat.name,
+          label: `${cat.name} [${typeTag}]`,
           indent: false,
         });
       }
@@ -128,7 +141,7 @@ export default function TaxPresetsForm({
         if (!assignedSubIds.has(sub.id)) {
           items.push({
             value: `sub:${sub.id}`,
-            label: `${cat.name} \u203A ${sub.name}`,
+            label: `${cat.name} \u203A ${sub.name} [${typeTag}]`,
             indent: true,
           });
         }
@@ -208,10 +221,11 @@ export default function TaxPresetsForm({
 
   function findLabel(type: string, id: string): string {
     for (const cat of categories) {
-      if (type === "cat" && cat.id === id) return cat.name;
+      const typeTag = TYPE_SHORT[cat.type] || cat.type;
+      if (type === "cat" && cat.id === id) return `${cat.name} [${typeTag}]`;
       for (const sub of cat.subcategories) {
         if (type === "sub" && sub.id === id)
-          return `${cat.name} \u203A ${sub.name}`;
+          return `${cat.name} \u203A ${sub.name} [${typeTag}]`;
       }
     }
     return "";
@@ -232,6 +246,7 @@ export default function TaxPresetsForm({
       {
         id: `__empty_${parsed}`,
         name: "",
+        type: "",
         defaultTaxRate: parsed,
         subcategories: [],
       },

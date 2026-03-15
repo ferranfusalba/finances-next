@@ -77,13 +77,15 @@ model UserTransactionCategory {
   id             String   @id @default(cuid())
   userId         String?
   name           String
+  type           String
+  color          String
   defaultTaxRate Decimal?
   recurring      String?
 
   User          User?                        @relation(fields: [userId], references: [id])
   subcategories UserTransactionSubcategory[]
 
-  @@unique([userId, name])
+  @@unique([userId, name, type])
 }
 
 model UserTransactionSubcategory {

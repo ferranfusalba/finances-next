@@ -17,6 +17,7 @@ import { AddAlt } from "@carbon/icons-react";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { cn } from "@/lib/utils";
+import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
 
 interface Props {
   variant: "account" | "budget";
@@ -34,8 +35,14 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
   const [newSubcategory, setNewSubcategory] = useState("");
 
   const category = useWatch({ control: form.control, name: "category" });
-  const prevCategory = useRef(category);
+  const selectedType = useWatch({ control: form.control, name: "type" });
+  const categoryType = transactionTypeToCategoryType(selectedType ?? "");
 
+  const prevCategory = useRef(category);
+  const prevCategoryType = useRef(categoryType);
+  const isInitialMount = useRef(true);
+
+  // Clear subcategory when category changes
   useEffect(() => {
     if (prevCategory.current === category) return;
     prevCategory.current = category;
@@ -43,6 +50,23 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
       form.setValue("subcategory", "");
     }
   }, [category, form, variant]);
+
+  // Clear category and subcategory when transaction type changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevCategoryType.current = categoryType;
+      return;
+    }
+    if (prevCategoryType.current === categoryType) return;
+    prevCategoryType.current = categoryType;
+    if (variant === "account") {
+      form.setValue("category", "");
+      form.setValue("subcategory", "");
+      setIsAddingNewCategory(false);
+      setIsAddingNewSubcategory(false);
+    }
+  }, [categoryType, form, variant]);
 
   if (variant === "budget") {
     return (
@@ -88,7 +112,7 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
   }
 
   const categories = userTransactionCategories
-    ?.filter((cat) => cat.name)
+    ?.filter((cat) => cat.name && cat.type === categoryType)
     .sort((a, b) =>
       (a.name as string).localeCompare(b.name as string),
     );
@@ -106,7 +130,7 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
   ];
 
   const subcategories = userTransactionCategories
-    ?.find((cat) => cat.name === category)
+    ?.find((cat) => cat.name === category && cat.type === categoryType)
     ?.subcategories?.filter((sub) => sub.name)
     .sort((a, b) =>
       (a.name as string).localeCompare(b.name as string),
@@ -123,6 +147,8 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
       label: sub.name as string,
     })) ?? []),
   ];
+
+  const isCategoryDisabled = !categoryType;
 
   return (
     <>
@@ -151,7 +177,8 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
                   controllerField.onChange(value);
                 }
               }}
-              placeholder="Select a category"
+              disabled={isCategoryDisabled}
+              placeholder={isCategoryDisabled ? "Select a type first" : "Select a category"}
               searchPlaceholder="Search categories..."
               emptyText="No categories found."
             />

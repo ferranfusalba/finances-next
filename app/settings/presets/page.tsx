@@ -27,6 +27,7 @@ export default async function TaxPresetsPage() {
     .map((cat) => ({
       id: cat.id,
       name: cat.name,
+      type: cat.type,
       defaultTaxRate: toRate(cat.defaultTaxRate),
       subcategories: cat.subcategories
         .map((sub) => ({
@@ -43,6 +44,7 @@ export default async function TaxPresetsPage() {
     .map((cat) => ({
       id: cat.id,
       name: cat.name,
+      type: cat.type,
       recurring: cat.recurring as string | null,
       subcategories: cat.subcategories
         .map((sub) => ({

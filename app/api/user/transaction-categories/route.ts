@@ -1,6 +1,9 @@
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { getRandomCategoryColor } from "@/lib/utils/categoryColors";
+
+const VALID_CATEGORY_TYPES = ["INCOME", "EXPENSE", "TRANSFER"];
 
 export async function GET() {
   const user = await currentUser();
@@ -13,6 +16,8 @@ export async function GET() {
     select: {
       id: true,
       name: true,
+      type: true,
+      color: true,
       defaultTaxRate: true,
       recurring: true,
       subcategories: {
@@ -38,14 +43,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
+  if (!data.type || !VALID_CATEGORY_TYPES.includes(data.type)) {
+    return NextResponse.json(
+      { error: "type must be one of: INCOME, EXPENSE, TRANSFER" },
+      { status: 400 },
+    );
+  }
+
   const transactionCategory = await db.userTransactionCategory.upsert({
     where: {
-      userId_name: { userId: user.id, name: data.name },
+      userId_name_type: { userId: user.id, name: data.name, type: data.type },
     },
     update: {},
     create: {
       userId: user.id,
       name: data.name,
+      type: data.type,
+      color: getRandomCategoryColor(),
     },
   });
 
@@ -156,6 +170,25 @@ export async function PATCH(request: Request) {
         category: category.name,
       },
       data: { recurring: data.recurring },
+    });
+  }
+  if ("color" in data) {
+    updateData.color = data.color;
+  }
+  if ("name" in data && data.name) {
+    updateData.name = data.name;
+  }
+  if ("type" in data && VALID_CATEGORY_TYPES.includes(data.type) && data.type !== category.type) {
+    updateData.type = data.type;
+
+    // Update existing transactions from old type to new type
+    await db.accountTransaction.updateMany({
+      where: {
+        Account: { userId: user.id },
+        category: category.name,
+        type: category.type,
+      },
+      data: { type: data.type },
     });
   }
 

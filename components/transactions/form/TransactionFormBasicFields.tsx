@@ -95,17 +95,7 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
               </FormControl>
               <SelectContent>
                 <SelectItem value="INCOME">INCOME</SelectItem>
-                {variant === "account" && (
-                  <SelectItem value="INCOME_N">
-                    INCOME (Not counted as such)
-                  </SelectItem>
-                )}
                 <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                {variant === "account" && (
-                  <SelectItem value="EXPENSE_N">
-                    EXPENSE (Not counted as such)
-                  </SelectItem>
-                )}
                 {variant === "account" ? (
                   <SelectItem value="TRANSFER">TRANSFER</SelectItem>
                 ) : (

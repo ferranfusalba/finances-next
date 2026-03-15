@@ -18,10 +18,6 @@ describe("computeTransactionAmount", () => {
     expect(computeTransactionAmount("EXPENSE", -50)).toBe(-50);
   });
 
-  it("negates amount for EXPENSE_N", () => {
-    expect(computeTransactionAmount("EXPENSE_N", 30)).toBe(-30);
-  });
-
   it("negates amount for TRANSFER", () => {
     expect(computeTransactionAmount("TRANSFER", 100)).toBe(-100);
   });
@@ -32,10 +28,6 @@ describe("computeTransactionAmount", () => {
 
   it("makes amount positive for INCOME even if negative input", () => {
     expect(computeTransactionAmount("INCOME", -75)).toBe(75);
-  });
-
-  it("makes amount positive for INCOME_N", () => {
-    expect(computeTransactionAmount("INCOME_N", 40)).toBe(40);
   });
 
   it("preserves raw positive value for OPENING", () => {

@@ -16,6 +16,12 @@ const sections = [
       "Profile, security, preferences, and appearance settings.",
   },
   {
+    href: "/settings/categories",
+    title: "Categories",
+    description:
+      "Manage transaction categories, colors, and subcategories by type.",
+  },
+  {
     href: "/settings/presets",
     title: "Presets",
     description:

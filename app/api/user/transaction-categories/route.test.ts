@@ -22,6 +22,10 @@ vi.mock("@/lib/auth", () => ({
   currentUser: vi.fn(),
 }));
 
+vi.mock("@/lib/utils/categoryColors", () => ({
+  getRandomCategoryColor: vi.fn(() => "4F46E5"),
+}));
+
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { POST, PATCH } from "./route";
@@ -44,7 +48,7 @@ describe("POST /api/user/transaction-categories", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(currentUser).mockResolvedValue(undefined as never);
 
-    const response = await POST(makeRequest({ name: "Food" }));
+    const response = await POST(makeRequest({ name: "Food", type: "EXPENSE" }));
 
     expect(response.status).toBe(401);
   });
@@ -52,10 +56,28 @@ describe("POST /api/user/transaction-categories", () => {
   it("returns 400 when name is empty", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
 
-    const response = await POST(makeRequest({ name: "" }));
+    const response = await POST(makeRequest({ name: "", type: "EXPENSE" }));
 
     expect(response.status).toBe(400);
     expect(db.userTransactionCategory.upsert).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when type is missing", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
+    const response = await POST(makeRequest({ name: "Food" }));
+
+    expect(response.status).toBe(400);
+    const json = await response.json();
+    expect(json.error).toContain("type");
+  });
+
+  it("returns 400 when type is invalid", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
+    const response = await POST(makeRequest({ name: "Food", type: "INVALID" }));
+
+    expect(response.status).toBe(400);
   });
 
   it("upserts category without subcategory", async () => {
@@ -64,17 +86,19 @@ describe("POST /api/user/transaction-categories", () => {
       id: "cat-1",
       userId: "user-1",
       name: "Food",
+      type: "EXPENSE",
+      color: "4F46E5",
     } as never);
 
-    const response = await POST(makeRequest({ name: "Food" }));
+    const response = await POST(makeRequest({ name: "Food", type: "EXPENSE" }));
     const json = await response.json();
 
     expect(response.status).toBe(200);
     expect(json.name).toBe("Food");
     expect(db.userTransactionCategory.upsert).toHaveBeenCalledWith({
-      where: { userId_name: { userId: "user-1", name: "Food" } },
+      where: { userId_name_type: { userId: "user-1", name: "Food", type: "EXPENSE" } },
       update: {},
-      create: { userId: "user-1", name: "Food" },
+      create: { userId: "user-1", name: "Food", type: "EXPENSE", color: "4F46E5" },
     });
     expect(db.userTransactionSubcategory.upsert).not.toHaveBeenCalled();
   });
@@ -85,6 +109,8 @@ describe("POST /api/user/transaction-categories", () => {
       id: "cat-1",
       userId: "user-1",
       name: "Food",
+      type: "EXPENSE",
+      color: "4F46E5",
     } as never);
     vi.mocked(db.userTransactionSubcategory.upsert).mockResolvedValue({
       id: "sub-1",
@@ -94,7 +120,7 @@ describe("POST /api/user/transaction-categories", () => {
     } as never);
 
     const response = await POST(
-      makeRequest({ name: "Food", subcategory: "Groceries" }),
+      makeRequest({ name: "Food", type: "EXPENSE", subcategory: "Groceries" }),
     );
 
     expect(response.status).toBe(200);
@@ -117,11 +143,48 @@ describe("POST /api/user/transaction-categories", () => {
       id: "cat-1",
       userId: "user-1",
       name: "Food",
+      type: "EXPENSE",
+      color: "4F46E5",
     } as never);
 
-    await POST(makeRequest({ name: "Food", subcategory: "" }));
+    await POST(makeRequest({ name: "Food", type: "EXPENSE", subcategory: "" }));
 
     expect(db.userTransactionSubcategory.upsert).not.toHaveBeenCalled();
+  });
+
+  it("allows same category name with different types", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.upsert).mockResolvedValue({
+      id: "cat-1",
+      userId: "user-1",
+      name: "Fees",
+      type: "EXPENSE",
+      color: "4F46E5",
+    } as never);
+
+    await POST(makeRequest({ name: "Fees", type: "EXPENSE" }));
+
+    expect(db.userTransactionCategory.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_name_type: { userId: "user-1", name: "Fees", type: "EXPENSE" } },
+      }),
+    );
+
+    vi.mocked(db.userTransactionCategory.upsert).mockResolvedValue({
+      id: "cat-2",
+      userId: "user-1",
+      name: "Fees",
+      type: "INCOME",
+      color: "4F46E5",
+    } as never);
+
+    await POST(makeRequest({ name: "Fees", type: "INCOME" }));
+
+    expect(db.userTransactionCategory.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_name_type: { userId: "user-1", name: "Fees", type: "INCOME" } },
+      }),
+    );
   });
 });
 
@@ -288,5 +351,84 @@ describe("PATCH /api/user/transaction-categories", () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it("updates transaction types when changing category type", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
+      id: "cat-1",
+      userId: "user-1",
+      name: "Salary",
+      type: "EXPENSE",
+    } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 3 } as never);
+    vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
+      id: "cat-1",
+      name: "Salary",
+      type: "INCOME",
+    } as never);
+
+    const response = await PATCH(
+      makePatchRequest({ categoryId: "cat-1", type: "INCOME" }),
+    );
+
+    expect(response.status).toBe(200);
+
+    // Should update EXPENSE transactions to INCOME
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Salary",
+        type: "EXPENSE",
+      },
+      data: { type: "INCOME" },
+    });
+
+    // Should update the category itself
+    const updateCall = vi.mocked(db.userTransactionCategory.update).mock.calls[0][0];
+    expect(updateCall.data.type).toBe("INCOME");
+  });
+
+  it("does not update transactions when type is unchanged", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
+      id: "cat-1",
+      userId: "user-1",
+      name: "Food",
+      type: "EXPENSE",
+    } as never);
+    vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
+      id: "cat-1",
+      name: "Food",
+      type: "EXPENSE",
+    } as never);
+
+    await PATCH(makePatchRequest({ categoryId: "cat-1", type: "EXPENSE" }));
+
+    expect(db.accountTransaction.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("updates color on a category", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
+      id: "cat-1",
+      userId: "user-1",
+      name: "Food",
+    } as never);
+    vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
+      id: "cat-1",
+      name: "Food",
+      color: "DB2777",
+    } as never);
+
+    const response = await PATCH(
+      makePatchRequest({ categoryId: "cat-1", color: "DB2777" }),
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.color).toBe("DB2777");
+    const updateCall = vi.mocked(db.userTransactionCategory.update).mock.calls[0][0];
+    expect(updateCall.data.color).toBe("DB2777");
   });
 });
