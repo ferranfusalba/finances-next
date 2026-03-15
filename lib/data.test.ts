@@ -10,7 +10,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 import { db } from "@/lib/db";
-import { getSalesTaxTransactions } from "./data";
+import { getSalesTaxTransactions, getTransactionLocations } from "./data";
 
 describe("getSalesTaxTransactions", () => {
   beforeEach(() => {
@@ -163,5 +163,218 @@ describe("getSalesTaxTransactions", () => {
     expect(result).toHaveLength(2);
     expect(result[0].totalTax).toBe(10.5);
     expect(result[1].totalTax).toBe(7.5);
+  });
+});
+
+describe("getTransactionLocations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns empty array when no transactions exist", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
+
+    const result = await getTransactionLocations("user-1");
+
+    expect(result).toEqual([]);
+  });
+
+  it("queries transactions with non-null location", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
+
+    await getTransactionLocations("user-1");
+
+    expect(db.accountTransaction.findMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        location: { not: expect.anything() },
+      },
+      orderBy: { dateTime: "desc" },
+      select: {
+        id: true,
+        dateTime: true,
+        payee: true,
+        concept: true,
+        amount: true,
+        currency: true,
+        location: true,
+      },
+    });
+  });
+
+  it("groups transactions by placeId", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
+      {
+        id: "tx-1",
+        dateTime: new Date("2025-01-15"),
+        payee: "Shop A",
+        concept: "",
+        amount: new Prisma.Decimal("50.00"),
+        currency: "EUR",
+        location: {
+          name: "Barcelona, ES",
+          address: "Carrer Example 1",
+          lat: 41.39,
+          lng: 2.17,
+          placeId: "bcn-1",
+        },
+      },
+      {
+        id: "tx-2",
+        dateTime: new Date("2025-02-01"),
+        payee: "Shop B",
+        concept: "",
+        amount: new Prisma.Decimal("30.00"),
+        currency: "EUR",
+        location: {
+          name: "Barcelona, ES",
+          address: "Carrer Example 1",
+          lat: 41.39,
+          lng: 2.17,
+          placeId: "bcn-1",
+        },
+      },
+    ] as never);
+
+    const result = await getTransactionLocations("user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].location.placeId).toBe("bcn-1");
+    expect(result[0].transactions).toHaveLength(2);
+    expect(result[0].transactions[0].amount).toBe(50);
+    expect(result[0].transactions[1].amount).toBe(30);
+  });
+
+  it("separates transactions with different placeIds", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
+      {
+        id: "tx-1",
+        dateTime: new Date("2025-01-15"),
+        payee: "Shop A",
+        concept: "",
+        amount: new Prisma.Decimal("50.00"),
+        currency: "EUR",
+        location: {
+          name: "Barcelona, ES",
+          address: "",
+          lat: 41.39,
+          lng: 2.17,
+          placeId: "bcn-1",
+        },
+      },
+      {
+        id: "tx-2",
+        dateTime: new Date("2025-02-01"),
+        payee: "Shop B",
+        concept: "",
+        amount: new Prisma.Decimal("75.00"),
+        currency: "EUR",
+        location: {
+          name: "Zürich, CH",
+          address: "",
+          lat: 47.37,
+          lng: 8.54,
+          placeId: "zrh-1",
+        },
+      },
+    ] as never);
+
+    const result = await getTransactionLocations("user-1");
+
+    expect(result).toHaveLength(2);
+    expect(result[0].location.name).toBe("Barcelona, ES");
+    expect(result[1].location.name).toBe("Zürich, CH");
+  });
+
+  it("sorts locations alphabetically by name", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
+      {
+        id: "tx-1",
+        dateTime: new Date("2025-01-01"),
+        payee: "Shop",
+        concept: "",
+        amount: new Prisma.Decimal("10.00"),
+        currency: "EUR",
+        location: {
+          name: "Zürich, CH",
+          address: "",
+          lat: 47.37,
+          lng: 8.54,
+          placeId: "zrh-1",
+        },
+      },
+      {
+        id: "tx-2",
+        dateTime: new Date("2025-01-02"),
+        payee: "Shop",
+        concept: "",
+        amount: new Prisma.Decimal("20.00"),
+        currency: "EUR",
+        location: {
+          name: "Amsterdam, NL",
+          address: "",
+          lat: 52.37,
+          lng: 4.9,
+          placeId: "ams-1",
+        },
+      },
+      {
+        id: "tx-3",
+        dateTime: new Date("2025-01-03"),
+        payee: "Shop",
+        concept: "",
+        amount: new Prisma.Decimal("30.00"),
+        currency: "EUR",
+        location: {
+          name: "Barcelona, ES",
+          address: "",
+          lat: 41.39,
+          lng: 2.17,
+          placeId: "bcn-1",
+        },
+      },
+    ] as never);
+
+    const result = await getTransactionLocations("user-1");
+
+    expect(result.map((l) => l.location.name)).toEqual([
+      "Amsterdam, NL",
+      "Barcelona, ES",
+      "Zürich, CH",
+    ]);
+  });
+
+  it("skips transactions with null or missing placeId", async () => {
+    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
+      {
+        id: "tx-1",
+        dateTime: new Date("2025-01-01"),
+        payee: "Shop",
+        concept: "",
+        amount: new Prisma.Decimal("10.00"),
+        currency: "EUR",
+        location: null,
+      },
+      {
+        id: "tx-2",
+        dateTime: new Date("2025-01-02"),
+        payee: "Shop",
+        concept: "",
+        amount: new Prisma.Decimal("20.00"),
+        currency: "EUR",
+        location: {
+          name: "Barcelona, ES",
+          address: "",
+          lat: 41.39,
+          lng: 2.17,
+          placeId: "bcn-1",
+        },
+      },
+    ] as never);
+
+    const result = await getTransactionLocations("user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].location.placeId).toBe("bcn-1");
   });
 });

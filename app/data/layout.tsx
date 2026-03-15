@@ -25,6 +25,10 @@ export default async function DataLayout({
       id: "sales-tax",
       name: "Sales Tax",
     },
+    {
+      id: "locations",
+      name: "Locations",
+    },
   ];
 
   return (
