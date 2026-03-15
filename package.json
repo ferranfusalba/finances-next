@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.48",
+  "version": "1.0.49",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -37,6 +37,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@tanstack/react-table": "^8.21.3",
     "@types/qrcode": "^1.5.6",
+    "@vis.gl/react-google-maps": "^1.7.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

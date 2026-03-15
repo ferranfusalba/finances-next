@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import type { LocationWithTransactions } from "@/lib/data";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-type MapProvider = "mapbox" | "carto" | "maptiler" | "osm";
+type MapProvider = "mapbox" | "carto" | "maptiler" | "osm" | "google";
 
 const styleOptions: Record<MapProvider, { value: string; label: string }[]> = {
   mapbox: [
@@ -31,6 +31,12 @@ const styleOptions: Record<MapProvider, { value: string; label: string }[]> = {
     { value: "dataviz-dark", label: "Dark" },
     { value: "outdoor-v2", label: "Outdoor" },
   ],
+  google: [
+    { value: "roadmap", label: "Roadmap" },
+    { value: "satellite", label: "Satellite" },
+    { value: "hybrid", label: "Hybrid" },
+    { value: "terrain", label: "Terrain" },
+  ],
   osm: [],
 };
 
@@ -38,6 +44,7 @@ const defaultStyles: Record<MapProvider, string> = {
   mapbox: "streets-v12",
   carto: "dark_all",
   maptiler: "streets-v2",
+  google: "roadmap",
   osm: "",
 };
 
@@ -53,6 +60,11 @@ const CartoMap = dynamic(
 
 const MapTilerMap = dynamic(
   () => import("@/components/data/TransactionLocationsMapLibre"),
+  { ssr: false },
+);
+
+const GoogleMap = dynamic(
+  () => import("@/components/data/TransactionLocationsGoogleMaps"),
   { ssr: false },
 );
 
@@ -102,6 +114,9 @@ export default function TransactionLocationsMapLoader({
           <ToggleGroupItem value="maptiler" size="sm">
             MapTiler
           </ToggleGroupItem>
+          <ToggleGroupItem value="google" size="sm">
+            Google Maps
+          </ToggleGroupItem>
           <ToggleGroupItem value="osm" size="sm">
             OpenStreetMap
           </ToggleGroupItem>
@@ -139,6 +154,13 @@ export default function TransactionLocationsMapLoader({
       )}
       {provider === "maptiler" && (
         <MapTilerMap
+          locations={locations}
+          userLocale={userLocale}
+          mapStyle={currentStyle}
+        />
+      )}
+      {provider === "google" && (
+        <GoogleMap
           locations={locations}
           userLocale={userLocale}
           mapStyle={currentStyle}
