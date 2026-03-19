@@ -1738,10 +1738,22 @@
   dependencies:
     "@tanstack/table-core" "8.21.3"
 
+"@tanstack/react-virtual@^3.13.23":
+  version "3.13.23"
+  resolved "https://registry.npmjs.org/@tanstack/react-virtual/-/react-virtual-3.13.23.tgz"
+  integrity sha512-XnMRnHQ23piOVj2bzJqHrRrLg4r+F86fuBcwteKfbIjJrtGxb4z7tIvPVAe4B+4UVwo9G4Giuz5fmapcrnZ0OQ==
+  dependencies:
+    "@tanstack/virtual-core" "3.13.23"
+
 "@tanstack/table-core@8.21.3":
   version "8.21.3"
   resolved "https://registry.npmjs.org/@tanstack/table-core/-/table-core-8.21.3.tgz"
   integrity sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==
+
+"@tanstack/virtual-core@3.13.23":
+  version "3.13.23"
+  resolved "https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.13.23.tgz"
+  integrity sha512-zSz2Z2HNyLjCplANTDyl3BcdQJc2k1+yyFoKhNRmCr7V7dY8o8q5m8uFTI1/Pg1kL+Hgrz6u3Xo6eFUB7l66cg==
 
 "@testing-library/dom@^10.0.0", "@testing-library/dom@^10.4.1", "@testing-library/dom@>=7.21.4":
   version "10.4.1"
@@ -4829,7 +4841,7 @@ react-day-picker@^9.14.0:
     date-fns "^4.1.0"
     date-fns-jalali "4.1.0-0"
 
-"react-dom@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom@^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc", "react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^18 || ^19 || ^19.0.0-rc", "react-dom@^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^18.0.0 || ^19.0.0", "react-dom@^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom@^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", react-dom@^19.0.0, react-dom@^19.2.4, react-dom@>=16.8, react-dom@>=16.8.0, "react-dom@>=16.8.0 || ^19.0 || ^19.0.0-rc":
+"react-dom@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom@^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc", "react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom@^18 || ^19 || ^19.0.0-rc", "react-dom@^18.0 || ^19.0 || ^19.0.0-rc", "react-dom@^18.0.0 || ^19.0.0", "react-dom@^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom@^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", react-dom@^19.0.0, react-dom@^19.2.4, react-dom@>=16.8, react-dom@>=16.8.0, "react-dom@>=16.8.0 || ^19.0 || ^19.0.0-rc":
   version "19.2.4"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.2.4.tgz"
   integrity sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==

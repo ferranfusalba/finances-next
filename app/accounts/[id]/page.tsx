@@ -6,7 +6,6 @@ import AccountTransactionTable from "@/components/accounts/tables/transactions/A
 import AccountTransactionAdd from "@/components/accounts/tables/transactions/AccountTransactionAdd";
 import AccountTransactionCollapseToggle from "@/components/accounts/tables/transactions/AccountTransactionCollapseToggle";
 import AccountTransactionDownload from "@/components/accounts/tables/transactions/AccountTransactionDownload";
-import AccountTransactionExpandable from "@/components/accounts/tables/transactions/AccountTransactionExpandable";
 
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import EditAccount from "@/components/accounts/edit/EditAccount";
@@ -161,32 +160,32 @@ export default async function AccountLayout({
         }}
       >
         <CollapseMonthsProvider>
-          <AccountTransactionExpandable
-            actions={
-              <>
-                <AccountTransactionAdd
-                  account={account}
-                  accountTransactions={accountTransactions}
-                  hasOpeningTransaction={accountTransactions.some(
-                    (t) => t.type === "OPENING",
-                  )}
-                />
-                <AccountTransactionDownload
-                  accountTransactions={accountTransactions}
-                  accountName={account.name}
-                />
-                <AccountTransactionCollapseToggle
-                  accountTransactions={accountTransactions}
-                />
-              </>
-            }
-          >
+          <Layout02a1>
+            <div className="flex flex-col sm:flex-row gap-2 py-2">
+              <AccountTransactionAdd
+                account={account}
+                accountTransactions={accountTransactions}
+                hasOpeningTransaction={accountTransactions.some(
+                  (t) => t.type === "OPENING",
+                )}
+              />
+              <AccountTransactionDownload
+                accountTransactions={accountTransactions}
+                accountName={account.name}
+              />
+              <AccountTransactionCollapseToggle
+                accountTransactions={accountTransactions}
+              />
+            </div>
+          </Layout02a1>
+
+          <div className="flex flex-col gap-2 pb-20 w-full">
             <AccountTransactionTable
               accountTransactions={accountTransactions}
               account={account}
               carryForwardBalance={carryForwardBalance}
             />
-          </AccountTransactionExpandable>
+          </div>
         </CollapseMonthsProvider>
       </TransactionUserProvider>
     </>

@@ -111,7 +111,7 @@ export default function EditAccount({ account, accountTypes }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" aria-label="Edit account">
+        <Button variant="ghost" aria-label="Edit account">
           <Edit />
         </Button>
       </DialogTrigger>

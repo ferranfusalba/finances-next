@@ -35,7 +35,7 @@ export default function YearSelector({ years }: YearSelectorProps) {
 
   return (
     <Select value={currentYear} onValueChange={handleChange}>
-      <SelectTrigger className="w-24 select-none">
+      <SelectTrigger className="w-28 select-none">
         <SelectValue placeholder="Inception" />
       </SelectTrigger>
       <SelectContent>
