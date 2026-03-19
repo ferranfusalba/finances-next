@@ -6,6 +6,9 @@ vi.mock("@/lib/db", () => ({
     accountTransaction: {
       findMany: vi.fn(),
     },
+    userTransactionCategory: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
   },
 }));
 
@@ -217,6 +220,7 @@ describe("getTransactionLocations", () => {
         amount: true,
         currency: true,
         location: true,
+        category: true,
       },
     });
   });
@@ -247,6 +251,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("50.00"),
         currency: "EUR",
+        category: "Food",
         location: {
           name: "Barcelona, ES",
           address: "Carrer Example 1",
@@ -262,6 +267,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("30.00"),
         currency: "EUR",
+        category: "Food",
         location: {
           name: "Barcelona, ES",
           address: "Carrer Example 1",
@@ -290,6 +296,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("50.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Barcelona, ES",
           address: "",
@@ -305,6 +312,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("75.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Zürich, CH",
           address: "",
@@ -331,6 +339,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("10.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Zürich, CH",
           address: "",
@@ -346,6 +355,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("20.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Amsterdam, NL",
           address: "",
@@ -361,6 +371,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("30.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Barcelona, ES",
           address: "",
@@ -389,6 +400,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("10.00"),
         currency: "EUR",
+        category: "",
         location: null,
       },
       {
@@ -398,6 +410,7 @@ describe("getTransactionLocations", () => {
         concept: "",
         amount: new Prisma.Decimal("20.00"),
         currency: "EUR",
+        category: "",
         location: {
           name: "Barcelona, ES",
           address: "",

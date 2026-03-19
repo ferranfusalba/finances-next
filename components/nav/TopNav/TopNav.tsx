@@ -16,11 +16,11 @@ const TopNav = async () => {
       className="flex items-center px-6 py-3 justify-between bg-white dark:bg-black"
     >
       <Link href="/">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <h1>Finances</h1>
+          {user && <YearSelector years={years} />}
         </div>
       </Link>
-      {user && <YearSelector years={years} />}
       <div className="flex gap-x-2 items-center">
         {user ? (
           <>

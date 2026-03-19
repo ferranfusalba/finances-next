@@ -62,8 +62,8 @@ export default function TransactionLocationsMap({
             center={[loc.location.lat, loc.location.lng]}
             radius={Math.min(6 + count * 2, 20)}
             pathOptions={{
-              color: "#3b82f6",
-              fillColor: "#3b82f6",
+              color: `#${loc.dominantColor}`,
+              fillColor: `#${loc.dominantColor}`,
               fillOpacity: 0.6,
             }}
           >
@@ -77,6 +77,9 @@ export default function TransactionLocationsMap({
                   {count} transaction{count !== 1 ? "s" : ""} &middot;{" "}
                   {formatCurrency(userLocale, cur).format(totalAmount)}
                 </p>
+                {loc.transactions[0]?.category && (
+                  <p className="text-slate-500">{loc.transactions[0].category}</p>
+                )}
               </div>
             </Popup>
           </CircleMarker>

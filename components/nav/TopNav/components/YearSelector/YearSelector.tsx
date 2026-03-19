@@ -36,10 +36,10 @@ export default function YearSelector({ years }: YearSelectorProps) {
   return (
     <Select value={currentYear} onValueChange={handleChange}>
       <SelectTrigger className="w-24 select-none">
-        <SelectValue placeholder="All" />
+        <SelectValue placeholder="Inception" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All</SelectItem>
+        <SelectItem value="all">Inception</SelectItem>
         {years.map((y) => (
           <SelectItem key={y} value={String(y)}>
             {y}

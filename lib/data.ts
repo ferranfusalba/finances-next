@@ -100,6 +100,7 @@ export async function getSalesTaxTransactions(
 
 export interface LocationWithTransactions {
   location: TransactionLocation;
+  dominantColor: string;
   transactions: {
     id: string;
     dateTime: Date;
@@ -107,6 +108,7 @@ export interface LocationWithTransactions {
     concept: string;
     amount: number;
     currency: string;
+    category: string;
   }[];
 }
 
@@ -114,25 +116,34 @@ export async function getTransactionLocations(
   userId: string,
   year: number | null = null,
 ): Promise<LocationWithTransactions[]> {
-  const transactions = await db.accountTransaction.findMany({
-    where: {
-      Account: { userId },
-      location: { not: Prisma.DbNull },
-      dateTime: buildDateTimeFilter(year),
-    },
-    orderBy: {
-      dateTime: "desc",
-    },
-    select: {
-      id: true,
-      dateTime: true,
-      payee: true,
-      concept: true,
-      amount: true,
-      currency: true,
-      location: true,
-    },
-  });
+  const [transactions, categories] = await Promise.all([
+    db.accountTransaction.findMany({
+      where: {
+        Account: { userId },
+        location: { not: Prisma.DbNull },
+        dateTime: buildDateTimeFilter(year),
+      },
+      orderBy: {
+        dateTime: "desc",
+      },
+      select: {
+        id: true,
+        dateTime: true,
+        payee: true,
+        concept: true,
+        amount: true,
+        currency: true,
+        location: true,
+        category: true,
+      },
+    }),
+    db.userTransactionCategory.findMany({
+      where: { userId },
+      select: { name: true, color: true },
+    }),
+  ]);
+
+  const colorMap = new Map(categories.map((c) => [c.name, c.color]));
 
   const map = new Map<string, LocationWithTransactions>();
 
@@ -141,7 +152,7 @@ export async function getTransactionLocations(
     if (!loc?.placeId) continue;
 
     if (!map.has(loc.placeId)) {
-      map.set(loc.placeId, { location: loc, transactions: [] });
+      map.set(loc.placeId, { location: loc, dominantColor: "", transactions: [] });
     }
     map.get(loc.placeId)!.transactions.push({
       id: t.id,
@@ -150,7 +161,27 @@ export async function getTransactionLocations(
       concept: t.concept,
       amount: toNumber(t.amount),
       currency: t.currency,
+      category: t.category,
     });
+  }
+
+  // Compute dominant color per location (most frequent category)
+  for (const entry of map.values()) {
+    const counts = new Map<string, number>();
+    for (const t of entry.transactions) {
+      if (t.category) {
+        counts.set(t.category, (counts.get(t.category) ?? 0) + 1);
+      }
+    }
+    let topCategory = "";
+    let topCount = 0;
+    for (const [cat, count] of counts) {
+      if (count > topCount) {
+        topCategory = cat;
+        topCount = count;
+      }
+    }
+    entry.dominantColor = colorMap.get(topCategory) ?? "3b82f6";
   }
 
   return Array.from(map.values()).sort((a, b) =>

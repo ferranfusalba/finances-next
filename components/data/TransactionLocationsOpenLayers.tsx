@@ -52,6 +52,9 @@ export default function TransactionLocationsOpenLayers({
       const cur = loc.transactions[0]?.currency ?? "EUR";
       const radius = Math.min(6 + count * 2, 20);
 
+      const color = loc.dominantColor;
+      const category = loc.transactions[0]?.category ?? "";
+
       const feature = new Feature({
         geometry: new Point(fromLonLat([loc.location.lng, loc.location.lat])),
         name: loc.location.name,
@@ -59,14 +62,15 @@ export default function TransactionLocationsOpenLayers({
         count,
         totalAmount,
         currency: cur,
+        category,
       });
 
       feature.setStyle(
         new Style({
           image: new Circle({
             radius,
-            fill: new Fill({ color: "rgba(59, 130, 246, 0.6)" }),
-            stroke: new Stroke({ color: "#3b82f6", width: 2 }),
+            fill: new Fill({ color: `#${color}99` }),
+            stroke: new Stroke({ color: `#${color}`, width: 2 }),
           }),
         }),
       );
@@ -105,11 +109,14 @@ export default function TransactionLocationsOpenLayers({
         const totalAmount = feature.get("totalAmount") as number;
         const cur = feature.get("currency") as string;
 
+        const category = feature.get("category") as string;
+
         popupRef.current!.innerHTML = [
           `<div class="text-sm bg-white text-black p-2 rounded shadow-md">`,
           `<p style="font-weight:600">${name}</p>`,
           address ? `<p style="color:#64748b">${address}</p>` : "",
           `<p style="margin-top:4px">${count} transaction${count !== 1 ? "s" : ""} · ${formatCurrency(userLocale, cur).format(totalAmount)}</p>`,
+          category ? `<p style="color:#64748b">${category}</p>` : "",
           `</div>`,
         ].join("");
 

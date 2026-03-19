@@ -6,11 +6,15 @@ vi.mock("@/lib/db", () => ({
       upsert: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
     userTransactionSubcategory: {
       upsert: vi.fn(),
       findFirst: vi.fn(),
+      findMany: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
     },
     accountTransaction: {
       updateMany: vi.fn(),
@@ -28,7 +32,7 @@ vi.mock("@/lib/utils/categoryColors", () => ({
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { POST, PATCH } from "./route";
+import { POST, PATCH, DELETE } from "./route";
 
 const mockUser = { id: "user-1", name: "John", email: "john@example.com" };
 
@@ -353,14 +357,79 @@ describe("PATCH /api/user/transaction-categories", () => {
     expect(response.status).toBe(404);
   });
 
+  it("merges into existing category when moving to a type with a duplicate name", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst)
+      .mockResolvedValueOnce({
+        id: "cat-1",
+        userId: "user-1",
+        name: "Fees",
+        type: "EXPENSE",
+      } as never)
+      .mockResolvedValueOnce({
+        id: "cat-2",
+        userId: "user-1",
+        name: "Fees",
+        type: "INCOME",
+        subcategories: [{ id: "sub-t1", name: "Bank Fees" }],
+      } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 5 } as never);
+    vi.mocked(db.userTransactionSubcategory.findMany).mockResolvedValue([
+      { id: "sub-s1", name: "Late Fees", categoryId: "cat-1" },
+      { id: "sub-s2", name: "Bank Fees", categoryId: "cat-1" },
+    ] as never);
+    vi.mocked(db.userTransactionSubcategory.update).mockResolvedValue({} as never);
+    vi.mocked(db.userTransactionSubcategory.delete).mockResolvedValue({} as never);
+    vi.mocked(db.userTransactionCategory.delete).mockResolvedValue({} as never);
+
+    const response = await PATCH(
+      makePatchRequest({ categoryId: "cat-1", type: "INCOME" }),
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.id).toBe("cat-2");
+
+    // Should update transactions to the new type
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Fees",
+        type: "EXPENSE",
+      },
+      data: { type: "INCOME" },
+    });
+
+    // Should move orphan subcategory "Late Fees" to target
+    expect(db.userTransactionSubcategory.update).toHaveBeenCalledWith({
+      where: { id: "sub-s1" },
+      data: { categoryId: "cat-2" },
+    });
+
+    // Should delete duplicate subcategory "Bank Fees"
+    expect(db.userTransactionSubcategory.delete).toHaveBeenCalledWith({
+      where: { id: "sub-s2" },
+    });
+
+    // Should delete the source category
+    expect(db.userTransactionCategory.delete).toHaveBeenCalledWith({
+      where: { id: "cat-1" },
+    });
+
+    // Should NOT call category update (source was deleted, not updated)
+    expect(db.userTransactionCategory.update).not.toHaveBeenCalled();
+  });
+
   it("updates transaction types when changing category type", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
-      id: "cat-1",
-      userId: "user-1",
-      name: "Salary",
-      type: "EXPENSE",
-    } as never);
+    vi.mocked(db.userTransactionCategory.findFirst)
+      .mockResolvedValueOnce({
+        id: "cat-1",
+        userId: "user-1",
+        name: "Salary",
+        type: "EXPENSE",
+      } as never)
+      .mockResolvedValueOnce(null as never);
     vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 3 } as never);
     vi.mocked(db.userTransactionCategory.update).mockResolvedValue({
       id: "cat-1",
@@ -430,5 +499,126 @@ describe("PATCH /api/user/transaction-categories", () => {
     expect(json.color).toBe("DB2777");
     const updateCall = vi.mocked(db.userTransactionCategory.update).mock.calls[0][0];
     expect(updateCall.data.color).toBe("DB2777");
+  });
+});
+
+function makeDeleteRequest(body: Record<string, unknown>) {
+  return new Request("http://localhost/api/user/transaction-categories", {
+    method: "DELETE",
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+describe("DELETE /api/user/transaction-categories", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(currentUser).mockResolvedValue(undefined as never);
+
+    const response = await DELETE(makeDeleteRequest({ categoryId: "cat-1" }));
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 400 when neither categoryId nor subcategoryId is provided", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+
+    const response = await DELETE(makeDeleteRequest({}));
+
+    expect(response.status).toBe(400);
+  });
+
+  it("deletes a category, clears transactions, and removes subcategories", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue({
+      id: "cat-1",
+      userId: "user-1",
+      name: "Food",
+      type: "EXPENSE",
+    } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 5 } as never);
+    vi.mocked(db.userTransactionSubcategory.deleteMany).mockResolvedValue({ count: 2 } as never);
+    vi.mocked(db.userTransactionCategory.delete).mockResolvedValue({} as never);
+
+    const response = await DELETE(makeDeleteRequest({ categoryId: "cat-1" }));
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.deleted).toBe(true);
+
+    // Should clear category/subcategory on affected transactions
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Food",
+      },
+      data: { category: "", subcategory: null },
+    });
+
+    // Should delete subcategories before the category
+    const subDeleteOrder = vi.mocked(db.userTransactionSubcategory.deleteMany).mock.invocationCallOrder[0];
+    const catDeleteOrder = vi.mocked(db.userTransactionCategory.delete).mock.invocationCallOrder[0];
+    expect(subDeleteOrder).toBeLessThan(catDeleteOrder);
+
+    expect(db.userTransactionSubcategory.deleteMany).toHaveBeenCalledWith({
+      where: { categoryId: "cat-1" },
+    });
+
+    expect(db.userTransactionCategory.delete).toHaveBeenCalledWith({
+      where: { id: "cat-1" },
+    });
+  });
+
+  it("returns 404 when category not found", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionCategory.findFirst).mockResolvedValue(null as never);
+
+    const response = await DELETE(makeDeleteRequest({ categoryId: "cat-999" }));
+
+    expect(response.status).toBe(404);
+  });
+
+  it("deletes a subcategory and clears subcategory field on transactions", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionSubcategory.findFirst).mockResolvedValue({
+      id: "sub-1",
+      categoryId: "cat-1",
+      name: "Groceries",
+      category: { name: "Food" },
+    } as never);
+    vi.mocked(db.accountTransaction.updateMany).mockResolvedValue({ count: 3 } as never);
+    vi.mocked(db.userTransactionSubcategory.delete).mockResolvedValue({} as never);
+
+    const response = await DELETE(makeDeleteRequest({ subcategoryId: "sub-1" }));
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.deleted).toBe(true);
+
+    // Should clear subcategory on affected transactions
+    expect(db.accountTransaction.updateMany).toHaveBeenCalledWith({
+      where: {
+        Account: { userId: "user-1" },
+        category: "Food",
+        subcategory: "Groceries",
+      },
+      data: { subcategory: null },
+    });
+
+    expect(db.userTransactionSubcategory.delete).toHaveBeenCalledWith({
+      where: { id: "sub-1" },
+    });
+  });
+
+  it("returns 404 when subcategory not found", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.userTransactionSubcategory.findFirst).mockResolvedValue(null as never);
+
+    const response = await DELETE(makeDeleteRequest({ subcategoryId: "sub-999" }));
+
+    expect(response.status).toBe(404);
   });
 });

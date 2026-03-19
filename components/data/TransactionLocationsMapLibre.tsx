@@ -56,8 +56,9 @@ export default function TransactionLocationsMapLibre({
         el.style.width = `${size}px`;
         el.style.height = `${size}px`;
         el.style.borderRadius = "50%";
-        el.style.backgroundColor = "rgba(59, 130, 246, 0.6)";
-        el.style.border = "2px solid #3b82f6";
+        const color = loc.dominantColor;
+        el.style.backgroundColor = `#${color}99`;
+        el.style.border = `2px solid #${color}`;
         el.style.cursor = "pointer";
 
         const popupContent = [
@@ -67,6 +68,9 @@ export default function TransactionLocationsMapLibre({
             ? `<p style="color:#64748b">${loc.location.address}</p>`
             : "",
           `<p style="margin-top:4px">${count} transaction${count !== 1 ? "s" : ""} · ${formatCurrency(userLocale, cur).format(totalAmount)}</p>`,
+          loc.transactions[0]?.category
+            ? `<p style="color:#64748b">${loc.transactions[0].category}</p>`
+            : "",
           `</div>`,
         ].join("");
 

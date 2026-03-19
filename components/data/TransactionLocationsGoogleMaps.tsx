@@ -87,8 +87,8 @@ export default function TransactionLocationsGoogleMaps({
                   width: `${size}px`,
                   height: `${size}px`,
                   borderRadius: "50%",
-                  backgroundColor: "rgba(59, 130, 246, 0.6)",
-                  border: "2px solid #3b82f6",
+                  backgroundColor: `#${loc.dominantColor}99`,
+                  border: `2px solid #${loc.dominantColor}`,
                   cursor: "pointer",
                 }}
               />
@@ -110,6 +110,9 @@ export default function TransactionLocationsGoogleMaps({
                       {count} transaction{count !== 1 ? "s" : ""} &middot;{" "}
                       {formatCurrency(userLocale, cur).format(totalAmount)}
                     </p>
+                    {loc.transactions[0]?.category && (
+                      <p className="text-slate-500">{loc.transactions[0].category}</p>
+                    )}
                   </div>
                 </InfoWindow>
               )}

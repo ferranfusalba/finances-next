@@ -24,8 +24,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-import { AddAlt } from "@carbon/icons-react";
+import { AddAlt, TrashCan } from "@carbon/icons-react";
 
 import {
   CATEGORY_PALETTE,
@@ -36,6 +44,7 @@ import type { CategoryType } from "@/lib/utils/categoryType";
 interface SubcategoryItem {
   id: string;
   name: string;
+  transactionCount: number;
 }
 
 interface CategoryItem {
@@ -43,6 +52,7 @@ interface CategoryItem {
   name: string;
   type: string;
   color: string;
+  transactionCount: number;
   subcategories: SubcategoryItem[];
 }
 
@@ -62,6 +72,12 @@ export default function CategorySettingsForm({
   const [newCategoryNames, setNewCategoryNames] = useState<
     Record<string, string>
   >({ INCOME: "", EXPENSE: "", TRANSFER: "" });
+  const [deleteDialog, setDeleteDialog] = useState<{
+    type: "category" | "subcategory";
+    id: string;
+    name: string;
+    transactionCount: number;
+  } | null>(null);
 
   function updateColor(categoryId: string, color: string) {
     startTransition(async () => {
@@ -102,12 +118,24 @@ export default function CategorySettingsForm({
           return;
         }
 
-        setCategories((prev) =>
-          prev.map((c) =>
-            c.id === categoryId ? { ...c, type: newType } : c,
-          ),
+        const returned = await res.json();
+        const merged = returned.id !== categoryId;
+
+        setCategories((prev) => {
+          // Remove the source category
+          const without = prev.filter((c) => c.id !== categoryId);
+          if (merged) {
+            // Merged into existing — target already in list, just refresh counts
+            return without;
+          }
+          // Simple type change — update in place
+          return without.concat({ ...prev.find((c) => c.id === categoryId)!, type: newType });
+        });
+        toast.success(
+          merged
+            ? `${oldName} merged into existing ${newType.toLowerCase()} category`
+            : `${oldName} moved to ${newType.toLowerCase()}`,
         );
-        toast.success(`${oldName} moved to ${newType.toLowerCase()}`);
       } catch {
         toast.error("Failed to update type");
       }
@@ -136,13 +164,55 @@ export default function CategorySettingsForm({
         setCategories((prev) =>
           [
             ...prev,
-            { ...created, subcategories: [] },
+            { ...created, transactionCount: 0, subcategories: [] },
           ].sort((a, b) => a.name.localeCompare(b.name)),
         );
         setNewCategoryNames((prev) => ({ ...prev, [type]: "" }));
         toast.success(`${name} added`);
       } catch {
         toast.error("Failed to add category");
+      }
+    });
+  }
+
+  function confirmDelete() {
+    if (!deleteDialog) return;
+    const { type, id, name } = deleteDialog;
+
+    startTransition(async () => {
+      try {
+        const body =
+          type === "category"
+            ? { categoryId: id }
+            : { subcategoryId: id };
+
+        const res = await fetch("/api/user/transaction-categories", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          toast.error(data.error || "Failed to delete");
+          return;
+        }
+
+        if (type === "category") {
+          setCategories((prev) => prev.filter((c) => c.id !== id));
+        } else {
+          setCategories((prev) =>
+            prev.map((c) => ({
+              ...c,
+              subcategories: c.subcategories.filter((s) => s.id !== id),
+            })),
+          );
+        }
+
+        toast.success(`${name} deleted`);
+        setDeleteDialog(null);
+      } catch {
+        toast.error("Failed to delete");
       }
     });
   }
@@ -177,6 +247,9 @@ export default function CategorySettingsForm({
                       disabled={isPending}
                     />
                     <span className="text-sm font-medium flex-1">{cat.name}</span>
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      {cat.transactionCount}
+                    </span>
                     <Select
                       value={cat.type}
                       onValueChange={(val) =>
@@ -193,6 +266,21 @@ export default function CategorySettingsForm({
                         <SelectItem value="TRANSFER">Transfer</SelectItem>
                       </SelectContent>
                     </Select>
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                      disabled={isPending}
+                      onClick={() =>
+                        setDeleteDialog({
+                          type: "category",
+                          id: cat.id,
+                          name: cat.name,
+                          transactionCount: cat.transactionCount,
+                        })
+                      }
+                    >
+                      <TrashCan className="h-4 w-4" />
+                    </button>
                   </div>
                   {cat.subcategories.map((sub, index) => (
                     <div
@@ -205,9 +293,27 @@ export default function CategorySettingsForm({
                           backgroundColor: `#${deriveSubcategoryColor(cat.color, index)}`,
                         }}
                       />
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground flex-1">
                         {sub.name}
                       </span>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {sub.transactionCount}
+                      </span>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                        disabled={isPending}
+                        onClick={() =>
+                          setDeleteDialog({
+                            type: "subcategory",
+                            id: sub.id,
+                            name: sub.name,
+                            transactionCount: sub.transactionCount,
+                          })
+                        }
+                      >
+                        <TrashCan className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -245,6 +351,43 @@ export default function CategorySettingsForm({
           </Card>
         );
       })}
+
+      <Dialog
+        open={deleteDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteDialog(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Delete {deleteDialog?.type === "category" ? "category" : "subcategory"} &ldquo;{deleteDialog?.name}&rdquo;
+            </DialogTitle>
+            <DialogDescription>
+              {deleteDialog?.transactionCount
+                ? `This will clear the ${deleteDialog.type === "category" ? "category" : "subcategory"} field on ${deleteDialog.transactionCount} transaction${deleteDialog.transactionCount === 1 ? "" : "s"}. Those transactions will remain but will no longer be categorized.`
+                : `No transactions are using this ${deleteDialog?.type === "category" ? "category" : "subcategory"}.`}
+              {" "}This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog(null)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isPending}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
