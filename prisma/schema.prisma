@@ -31,6 +31,7 @@ model User {
   updatedAt                 DateTime                  @updatedAt
   accounts                  Account[]
   budgets                   Budget[]
+  salaries                  Salary[]
   userCountry               String                    @default("") @map("defaultCountry")
   userCurrency              String                    @default("") @map("defaultCurrency")
   userTimezone              String                    @default("") @map("defaultTimezone")
@@ -126,31 +127,32 @@ model PasswordResetToken {
 }
 
 model AccountTransaction {
-  id                          String   @id @default(uuid())
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
-  payee                       String   @default("")
+  id                          String          @id @default(uuid())
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+  payee                       String          @default("")
   concept                     String
   type                        String
-  typeTransferOrigin          String?  @default("")
-  typeTransferDestination     String?  @default("")
+  typeTransferOrigin          String?         @default("")
+  typeTransferDestination     String?         @default("")
   transferId                  String?
   currency                    String
   amount                      Decimal
-  foreignCurrency             String?  @default("")
-  foreignCurrencyAmount       Decimal? @default(0.00)
-  foreignCurrencyExchangeRate Decimal? @default(0.00)
-  category                    String   @default("")
-  subcategory                 String?  @default("")
+  foreignCurrency             String?         @default("")
+  foreignCurrencyAmount       Decimal?        @default(0.00)
+  foreignCurrencyExchangeRate Decimal?        @default(0.00)
+  category                    String          @default("")
+  subcategory                 String?         @default("")
   tags                        String[]
-  dateTime                    DateTime @default(now())
-  timezone                    String?  @default("")
+  dateTime                    DateTime        @default(now())
+  timezone                    String?         @default("")
   location                    Json?
   notes                       String
   recurring                   String?
   taxLines                    TaxLine[]
-  Account                     Account? @relation(fields: [accountId], references: [id])
+  Account                     Account?        @relation(fields: [accountId], references: [id])
   accountId                   String
+  salaryPayment               SalaryPayment?
 
   @@index([accountId, dateTime])
 }
@@ -188,6 +190,48 @@ model BudgetTransaction {
   budgetId                    String
 
   @@index([budgetId, dateTime])
+}
+
+model Salary {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  month     DateTime
+  employer  String
+  grossPay  Decimal  @db.Decimal(10, 2)
+  currency  String
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines    SalaryLine[]
+  payments SalaryPayment[]
+
+  @@unique([userId, month, employer])
+  @@index([userId, month])
+}
+
+model SalaryLine {
+  id       String  @id @default(cuid())
+  salaryId String
+  salary   Salary  @relation(fields: [salaryId], references: [id], onDelete: Cascade)
+  concept  String
+  group    String
+  amount   Decimal @db.Decimal(10, 2)
+  order    Int     @default(0)
+
+  @@index([salaryId])
+}
+
+model SalaryPayment {
+  id            String             @id @default(cuid())
+  salaryId      String
+  salary        Salary             @relation(fields: [salaryId], references: [id], onDelete: Cascade)
+  transactionId String             @unique
+  transaction   AccountTransaction @relation(fields: [transactionId], references: [id])
+  concept       String             @default("")
+
+  @@index([salaryId])
 }
 
 model Account {

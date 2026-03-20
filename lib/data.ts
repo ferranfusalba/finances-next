@@ -112,6 +112,115 @@ export interface LocationWithTransactions {
   }[];
 }
 
+export async function getSalaries(
+  userId: string,
+  year: number | null = null,
+) {
+  const salaries = await db.salary.findMany({
+    where: {
+      userId,
+      month: buildDateTimeFilter(year),
+    },
+    orderBy: { month: "asc" },
+    include: {
+      lines: { orderBy: { order: "asc" } },
+      payments: {
+        include: {
+          transaction: {
+            select: {
+              id: true,
+              amount: true,
+              currency: true,
+              payee: true,
+              concept: true,
+              dateTime: true,
+              accountId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return salaries.map((s) => ({
+    ...s,
+    grossPay: toNumber(s.grossPay),
+    lines: s.lines.map((l) => ({
+      ...l,
+      amount: toNumber(l.amount),
+    })),
+    payments: s.payments.map((p) => ({
+      ...p,
+      transaction: {
+        ...p.transaction,
+        amount: toNumber(p.transaction.amount),
+      },
+    })),
+  }));
+}
+
+export async function getSalaryTransactions(
+  userId: string,
+  year: number | null = null,
+) {
+  const transactions = await db.accountTransaction.findMany({
+    where: {
+      Account: { userId },
+      category: "Salary",
+      dateTime: buildDateTimeFilter(year),
+    },
+    orderBy: { dateTime: "asc" },
+    select: {
+      id: true,
+      dateTime: true,
+      payee: true,
+      concept: true,
+      accountId: true,
+      amount: true,
+      currency: true,
+      salaryPayment: {
+        select: { salaryId: true },
+      },
+    },
+  });
+
+  return transactions.map((t) => ({
+    ...t,
+    amount: toNumber(t.amount),
+    salaryId: t.salaryPayment?.salaryId ?? null,
+  }));
+}
+
+export async function getDistinctSalaryEmployers(userId: string) {
+  const results = await db.salary.findMany({
+    where: { userId },
+    select: { employer: true },
+    distinct: ["employer"],
+    orderBy: { employer: "asc" },
+  });
+  return results.map((r) => r.employer);
+}
+
+export async function getDistinctSalaryLineGroups(userId: string) {
+  const results = await db.salaryLine.findMany({
+    where: { salary: { userId } },
+    select: { group: true },
+    distinct: ["group"],
+    orderBy: { group: "asc" },
+  });
+  return results.map((r) => r.group);
+}
+
+export async function getDistinctSalaryLineConcepts(userId: string) {
+  const results = await db.salaryLine.findMany({
+    where: { salary: { userId } },
+    select: { concept: true },
+    distinct: ["concept"],
+    orderBy: { concept: "asc" },
+  });
+  return results.map((r) => r.concept);
+}
+
 export async function getTransactionLocations(
   userId: string,
   year: number | null = null,
