@@ -24,7 +24,7 @@ UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC-01',    "timezone" = 'At
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+00',    "timezone" = 'Etc/UTC'               WHERE "timezone" = '0';
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+00',    "timezone" = 'Etc/UTC'               WHERE "timezone" = 'UTC';
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+01',    "timezone" = 'Europe/Brussels'       WHERE "timezone" = '1';
-UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+02',    "timezone" = 'Europe/Berlin'         WHERE "timezone" = '2';
+UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+02',    "timezone" = 'Europe/Andorra'         WHERE "timezone" = '2';
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+03',    "timezone" = 'Europe/Moscow'         WHERE "timezone" = '3';
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+03:30', "timezone" = 'Asia/Tehran'           WHERE "timezone" = '3.5';
 UPDATE "AccountTransaction" SET "timezoneOffset" = 'UTC+04',    "timezone" = 'Asia/Dubai'            WHERE "timezone" = '4';
@@ -61,7 +61,7 @@ UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC-01',    "timezone" = 'Atl
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+00',    "timezone" = 'Etc/UTC'               WHERE "timezone" = '0';
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+00',    "timezone" = 'Etc/UTC'               WHERE "timezone" = 'UTC';
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+01',    "timezone" = 'Europe/Brussels'       WHERE "timezone" = '1';
-UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+02',    "timezone" = 'Europe/Berlin'         WHERE "timezone" = '2';
+UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+02',    "timezone" = 'Europe/Andorra'         WHERE "timezone" = '2';
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+03',    "timezone" = 'Europe/Moscow'         WHERE "timezone" = '3';
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+03:30', "timezone" = 'Asia/Tehran'           WHERE "timezone" = '3.5';
 UPDATE "BudgetTransaction" SET "timezoneOffset" = 'UTC+04',    "timezone" = 'Asia/Dubai'            WHERE "timezone" = '4';
@@ -98,7 +98,7 @@ UPDATE "User" SET "defaultTimezone" = 'Atlantic/Cape_Verde'   WHERE "defaultTime
 UPDATE "User" SET "defaultTimezone" = 'Etc/UTC'               WHERE "defaultTimezone" = '0';
 UPDATE "User" SET "defaultTimezone" = 'Etc/UTC'               WHERE "defaultTimezone" = 'UTC';
 UPDATE "User" SET "defaultTimezone" = 'Europe/Brussels'       WHERE "defaultTimezone" = '1';
-UPDATE "User" SET "defaultTimezone" = 'Europe/Berlin'         WHERE "defaultTimezone" = '2';
+UPDATE "User" SET "defaultTimezone" = 'Europe/Andorra'         WHERE "defaultTimezone" = '2';
 UPDATE "User" SET "defaultTimezone" = 'Europe/Moscow'         WHERE "defaultTimezone" = '3';
 UPDATE "User" SET "defaultTimezone" = 'Asia/Tehran'           WHERE "defaultTimezone" = '3.5';
 UPDATE "User" SET "defaultTimezone" = 'Asia/Dubai'            WHERE "defaultTimezone" = '4';
