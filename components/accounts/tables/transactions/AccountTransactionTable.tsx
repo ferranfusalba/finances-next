@@ -281,7 +281,7 @@ export default function AccountTransactionTable(props: Props) {
     columnHelper.accessor((row) => row.dateTime, {
       id: "dateTime",
       cell: (info) => {
-        const tz = info.row.original.timezone;
+        const tz = info.row.original.timezoneOffset;
         return (
           <div>
             <i>{info.getValue().toLocaleString("ca")}</i>

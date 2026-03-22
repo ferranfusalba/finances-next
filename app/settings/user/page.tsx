@@ -46,7 +46,7 @@ import { TwoFactorSection } from "@/components/auth/two-factor-section";
 
 import countries from "@/statics/countries.json";
 import currencies from "@/statics/currencies.json";
-import timezones from "@/statics/timezones.json";
+import timezones from "@/statics/timezones-iana.json";
 
 import { Currency } from "@/types/Currency";
 import { Country } from "@/types/Country";
@@ -96,17 +96,11 @@ const UserPage = () => {
 
   const timezoneOptions: ComboboxOption[] = useMemo(
     () =>
-      timezones
-        .filter(
-          (tz: Timezone, i: number, arr: Timezone[]) =>
-            tz.utc.length > 0 &&
-            arr.findIndex((t) => t.utc[0] === tz.utc[0]) === i,
-        )
-        .map((timezone: Timezone) => ({
-          value: timezone.utc[0],
-          label: `${timezone.text} - ${timezone.value}`,
-          searchLabel: `${timezone.text} ${timezone.value} ${timezone.utc[0]}`,
-        })),
+      timezones.map((tz: Timezone) => ({
+        value: tz.id,
+        label: `(${tz.offset}) ${tz.name} — ${tz.region}`,
+        searchLabel: `${tz.id} ${tz.name} ${tz.region} ${tz.offset}`,
+      })),
     [],
   );
 

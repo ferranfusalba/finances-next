@@ -49,7 +49,8 @@ describe("transactionToRow", () => {
   const baseTx: AccountTransaction = {
     id: "tx-1",
     dateTime: new Date("2025-03-15T10:00:00.000Z"),
-    timezone: "+1",
+    timezoneId: "Europe/Brussels",
+    timezoneOffset: "UTC+01",
     payee: "Grocery Store",
     concept: "Weekly groceries",
     type: "EXPENSE",

@@ -38,7 +38,7 @@ const baseTransaction = {
   amount: -50,
   accountId: "acc-1",
   dateTime: "2024-01-15T10:00:00Z",
-  timezone: "UTC",
+  timezoneId: "Etc/UTC",
   notes: "",
 };
 

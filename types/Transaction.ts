@@ -24,7 +24,8 @@ interface Transaction {
   notes: string;
   subcategory?: string | null;
   tags?: string[];
-  timezone?: string | null;
+  timezoneId?: string | null;
+  timezoneOffset?: string | null;
   type: string;
   updatedAt: Date;
 }

@@ -21,7 +21,7 @@ import { Form } from "@/components/ui/form";
 import TransactionFormContent from "@/components/transactions/form/TransactionFormContent";
 
 import { computeTransactionAmount, nextTimeIncrement } from "@/lib/utils/transaction";
-import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
+import { detectTimezone, getTimezoneOffset } from "@/lib/utils/timezone";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
@@ -46,9 +46,7 @@ export default function BudgetTransactionAdd(props: Props) {
   const timeCounterRef = useRef(540);
 
   const detectedTimezone = detectTimezone(userTimezone || undefined);
-  const detectedTimezoneValue = detectedTimezone
-    ? timezoneToSelectValue(detectedTimezone)
-    : undefined;
+  const detectedTimezoneValue = detectedTimezone?.id;
 
   const form = useForm<BudgetTransactionFormValues>({
     resolver: zodResolver(formSchema),
@@ -65,16 +63,13 @@ export default function BudgetTransactionAdd(props: Props) {
       tags: [],
       date: new Date(),
       time: "09:00",
-      timezone: detectedTimezoneValue,
+      timezoneId: detectedTimezoneValue,
       location: null,
       notes: "",
     },
   });
 
   const onSubmit = async (values: BudgetTransactionFormValues) => {
-    const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
-    const timezoneToOffsetString = values.timezone.split("|")[0];
-
     const selectedDate = values.date;
     const dateBuilt = new Date(
       selectedDate.getFullYear(),
@@ -82,8 +77,6 @@ export default function BudgetTransactionAdd(props: Props) {
       selectedDate.getDate(),
       Number(values.time.split(":")[0] ?? 9),
       Number(values.time.split(":")[1] ?? 0),
-      0,
-      timezoneToOffset,
     );
 
     const concept = values.concept;
@@ -100,7 +93,8 @@ export default function BudgetTransactionAdd(props: Props) {
     const subcategory = values.subcategory;
     const tags = values.tags;
     const dateTime = dateBuilt;
-    const timezone = timezoneToOffsetString;
+    const timezoneId = values.timezoneId;
+    const timezoneOffset = getTimezoneOffset(timezoneId, dateBuilt);
     const location = values.location;
     const notes = values.notes;
     const budgetId = props.budget?.id;
@@ -120,7 +114,8 @@ export default function BudgetTransactionAdd(props: Props) {
           subcategory,
           tags,
           dateTime,
-          timezone,
+          timezoneId,
+          timezoneOffset,
           location,
           notes,
           budgetId,

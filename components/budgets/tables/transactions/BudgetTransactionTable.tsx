@@ -36,13 +36,15 @@ export default function BudgetTransactionTable({
     columnHelper.accessor((row) => row.dateTime, {
       id: "dateTime",
       cell: (info) => {
-        return <i>{info.getValue().toLocaleString("ca")}</i>;
+        const tz = info.row.original.timezoneOffset;
+        return (
+          <div>
+            <i>{info.getValue().toLocaleString("ca")}</i>
+            {tz && <div className="text-xs text-muted-foreground">{tz}</div>}
+          </div>
+        );
       },
       header: () => <span>Date & Time</span>,
-      footer: (info) => info.column.id,
-    }),
-    columnHelper.accessor("timezone", {
-      header: "Timezone",
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("concept", {

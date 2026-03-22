@@ -45,7 +45,7 @@ const baseUpdate = {
   amount: -75,
   accountId: "acc-1",
   dateTime: "2024-01-15T12:00:00Z",
-  timezone: "1",
+  timezoneId: "Europe/Brussels",
   notes: "updated",
 };
 

@@ -45,7 +45,7 @@ export const RegisterForm = () => {
     const detectedTz = detectTimezone();
     const enriched = {
       ...values,
-      userTimezone: detectedTz?.utc[0] ?? "",
+      userTimezone: detectedTz?.id ?? "",
       userLocale: navigator.language ?? "en-US",
     };
 

@@ -2,7 +2,8 @@ import { AccountTransaction } from "@/types/Transaction";
 
 export const CSV_HEADERS = [
   "Date & Time",
-  "Timezone",
+  "Timezone ID",
+  "Timezone Offset",
   "Payee",
   "Concept",
   "Type",
@@ -38,7 +39,8 @@ export function transactionToRow(
 ): string {
   return [
     t.dateTime,
-    t.timezone,
+    t.timezoneId,
+    t.timezoneOffset,
     t.payee,
     t.concept,
     t.type,

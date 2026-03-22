@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/utils/timezone", () => ({
-  detectTimezone: () => ({ utc: ["America/New_York"], offset: -5, text: "(UTC-05:00) Eastern Time" }),
+  detectTimezone: () => ({ id: "America/New_York", offset: "UTC-05", name: "New York", region: "Americas", countryCodes: ["US"] }),
 }));
 
 import { register } from "@/actions/register";

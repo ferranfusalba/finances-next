@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 import { Timezone } from "@/types/Timezone";
 
-import timezones from "@/statics/timezones.json";
+import timezones from "@/statics/timezones-iana.json";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 
@@ -36,10 +36,10 @@ export default function TransactionFormDateTimeFields() {
 
   const timezoneOptions: ComboboxOption[] = useMemo(
     () =>
-      timezones.map((timezone: Timezone) => ({
-        value: timezone.offset.toString() + "|" + timezone.text,
-        label: `${timezone.text} - ${timezone.value}`,
-        searchLabel: `${timezone.text} ${timezone.value} ${timezone.offset}`,
+      timezones.map((tz: Timezone) => ({
+        value: tz.id,
+        label: `(${tz.offset}) ${tz.name} — ${tz.region}`,
+        searchLabel: `${tz.id} ${tz.name} ${tz.region} ${tz.offset}`,
       })),
     []
   );
@@ -106,7 +106,7 @@ export default function TransactionFormDateTimeFields() {
       {/* Timezone */}
       <FormField
         control={form.control}
-        name="timezone"
+        name="timezoneId"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Timezone*</FormLabel>

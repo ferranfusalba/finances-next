@@ -145,7 +145,8 @@ model AccountTransaction {
   subcategory                 String?         @default("")
   tags                        String[]
   dateTime                    DateTime        @default(now())
-  timezone                    String?         @default("")
+  timezoneId                  String?         @default("") @map("timezone")
+  timezoneOffset              String?         @default("")
   location                    Json?
   notes                       String
   recurring                   String?
@@ -183,7 +184,8 @@ model BudgetTransaction {
   subcategory                 String?  @default("")
   tags                        String[]
   dateTime                    DateTime @default(now())
-  timezone                    String?  @default("")
+  timezoneId                  String?  @default("") @map("timezone")
+  timezoneOffset              String?  @default("")
   location                    Json?
   notes                       String
   Budget                      Budget?  @relation(fields: [budgetId], references: [id])

@@ -28,7 +28,7 @@ import {
   convertFormTaxLines,
   getNextTimeForDate,
 } from "@/lib/utils/transaction";
-import { detectTimezone, timezoneToSelectValue } from "@/lib/utils/timezone";
+import { detectTimezone, getTimezoneOffset } from "@/lib/utils/timezone";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
@@ -41,7 +41,6 @@ import {
 import { Account } from "@/types/Account";
 import { AccountTransaction } from "@/types/Transaction";
 
-import timezones from "@/statics/timezones.json";
 
 interface Props {
   account: Account | null;
@@ -77,9 +76,7 @@ export default function AccountTransactionAdd(props: Props) {
     editTx.typeTransferOrigin !== props.account?.id;
 
   const detectedTimezone = detectTimezone(userTimezone || undefined);
-  const detectedTimezoneValue = detectedTimezone
-    ? timezoneToSelectValue(detectedTimezone)
-    : undefined;
+  const detectedTimezoneValue = detectedTimezone?.id;
 
   const editDate = editTx?.dateTime ? new Date(editTx.dateTime) : undefined;
   const editTime = editTx?.dateTime
@@ -88,14 +85,7 @@ export default function AccountTransactionAdd(props: Props) {
         return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
       })()
     : undefined;
-  const editTimezoneValue = editTx?.timezone
-    ? (() => {
-        const tz = timezones.find(
-          (t) => t.offset.toString() === editTx.timezone,
-        );
-        return tz ? timezoneToSelectValue(tz) : undefined;
-      })()
-    : undefined;
+  const editTimezoneValue = editTx?.timezoneId || undefined;
 
   const form = useForm<AccountTransactionFormValues>({
     mode: "onChange",
@@ -120,7 +110,7 @@ export default function AccountTransactionAdd(props: Props) {
       tags: editTx?.tags ?? [],
       date: editDate ?? new Date(),
       time: editTime ?? "09:00",
-      timezone: editTimezoneValue ?? detectedTimezoneValue,
+      timezoneId: editTimezoneValue ?? detectedTimezoneValue,
       location: editTx?.location ?? null,
       notes: editTx?.notes ?? "",
       taxLines:
@@ -170,9 +160,6 @@ export default function AccountTransactionAdd(props: Props) {
   ]);
 
   const onSubmit = async (values: AccountTransactionFormValues) => {
-    const timezoneToOffset = parseInt(values.timezone.split("|")[0]);
-    const timezoneToOffsetString = values.timezone.split("|")[0];
-
     const selectedDate = values.date;
     const dateBuilt = new Date(
       selectedDate.getFullYear(),
@@ -180,8 +167,6 @@ export default function AccountTransactionAdd(props: Props) {
       selectedDate.getDate(),
       Number(values.time.split(":")[0] ?? 9),
       Number(values.time.split(":")[1] ?? 0),
-      0,
-      timezoneToOffset,
     );
 
     const payee = values.payee;
@@ -200,7 +185,8 @@ export default function AccountTransactionAdd(props: Props) {
     const subcategory = values.subcategory;
     const tags = values.tags;
     const dateTime = dateBuilt;
-    const timezone = timezoneToOffsetString;
+    const timezoneId = values.timezoneId;
+    const timezoneOffset = getTimezoneOffset(timezoneId, dateBuilt);
     const location = values.location;
     const notes = values.notes;
     const taxLines = convertFormTaxLines(values.taxLines);
@@ -247,7 +233,8 @@ export default function AccountTransactionAdd(props: Props) {
         subcategory,
         tags,
         dateTime,
-        timezone,
+        timezoneId,
+        timezoneOffset,
         location,
         notes,
         taxLines,

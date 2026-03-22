@@ -19,7 +19,7 @@ const baseFields = {
   tags: z.array(z.string()),
   date: z.date({ required_error: "A date is required." }),
   time: z.string(),
-  timezone: z.string().min(1, {
+  timezoneId: z.string().min(1, {
     message: "Timezone is required",
   }),
   location: z.object({
