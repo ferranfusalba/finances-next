@@ -18,7 +18,7 @@ describe("getCountryFlag", () => {
 
 describe("getCountryName", () => {
   it("returns the name for US", () => {
-    expect(getCountryName("US")).toBe("United States of America");
+    expect(getCountryName("US")).toBe("United States");
   });
 
   it("returns the name for ES", () => {

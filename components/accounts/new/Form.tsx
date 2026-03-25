@@ -22,16 +22,15 @@ import { Combobox } from "@/components/ui/combobox";
 
 import AccountTypeField from "@/components/accounts/form/AccountTypeField";
 
-import countries from "@/statics/countries.json";
+import { countries } from "@/lib/utils/country";
 import currencies from "@/statics/currencies.json";
 
 import { Currency } from "@/types/Currency";
-import { Country } from "@/types/Country";
 
-const countryOptions = countries.map((country: Country) => ({
-  value: country["alpha-2"],
-  label: `${country["alpha-2"]} ${country["emoji-flag"]}  ${country.name}${country["full-name"] ? " (" + country["full-name"] + ")" : ""}`,
-  searchLabel: `${country["alpha-2"]} ${country.name} ${country["full-name"] ?? ""}`,
+const countryOptions = countries.map((country) => ({
+  value: country.alpha2Code,
+  label: `${country.alpha2Code} ${country.flag}  ${country.name}${country.fullName ? " (" + country.fullName + ")" : ""}`,
+  searchLabel: `${country.alpha2Code} ${country.name} ${country.fullName ?? ""}`,
 }));
 
 const currencyOptions = currencies.map((currency: Currency) => ({

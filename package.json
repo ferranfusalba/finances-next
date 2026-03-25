@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.60",
+  "version": "1.0.61",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",

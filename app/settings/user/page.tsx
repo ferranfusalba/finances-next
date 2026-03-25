@@ -44,12 +44,11 @@ import { SettingsSchema } from "@/schemas";
 import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeToggle";
 import { TwoFactorSection } from "@/components/auth/two-factor-section";
 
-import countries from "@/statics/countries.json";
+import { countries } from "@/lib/utils/country";
 import currencies from "@/statics/currencies.json";
 import timezones from "@/statics/timezones-iana.json";
 
 import { Currency } from "@/types/Currency";
-import { Country } from "@/types/Country";
 import { Timezone } from "@/types/Timezone";
 
 const UserPage = () => {
@@ -76,10 +75,10 @@ const UserPage = () => {
 
   const countryOptions: ComboboxOption[] = useMemo(
     () =>
-      countries.map((country: Country) => ({
-        value: country["alpha-2"],
-        label: `${country["alpha-2"]} ${country["emoji-flag"]}  ${country.name}${country["full-name"] ? ` (${country["full-name"]})` : ""}`,
-        searchLabel: `${country["alpha-2"]} ${country.name} ${country["full-name"] ?? ""}`,
+      countries.map((country) => ({
+        value: country.alpha2Code,
+        label: `${country.alpha2Code} ${country.flag}  ${country.name}${country.fullName ? ` (${country.fullName})` : ""}`,
+        searchLabel: `${country.alpha2Code} ${country.name} ${country.fullName ?? ""}`,
       })),
     [],
   );
