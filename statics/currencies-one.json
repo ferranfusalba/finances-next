@@ -1,0 +1,1689 @@
+[
+  {
+    "code": "XBA",
+    "numericCode": "955",
+    "type": "bond market unit",
+    "name": "Bond Markets Unit European Composite Unit (EURCO)",
+    "minorUnit": null
+  },
+  {
+    "code": "XBB",
+    "numericCode": "956",
+    "type": "bond market unit",
+    "name": "Bond Markets Unit European Monetary Unit (E.M.U.-6)",
+    "minorUnit": null
+  },
+  {
+    "code": "XBC",
+    "numericCode": "957",
+    "type": "bond market unit",
+    "name": "Bond Markets Unit European Unit of Account 9 (E.U.A.-9)",
+    "minorUnit": null
+  },
+  {
+    "code": "XBD",
+    "numericCode": "958",
+    "type": "bond market unit",
+    "name": "Bond Markets Unit European Unit of Account 17 (E.U.A.-17)",
+    "minorUnit": null
+  },
+  {
+    "code": "BOV",
+    "numericCode": "984",
+    "type": "fund",
+    "name": "Mvdol",
+    "minorUnit": 2,
+    "countries": [
+      "BO"
+    ]
+  },
+  {
+    "code": "CHE",
+    "numericCode": "947",
+    "type": "fund",
+    "name": "WIR Euro",
+    "minorUnit": 2,
+    "countries": [
+      "CH"
+    ]
+  },
+  {
+    "code": "CHW",
+    "numericCode": "948",
+    "type": "fund",
+    "name": "WIR Franc",
+    "minorUnit": 2,
+    "countries": [
+      "CH"
+    ]
+  },
+  {
+    "code": "CLF",
+    "numericCode": "990",
+    "type": "fund",
+    "name": "Unidad de Fomento",
+    "minorUnit": 4,
+    "countries": [
+      "CL"
+    ]
+  },
+  {
+    "code": "COU",
+    "numericCode": "970",
+    "type": "fund",
+    "name": "Unidad de Valor Real",
+    "minorUnit": 2,
+    "countries": [
+      "CO"
+    ]
+  },
+  {
+    "code": "MXV",
+    "numericCode": "979",
+    "type": "fund",
+    "name": "Mexican Unidad de Inversion (UDI)",
+    "minorUnit": 2,
+    "countries": [
+      "MX"
+    ]
+  },
+  {
+    "code": "USN",
+    "numericCode": "997",
+    "type": "fund",
+    "name": "US Dollar (Next day)",
+    "minorUnit": 2,
+    "countries": [
+      "US"
+    ]
+  },
+  {
+    "code": "UYI",
+    "numericCode": "940",
+    "type": "fund",
+    "name": "Uruguay Peso en Unidades Indexadas (UI)",
+    "minorUnit": 0,
+    "countries": [
+      "UY"
+    ]
+  },
+  {
+    "code": "UYW",
+    "numericCode": "927",
+    "type": "fund",
+    "name": "Unidad Previsional",
+    "minorUnit": 4,
+    "countries": [
+      "UY"
+    ]
+  },
+  {
+    "code": "XAD",
+    "numericCode": "396",
+    "type": "fund",
+    "name": "Arab Accounting Dinar",
+    "minorUnit": 2
+  },
+  {
+    "code": "XXX",
+    "numericCode": "999",
+    "type": "no-currency",
+    "name": "The codes assigned for transactions where no currency is involved",
+    "minorUnit": null
+  },
+  {
+    "code": "XAG",
+    "numericCode": "961",
+    "type": "precious metal",
+    "name": "Silver",
+    "minorUnit": null
+  },
+  {
+    "code": "XAU",
+    "numericCode": "959",
+    "type": "precious metal",
+    "name": "Gold",
+    "minorUnit": null
+  },
+  {
+    "code": "XPD",
+    "numericCode": "964",
+    "type": "precious metal",
+    "name": "Palladium",
+    "minorUnit": null
+  },
+  {
+    "code": "XPT",
+    "numericCode": "962",
+    "type": "precious metal",
+    "name": "Platinum",
+    "minorUnit": null
+  },
+  {
+    "code": "XDR",
+    "numericCode": "960",
+    "type": "special drawing right",
+    "name": "SDR (Special Drawing Right)",
+    "minorUnit": null
+  },
+  {
+    "code": "XAF",
+    "numericCode": "950",
+    "type": "supranational",
+    "name": "CFA Franc BEAC",
+    "minorUnit": 0,
+    "countries": [
+      "CM",
+      "CF",
+      "TD",
+      "CG",
+      "GQ",
+      "GA"
+    ]
+  },
+  {
+    "code": "XCD",
+    "numericCode": "951",
+    "type": "supranational",
+    "name": "East Caribbean Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "AI",
+      "AG",
+      "DM",
+      "GD",
+      "MS",
+      "KN",
+      "LC",
+      "VC"
+    ]
+  },
+  {
+    "code": "XCG",
+    "numericCode": "532",
+    "type": "supranational",
+    "name": "Caribbean Guilder",
+    "minorUnit": 2,
+    "countries": [
+      "CW",
+      "SX"
+    ]
+  },
+  {
+    "code": "XOF",
+    "numericCode": "952",
+    "type": "supranational",
+    "name": "CFA Franc BCEAO",
+    "minorUnit": 0,
+    "countries": [
+      "BJ",
+      "BF",
+      "CI",
+      "GW",
+      "ML",
+      "NE",
+      "SN",
+      "TG"
+    ]
+  },
+  {
+    "code": "XPF",
+    "numericCode": "953",
+    "type": "supranational",
+    "name": "CFP Franc",
+    "minorUnit": 0,
+    "countries": [
+      "PF",
+      "NC",
+      "WF"
+    ]
+  },
+  {
+    "code": "XSU",
+    "numericCode": "994",
+    "type": "supranational",
+    "name": "Sucre",
+    "minorUnit": null
+  },
+  {
+    "code": "XUA",
+    "numericCode": "965",
+    "type": "supranational",
+    "name": "ADB Unit of Account",
+    "minorUnit": null
+  },
+  {
+    "code": "XTS",
+    "numericCode": "963",
+    "type": "testing",
+    "name": "Codes specifically reserved for testing purposes",
+    "minorUnit": null
+  },
+  {
+    "code": "AED",
+    "numericCode": "784",
+    "name": "UAE Dirham",
+    "minorUnit": 2,
+    "countries": [
+      "AE"
+    ]
+  },
+  {
+    "code": "AFN",
+    "numericCode": "971",
+    "name": "Afghani",
+    "minorUnit": 2,
+    "countries": [
+      "AF"
+    ]
+  },
+  {
+    "code": "ALL",
+    "numericCode": "008",
+    "name": "Lek",
+    "minorUnit": 2,
+    "countries": [
+      "AL"
+    ]
+  },
+  {
+    "code": "AMD",
+    "numericCode": "051",
+    "name": "Armenian Dram",
+    "minorUnit": 2,
+    "countries": [
+      "AM"
+    ]
+  },
+  {
+    "code": "AOA",
+    "numericCode": "973",
+    "name": "Kwanza",
+    "minorUnit": 2,
+    "countries": [
+      "AO"
+    ]
+  },
+  {
+    "code": "ARS",
+    "numericCode": "032",
+    "name": "Argentine Peso",
+    "minorUnit": 2,
+    "countries": [
+      "AR"
+    ]
+  },
+  {
+    "code": "AUD",
+    "numericCode": "036",
+    "name": "Australian Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "AU",
+      "CX",
+      "CC",
+      "HM",
+      "KI",
+      "NR",
+      "NF",
+      "TV"
+    ]
+  },
+  {
+    "code": "AWG",
+    "numericCode": "533",
+    "name": "Aruban Florin",
+    "minorUnit": 2,
+    "countries": [
+      "AW"
+    ]
+  },
+  {
+    "code": "AZN",
+    "numericCode": "944",
+    "name": "Azerbaijan Manat",
+    "minorUnit": 2,
+    "countries": [
+      "AZ"
+    ]
+  },
+  {
+    "code": "BAM",
+    "numericCode": "977",
+    "name": "Convertible Mark",
+    "minorUnit": 2,
+    "countries": [
+      "BA"
+    ]
+  },
+  {
+    "code": "BBD",
+    "numericCode": "052",
+    "name": "Barbados Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "BB"
+    ]
+  },
+  {
+    "code": "BDT",
+    "numericCode": "050",
+    "name": "Taka",
+    "minorUnit": 2,
+    "countries": [
+      "BD"
+    ]
+  },
+  {
+    "code": "BHD",
+    "numericCode": "048",
+    "name": "Bahraini Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "BH"
+    ]
+  },
+  {
+    "code": "BIF",
+    "numericCode": "108",
+    "name": "Burundi Franc",
+    "minorUnit": 0,
+    "countries": [
+      "BI"
+    ]
+  },
+  {
+    "code": "BMD",
+    "numericCode": "060",
+    "name": "Bermudian Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "BM"
+    ]
+  },
+  {
+    "code": "BND",
+    "numericCode": "096",
+    "name": "Brunei Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "BN"
+    ]
+  },
+  {
+    "code": "BOB",
+    "numericCode": "068",
+    "name": "Boliviano",
+    "minorUnit": 2,
+    "countries": [
+      "BO"
+    ]
+  },
+  {
+    "code": "BRL",
+    "numericCode": "986",
+    "name": "Brazilian Real",
+    "minorUnit": 2,
+    "countries": [
+      "BR"
+    ]
+  },
+  {
+    "code": "BSD",
+    "numericCode": "044",
+    "name": "Bahamian Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "BS"
+    ]
+  },
+  {
+    "code": "BTN",
+    "numericCode": "064",
+    "name": "Ngultrum",
+    "minorUnit": 2,
+    "countries": [
+      "BT"
+    ]
+  },
+  {
+    "code": "BWP",
+    "numericCode": "072",
+    "name": "Pula",
+    "minorUnit": 2,
+    "countries": [
+      "BW"
+    ]
+  },
+  {
+    "code": "BYN",
+    "numericCode": "933",
+    "name": "Belarusian Ruble",
+    "minorUnit": 2,
+    "countries": [
+      "BY"
+    ]
+  },
+  {
+    "code": "BZD",
+    "numericCode": "084",
+    "name": "Belize Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "BZ"
+    ]
+  },
+  {
+    "code": "CAD",
+    "numericCode": "124",
+    "name": "Canadian Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "CA"
+    ]
+  },
+  {
+    "code": "CDF",
+    "numericCode": "976",
+    "name": "Congolese Franc",
+    "minorUnit": 2,
+    "countries": [
+      "CD"
+    ]
+  },
+  {
+    "code": "CHF",
+    "numericCode": "756",
+    "name": "Swiss Franc",
+    "minorUnit": 2,
+    "countries": [
+      "LI",
+      "CH"
+    ]
+  },
+  {
+    "code": "CLP",
+    "numericCode": "152",
+    "name": "Chilean Peso",
+    "minorUnit": 0,
+    "countries": [
+      "CL"
+    ]
+  },
+  {
+    "code": "CNY",
+    "numericCode": "156",
+    "name": "Yuan Renminbi",
+    "minorUnit": 2,
+    "countries": [
+      "CN"
+    ]
+  },
+  {
+    "code": "COP",
+    "numericCode": "170",
+    "name": "Colombian Peso",
+    "minorUnit": 2,
+    "countries": [
+      "CO"
+    ]
+  },
+  {
+    "code": "CRC",
+    "numericCode": "188",
+    "name": "Costa Rican Colon",
+    "minorUnit": 2,
+    "countries": [
+      "CR"
+    ]
+  },
+  {
+    "code": "CUP",
+    "numericCode": "192",
+    "name": "Cuban Peso",
+    "minorUnit": 2,
+    "countries": [
+      "CU"
+    ]
+  },
+  {
+    "code": "CVE",
+    "numericCode": "132",
+    "name": "Cabo Verde Escudo",
+    "minorUnit": 2,
+    "countries": [
+      "CV"
+    ]
+  },
+  {
+    "code": "CZK",
+    "numericCode": "203",
+    "name": "Czech Koruna",
+    "minorUnit": 2,
+    "countries": [
+      "CZ"
+    ]
+  },
+  {
+    "code": "DJF",
+    "numericCode": "262",
+    "name": "Djibouti Franc",
+    "minorUnit": 0,
+    "countries": [
+      "DJ"
+    ]
+  },
+  {
+    "code": "DKK",
+    "numericCode": "208",
+    "name": "Danish Krone",
+    "minorUnit": 2,
+    "countries": [
+      "DK",
+      "FO",
+      "GL"
+    ]
+  },
+  {
+    "code": "DOP",
+    "numericCode": "214",
+    "name": "Dominican Peso",
+    "minorUnit": 2,
+    "countries": [
+      "DO"
+    ]
+  },
+  {
+    "code": "DZD",
+    "numericCode": "012",
+    "name": "Algerian Dinar",
+    "minorUnit": 2,
+    "countries": [
+      "DZ"
+    ]
+  },
+  {
+    "code": "EGP",
+    "numericCode": "818",
+    "name": "Egyptian Pound",
+    "minorUnit": 2,
+    "countries": [
+      "EG"
+    ]
+  },
+  {
+    "code": "ERN",
+    "numericCode": "232",
+    "name": "Nakfa",
+    "minorUnit": 2,
+    "countries": [
+      "ER"
+    ]
+  },
+  {
+    "code": "ETB",
+    "numericCode": "230",
+    "name": "Ethiopian Birr",
+    "minorUnit": 2,
+    "countries": [
+      "ET"
+    ]
+  },
+  {
+    "code": "EUR",
+    "numericCode": "978",
+    "name": "Euro",
+    "minorUnit": 2,
+    "countries": [
+      "AD",
+      "AT",
+      "BE",
+      "BG",
+      "HR",
+      "CY",
+      "EE",
+      "EU",
+      "FI",
+      "FR",
+      "GF",
+      "TF",
+      "DE",
+      "GR",
+      "GP",
+      "VA",
+      "IE",
+      "IT",
+      "LV",
+      "LT",
+      "LU",
+      "MT",
+      "MQ",
+      "YT",
+      "MC",
+      "ME",
+      "NL",
+      "PT",
+      "RE",
+      "BL",
+      "MF",
+      "PM",
+      "SM",
+      "SK",
+      "SI",
+      "ES",
+      "AX"
+    ]
+  },
+  {
+    "code": "FJD",
+    "numericCode": "242",
+    "name": "Fiji Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "FJ"
+    ]
+  },
+  {
+    "code": "FKP",
+    "numericCode": "238",
+    "name": "Falkland Islands Pound",
+    "minorUnit": 2,
+    "countries": [
+      "FK"
+    ]
+  },
+  {
+    "code": "GBP",
+    "numericCode": "826",
+    "name": "Pound Sterling",
+    "minorUnit": 2,
+    "countries": [
+      "GG",
+      "IM",
+      "JE",
+      "GB"
+    ]
+  },
+  {
+    "code": "GEL",
+    "numericCode": "981",
+    "name": "Lari",
+    "minorUnit": 2,
+    "countries": [
+      "GE"
+    ]
+  },
+  {
+    "code": "GHS",
+    "numericCode": "936",
+    "name": "Ghana Cedi",
+    "minorUnit": 2,
+    "countries": [
+      "GH"
+    ]
+  },
+  {
+    "code": "GIP",
+    "numericCode": "292",
+    "name": "Gibraltar Pound",
+    "minorUnit": 2,
+    "countries": [
+      "GI"
+    ]
+  },
+  {
+    "code": "GMD",
+    "numericCode": "270",
+    "name": "Dalasi",
+    "minorUnit": 2,
+    "countries": [
+      "GM"
+    ]
+  },
+  {
+    "code": "GNF",
+    "numericCode": "324",
+    "name": "Guinean Franc",
+    "minorUnit": 0,
+    "countries": [
+      "GN"
+    ]
+  },
+  {
+    "code": "GTQ",
+    "numericCode": "320",
+    "name": "Quetzal",
+    "minorUnit": 2,
+    "countries": [
+      "GT"
+    ]
+  },
+  {
+    "code": "GYD",
+    "numericCode": "328",
+    "name": "Guyana Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "GY"
+    ]
+  },
+  {
+    "code": "HKD",
+    "numericCode": "344",
+    "name": "Hong Kong Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "HK"
+    ]
+  },
+  {
+    "code": "HNL",
+    "numericCode": "340",
+    "name": "Lempira",
+    "minorUnit": 2,
+    "countries": [
+      "HN"
+    ]
+  },
+  {
+    "code": "HTG",
+    "numericCode": "332",
+    "name": "Gourde",
+    "minorUnit": 2,
+    "countries": [
+      "HT"
+    ]
+  },
+  {
+    "code": "HUF",
+    "numericCode": "348",
+    "name": "Forint",
+    "minorUnit": 2,
+    "countries": [
+      "HU"
+    ]
+  },
+  {
+    "code": "IDR",
+    "numericCode": "360",
+    "name": "Rupiah",
+    "minorUnit": 2,
+    "countries": [
+      "ID"
+    ]
+  },
+  {
+    "code": "ILS",
+    "numericCode": "376",
+    "name": "New Israeli Sheqel",
+    "minorUnit": 2,
+    "countries": [
+      "IL"
+    ]
+  },
+  {
+    "code": "INR",
+    "numericCode": "356",
+    "name": "Indian Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "BT",
+      "IN"
+    ]
+  },
+  {
+    "code": "IQD",
+    "numericCode": "368",
+    "name": "Iraqi Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "IQ"
+    ]
+  },
+  {
+    "code": "IRR",
+    "numericCode": "364",
+    "name": "Iranian Rial",
+    "minorUnit": 2,
+    "countries": [
+      "IR"
+    ]
+  },
+  {
+    "code": "ISK",
+    "numericCode": "352",
+    "name": "Iceland Krona",
+    "minorUnit": 0,
+    "countries": [
+      "IS"
+    ]
+  },
+  {
+    "code": "JMD",
+    "numericCode": "388",
+    "name": "Jamaican Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "JM"
+    ]
+  },
+  {
+    "code": "JOD",
+    "numericCode": "400",
+    "name": "Jordanian Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "JO"
+    ]
+  },
+  {
+    "code": "JPY",
+    "numericCode": "392",
+    "name": "Yen",
+    "minorUnit": 0,
+    "countries": [
+      "JP"
+    ]
+  },
+  {
+    "code": "KES",
+    "numericCode": "404",
+    "name": "Kenyan Shilling",
+    "minorUnit": 2,
+    "countries": [
+      "KE"
+    ]
+  },
+  {
+    "code": "KGS",
+    "numericCode": "417",
+    "name": "Som",
+    "minorUnit": 2,
+    "countries": [
+      "KG"
+    ]
+  },
+  {
+    "code": "KHR",
+    "numericCode": "116",
+    "name": "Riel",
+    "minorUnit": 2,
+    "countries": [
+      "KH"
+    ]
+  },
+  {
+    "code": "KMF",
+    "numericCode": "174",
+    "name": "Comorian Franc ",
+    "minorUnit": 0,
+    "countries": [
+      "KM"
+    ]
+  },
+  {
+    "code": "KPW",
+    "numericCode": "408",
+    "name": "North Korean Won",
+    "minorUnit": 2,
+    "countries": [
+      "KP"
+    ]
+  },
+  {
+    "code": "KRW",
+    "numericCode": "410",
+    "name": "Won",
+    "minorUnit": 0,
+    "countries": [
+      "KR"
+    ]
+  },
+  {
+    "code": "KWD",
+    "numericCode": "414",
+    "name": "Kuwaiti Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "KW"
+    ]
+  },
+  {
+    "code": "KYD",
+    "numericCode": "136",
+    "name": "Cayman Islands Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "KY"
+    ]
+  },
+  {
+    "code": "KZT",
+    "numericCode": "398",
+    "name": "Tenge",
+    "minorUnit": 2,
+    "countries": [
+      "KZ"
+    ]
+  },
+  {
+    "code": "LAK",
+    "numericCode": "418",
+    "name": "Lao Kip",
+    "minorUnit": 2,
+    "countries": [
+      "LA"
+    ]
+  },
+  {
+    "code": "LBP",
+    "numericCode": "422",
+    "name": "Lebanese Pound",
+    "minorUnit": 2,
+    "countries": [
+      "LB"
+    ]
+  },
+  {
+    "code": "LKR",
+    "numericCode": "144",
+    "name": "Sri Lanka Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "LK"
+    ]
+  },
+  {
+    "code": "LRD",
+    "numericCode": "430",
+    "name": "Liberian Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "LR"
+    ]
+  },
+  {
+    "code": "LSL",
+    "numericCode": "426",
+    "name": "Loti",
+    "minorUnit": 2,
+    "countries": [
+      "LS"
+    ]
+  },
+  {
+    "code": "LYD",
+    "numericCode": "434",
+    "name": "Libyan Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "LY"
+    ]
+  },
+  {
+    "code": "MAD",
+    "numericCode": "504",
+    "name": "Moroccan Dirham",
+    "minorUnit": 2,
+    "countries": [
+      "MA",
+      "EH"
+    ]
+  },
+  {
+    "code": "MDL",
+    "numericCode": "498",
+    "name": "Moldovan Leu",
+    "minorUnit": 2,
+    "countries": [
+      "MD"
+    ]
+  },
+  {
+    "code": "MGA",
+    "numericCode": "969",
+    "name": "Malagasy Ariary",
+    "minorUnit": 2,
+    "countries": [
+      "MG"
+    ]
+  },
+  {
+    "code": "MKD",
+    "numericCode": "807",
+    "name": "Denar",
+    "minorUnit": 2,
+    "countries": [
+      "MK"
+    ]
+  },
+  {
+    "code": "MMK",
+    "numericCode": "104",
+    "name": "Kyat",
+    "minorUnit": 2,
+    "countries": [
+      "MM"
+    ]
+  },
+  {
+    "code": "MNT",
+    "numericCode": "496",
+    "name": "Tugrik",
+    "minorUnit": 2,
+    "countries": [
+      "MN"
+    ]
+  },
+  {
+    "code": "MOP",
+    "numericCode": "446",
+    "name": "Pataca",
+    "minorUnit": 2,
+    "countries": [
+      "MO"
+    ]
+  },
+  {
+    "code": "MRU",
+    "numericCode": "929",
+    "name": "Ouguiya",
+    "minorUnit": 2,
+    "countries": [
+      "MR"
+    ]
+  },
+  {
+    "code": "MUR",
+    "numericCode": "480",
+    "name": "Mauritius Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "MU"
+    ]
+  },
+  {
+    "code": "MVR",
+    "numericCode": "462",
+    "name": "Rufiyaa",
+    "minorUnit": 2,
+    "countries": [
+      "MV"
+    ]
+  },
+  {
+    "code": "MWK",
+    "numericCode": "454",
+    "name": "Malawi Kwacha",
+    "minorUnit": 2,
+    "countries": [
+      "MW"
+    ]
+  },
+  {
+    "code": "MXN",
+    "numericCode": "484",
+    "name": "Mexican Peso",
+    "minorUnit": 2,
+    "countries": [
+      "MX"
+    ]
+  },
+  {
+    "code": "MYR",
+    "numericCode": "458",
+    "name": "Malaysian Ringgit",
+    "minorUnit": 2,
+    "countries": [
+      "MY"
+    ]
+  },
+  {
+    "code": "MZN",
+    "numericCode": "943",
+    "name": "Mozambique Metical",
+    "minorUnit": 2,
+    "countries": [
+      "MZ"
+    ]
+  },
+  {
+    "code": "NAD",
+    "numericCode": "516",
+    "name": "Namibia Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "NA"
+    ]
+  },
+  {
+    "code": "NGN",
+    "numericCode": "566",
+    "name": "Naira",
+    "minorUnit": 2,
+    "countries": [
+      "NG"
+    ]
+  },
+  {
+    "code": "NIO",
+    "numericCode": "558",
+    "name": "Cordoba Oro",
+    "minorUnit": 2,
+    "countries": [
+      "NI"
+    ]
+  },
+  {
+    "code": "NOK",
+    "numericCode": "578",
+    "name": "Norwegian Krone",
+    "minorUnit": 2,
+    "countries": [
+      "BV",
+      "NO",
+      "SJ"
+    ]
+  },
+  {
+    "code": "NPR",
+    "numericCode": "524",
+    "name": "Nepalese Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "NP"
+    ]
+  },
+  {
+    "code": "NZD",
+    "numericCode": "554",
+    "name": "New Zealand Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "CK",
+      "NZ",
+      "NU",
+      "PN",
+      "TK"
+    ]
+  },
+  {
+    "code": "OMR",
+    "numericCode": "512",
+    "name": "Rial Omani",
+    "minorUnit": 3,
+    "countries": [
+      "OM"
+    ]
+  },
+  {
+    "code": "PAB",
+    "numericCode": "590",
+    "name": "Balboa",
+    "minorUnit": 2,
+    "countries": [
+      "PA"
+    ]
+  },
+  {
+    "code": "PEN",
+    "numericCode": "604",
+    "name": "Sol",
+    "minorUnit": 2,
+    "countries": [
+      "PE"
+    ]
+  },
+  {
+    "code": "PGK",
+    "numericCode": "598",
+    "name": "Kina",
+    "minorUnit": 2,
+    "countries": [
+      "PG"
+    ]
+  },
+  {
+    "code": "PHP",
+    "numericCode": "608",
+    "name": "Philippine Peso",
+    "minorUnit": 2,
+    "countries": [
+      "PH"
+    ]
+  },
+  {
+    "code": "PKR",
+    "numericCode": "586",
+    "name": "Pakistan Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "PK"
+    ]
+  },
+  {
+    "code": "PLN",
+    "numericCode": "985",
+    "name": "Zloty",
+    "minorUnit": 2,
+    "countries": [
+      "PL"
+    ]
+  },
+  {
+    "code": "PYG",
+    "numericCode": "600",
+    "name": "Guarani",
+    "minorUnit": 0,
+    "countries": [
+      "PY"
+    ]
+  },
+  {
+    "code": "QAR",
+    "numericCode": "634",
+    "name": "Qatari Rial",
+    "minorUnit": 2,
+    "countries": [
+      "QA"
+    ]
+  },
+  {
+    "code": "RON",
+    "numericCode": "946",
+    "name": "Romanian Leu",
+    "minorUnit": 2,
+    "countries": [
+      "RO"
+    ]
+  },
+  {
+    "code": "RSD",
+    "numericCode": "941",
+    "name": "Serbian Dinar",
+    "minorUnit": 2,
+    "countries": [
+      "RS"
+    ]
+  },
+  {
+    "code": "RUB",
+    "numericCode": "643",
+    "name": "Russian Ruble",
+    "minorUnit": 2,
+    "countries": [
+      "RU"
+    ]
+  },
+  {
+    "code": "RWF",
+    "numericCode": "646",
+    "name": "Rwanda Franc",
+    "minorUnit": 0,
+    "countries": [
+      "RW"
+    ]
+  },
+  {
+    "code": "SAR",
+    "numericCode": "682",
+    "name": "Saudi Riyal",
+    "minorUnit": 2,
+    "countries": [
+      "SA"
+    ]
+  },
+  {
+    "code": "SBD",
+    "numericCode": "090",
+    "name": "Solomon Islands Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "SB"
+    ]
+  },
+  {
+    "code": "SCR",
+    "numericCode": "690",
+    "name": "Seychelles Rupee",
+    "minorUnit": 2,
+    "countries": [
+      "SC"
+    ]
+  },
+  {
+    "code": "SDG",
+    "numericCode": "938",
+    "name": "Sudanese Pound",
+    "minorUnit": 2,
+    "countries": [
+      "SD"
+    ]
+  },
+  {
+    "code": "SEK",
+    "numericCode": "752",
+    "name": "Swedish Krona",
+    "minorUnit": 2,
+    "countries": [
+      "SE"
+    ]
+  },
+  {
+    "code": "SGD",
+    "numericCode": "702",
+    "name": "Singapore Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "SG"
+    ]
+  },
+  {
+    "code": "SHP",
+    "numericCode": "654",
+    "name": "Saint Helena Pound",
+    "minorUnit": 2,
+    "countries": [
+      "SH"
+    ]
+  },
+  {
+    "code": "SLE",
+    "numericCode": "925",
+    "name": "Leone",
+    "minorUnit": 2,
+    "countries": [
+      "SL"
+    ]
+  },
+  {
+    "code": "SOS",
+    "numericCode": "706",
+    "name": "Somali Shilling",
+    "minorUnit": 2,
+    "countries": [
+      "SO"
+    ]
+  },
+  {
+    "code": "SRD",
+    "numericCode": "968",
+    "name": "Surinam Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "SR"
+    ]
+  },
+  {
+    "code": "SSP",
+    "numericCode": "728",
+    "name": "South Sudanese Pound",
+    "minorUnit": 2,
+    "countries": [
+      "SS"
+    ]
+  },
+  {
+    "code": "STN",
+    "numericCode": "930",
+    "name": "Dobra",
+    "minorUnit": 2,
+    "countries": [
+      "ST"
+    ]
+  },
+  {
+    "code": "SVC",
+    "numericCode": "222",
+    "name": "El Salvador Colon",
+    "minorUnit": 2,
+    "countries": [
+      "SV"
+    ]
+  },
+  {
+    "code": "SYP",
+    "numericCode": "760",
+    "name": "Syrian Pound",
+    "minorUnit": 2,
+    "countries": [
+      "SY"
+    ]
+  },
+  {
+    "code": "SZL",
+    "numericCode": "748",
+    "name": "Lilangeni",
+    "minorUnit": 2,
+    "countries": [
+      "SZ"
+    ]
+  },
+  {
+    "code": "THB",
+    "numericCode": "764",
+    "name": "Baht",
+    "minorUnit": 2,
+    "countries": [
+      "TH"
+    ]
+  },
+  {
+    "code": "TJS",
+    "numericCode": "972",
+    "name": "Somoni",
+    "minorUnit": 2,
+    "countries": [
+      "TJ"
+    ]
+  },
+  {
+    "code": "TMT",
+    "numericCode": "934",
+    "name": "Turkmenistan New Manat",
+    "minorUnit": 2,
+    "countries": [
+      "TM"
+    ]
+  },
+  {
+    "code": "TND",
+    "numericCode": "788",
+    "name": "Tunisian Dinar",
+    "minorUnit": 3,
+    "countries": [
+      "TN"
+    ]
+  },
+  {
+    "code": "TOP",
+    "numericCode": "776",
+    "name": "Pa’anga",
+    "minorUnit": 2,
+    "countries": [
+      "TO"
+    ]
+  },
+  {
+    "code": "TRY",
+    "numericCode": "949",
+    "name": "Turkish Lira",
+    "minorUnit": 2,
+    "countries": [
+      "TR"
+    ]
+  },
+  {
+    "code": "TTD",
+    "numericCode": "780",
+    "name": "Trinidad and Tobago Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "TT"
+    ]
+  },
+  {
+    "code": "TWD",
+    "numericCode": "901",
+    "name": "New Taiwan Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "TW"
+    ]
+  },
+  {
+    "code": "TZS",
+    "numericCode": "834",
+    "name": "Tanzanian Shilling",
+    "minorUnit": 2,
+    "countries": [
+      "TZ"
+    ]
+  },
+  {
+    "code": "UAH",
+    "numericCode": "980",
+    "name": "Hryvnia",
+    "minorUnit": 2,
+    "countries": [
+      "UA"
+    ]
+  },
+  {
+    "code": "UGX",
+    "numericCode": "800",
+    "name": "Uganda Shilling",
+    "minorUnit": 0,
+    "countries": [
+      "UG"
+    ]
+  },
+  {
+    "code": "USD",
+    "numericCode": "840",
+    "name": "US Dollar",
+    "minorUnit": 2,
+    "countries": [
+      "AS",
+      "BQ",
+      "IO",
+      "EC",
+      "SV",
+      "GU",
+      "HT",
+      "MH",
+      "FM",
+      "MP",
+      "PW",
+      "PA",
+      "PR",
+      "TL",
+      "TC",
+      "UM",
+      "US",
+      "VG",
+      "VI"
+    ]
+  },
+  {
+    "code": "UYU",
+    "numericCode": "858",
+    "name": "Peso Uruguayo",
+    "minorUnit": 2,
+    "countries": [
+      "UY"
+    ]
+  },
+  {
+    "code": "UZS",
+    "numericCode": "860",
+    "name": "Uzbekistan Sum",
+    "minorUnit": 2,
+    "countries": [
+      "UZ"
+    ]
+  },
+  {
+    "code": "VED",
+    "numericCode": "926",
+    "name": "Bolívar Soberano",
+    "minorUnit": 2,
+    "countries": [
+      "VE"
+    ]
+  },
+  {
+    "code": "VES",
+    "numericCode": "928",
+    "name": "Bolívar Soberano",
+    "minorUnit": 2,
+    "countries": [
+      "VE"
+    ]
+  },
+  {
+    "code": "VND",
+    "numericCode": "704",
+    "name": "Dong",
+    "minorUnit": 0,
+    "countries": [
+      "VN"
+    ]
+  },
+  {
+    "code": "VUV",
+    "numericCode": "548",
+    "name": "Vatu",
+    "minorUnit": 0,
+    "countries": [
+      "VU"
+    ]
+  },
+  {
+    "code": "WST",
+    "numericCode": "882",
+    "name": "Tala",
+    "minorUnit": 2,
+    "countries": [
+      "WS"
+    ]
+  },
+  {
+    "code": "YER",
+    "numericCode": "886",
+    "name": "Yemeni Rial",
+    "minorUnit": 2,
+    "countries": [
+      "YE"
+    ]
+  },
+  {
+    "code": "ZAR",
+    "numericCode": "710",
+    "name": "Rand",
+    "minorUnit": 2,
+    "countries": [
+      "LS",
+      "NA",
+      "ZA"
+    ]
+  },
+  {
+    "code": "ZMW",
+    "numericCode": "967",
+    "name": "Zambian Kwacha",
+    "minorUnit": 2,
+    "countries": [
+      "ZM"
+    ]
+  },
+  {
+    "code": "ZWG",
+    "numericCode": "924",
+    "name": "Zimbabwe Gold",
+    "minorUnit": 2,
+    "countries": [
+      "ZW"
+    ]
+  }
+]

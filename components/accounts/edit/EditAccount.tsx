@@ -32,10 +32,9 @@ import { Combobox } from "@/components/ui/combobox";
 import AccountTypeField from "@/components/accounts/form/AccountTypeField";
 
 import { countries } from "@/lib/utils/country";
-import currencies from "@/statics/currencies.json";
+import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 
 import { Account } from "@/types/Account";
-import { Currency } from "@/types/Currency";
 
 const countryOptions = countries.map((country) => ({
   value: country.alpha2Code,
@@ -43,9 +42,9 @@ const countryOptions = countries.map((country) => ({
   searchLabel: `${country.alpha2Code} ${country.name} ${country.fullName ?? ""}`,
 }));
 
-const currencyOptions = currencies.map((currency: Currency) => ({
+const currencyOptions = currencies.map((currency) => ({
   value: currency.code,
-  label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+  label: `${currency.code} - ${currency.name} (${getCurrencySymbol(currency.code)})`,
   searchLabel: `${currency.code} ${currency.name}`,
 }));
 

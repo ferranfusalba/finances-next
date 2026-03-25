@@ -2,7 +2,7 @@
 
 import { useFormContext, useWatch } from "react-hook-form";
 
-import BackgroundChip from "@/components/chips/BackgroundChip";
+import CurrencyTag from "@/components/chips/CurrencyTag";
 import { Input } from "@/components/ui/input";
 import {
   FormControl,
@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
-import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 
 import { Account } from "@/types/Account";
 
@@ -154,19 +153,7 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
                             {acct.bankName} - {acct.name}{" "}
                             {account?.defaultCurrency !==
                             acct.defaultCurrency ? (
-                              <BackgroundChip
-                                data={acct.defaultCurrency as string}
-                                backgroundColor={
-                                  getCurrencyColor0(
-                                    acct.defaultCurrency as string,
-                                  ) as string
-                                }
-                                textColor={
-                                  getCurrencyColor1(
-                                    acct.defaultCurrency as string,
-                                  ) as string
-                                }
-                              />
+                              <CurrencyTag code={acct.defaultCurrency as string} />
                             ) : (
                               ""
                             )}

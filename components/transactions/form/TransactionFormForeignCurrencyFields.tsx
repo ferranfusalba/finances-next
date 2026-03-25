@@ -18,9 +18,7 @@ import { Close as X } from "@carbon/icons-react";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 
-import { Currency } from "@/types/Currency";
-
-import currencies from "@/statics/currencies.json";
+import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 
 interface Props {
   accountCurrency: string | undefined;
@@ -60,17 +58,17 @@ export default function TransactionFormForeignCurrencyFields({
       {
         heading:
           userForeignCurrencies.length > 0 ? "Previously used" : "Common",
-        options: commonCurrencies.map((currency: Currency) => ({
+        options: commonCurrencies.map((currency) => ({
           value: currency.code,
-          label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+          label: `${currency.code} - ${currency.name} (${getCurrencySymbol(currency.code)})`,
           searchLabel: `${currency.code} ${currency.name}`,
         })),
       },
       {
         heading: "All currencies",
-        options: remainingCurrencies.map((currency: Currency) => ({
+        options: remainingCurrencies.map((currency) => ({
           value: currency.code,
-          label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+          label: `${currency.code} - ${currency.name} (${getCurrencySymbol(currency.code)})`,
           searchLabel: `${currency.code} ${currency.name}`,
         })),
       },

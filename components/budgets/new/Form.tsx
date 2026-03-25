@@ -21,9 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
-import currencies from "@/statics/currencies.json";
+import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 
-import { Currency } from "@/types/Currency";
 import { User } from "@/types/User";
 
 interface Props {
@@ -68,9 +67,9 @@ export default function NewBudgetForm(props: Props) {
 
   const currencyOptions: ComboboxOption[] = useMemo(
     () =>
-      currencies.map((currency: Currency) => ({
+      currencies.map((currency) => ({
         value: currency.code,
-        label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+        label: `${currency.code} - ${currency.name} (${getCurrencySymbol(currency.code)})`,
         searchLabel: `${currency.code} ${currency.name}`,
       })),
     [],

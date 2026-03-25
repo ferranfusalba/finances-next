@@ -1,5 +1,9 @@
 import Layout02b from "@/components/layouts/Layout02b";
 import { PlaygroundToastButtons } from "./PlaygroundToastButtons";
+import { currencies, getCurrencySymbol, getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import { getCountryFlag } from "@/lib/utils/country";
+import CurrencyTag from "@/components/chips/CurrencyTag";
+import BorderChip from "@/components/chips/BorderChip";
 
 const PlaygroundServerPage = async () => {
   return (
@@ -8,70 +12,51 @@ const PlaygroundServerPage = async () => {
       <div className="m-2 flex flex-wrap gap-2">
         <PlaygroundToastButtons />
       </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-sky-300 text-yellow-400">
-          ARS
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-sky-300 text-yellow-400">
-          ARS
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-sky-300 text-slate-50">
-          ARS
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-blue-950 text-slate-50">
-          AUD
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-blue-950 text-slate-50">
-          AUD
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-red-600 text-slate-50">
-          CAD
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-red-600 text-slate-50">
-          CAD
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-red-700 text-slate-50">
-          CHF
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-red-700 text-slate-50">
-          CHF
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-blue-800 text-amber-300">
-          EUR
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-blue-800 text-amber-300">
-          EUR
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-blue-800 text-slate-50">
-          EUR
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-blue-950 text-red-600">
-          NZD
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-blue-950 text-red-600">
-          NZD
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-blue-950 text-slate-50">
-          NZD
-        </span>
-      </div>
-      <div className="m-2">
-        <span className="font-mono p-1 mx-2 rounded-md bg-lime-900 text-slate-50">
-          USD
-        </span>
-        <span className="font-mono p-1 mx-2 border-solid border-2 rounded-md border-lime-900 text-slate-50">
-          USD
-        </span>
+
+      {/* Currencies Table */}
+      <div className="m-2 overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left select-none">
+              <th className="p-2">Code</th>
+              <th className="p-2">Symbol</th>
+              <th className="p-2">Name</th>
+              <th className="p-2">Type</th>
+              <th className="p-2">Countries</th>
+              <th className="p-2">Colors</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currencies.map((currency) => (
+              <tr key={currency.code} className="border-b">
+                <td className="p-2 font-mono">{currency.code}</td>
+                <td className="p-2">{getCurrencySymbol(currency.code)}</td>
+                <td className="p-2">{currency.name}</td>
+                <td className="p-2 text-muted-foreground">
+                  {currency.type ?? "currency"}
+                </td>
+                <td className="p-2">
+                  {currency.countries?.map((code) => (
+                    <span key={code} title={code}>
+                      {getCountryFlag(code)}
+                    </span>
+                  ))}
+                </td>
+                <td className="p-2">
+                  {getCurrencyColor0(currency.code) && getCurrencyColor1(currency.code) ? (
+                    <div className="flex gap-1">
+                      <CurrencyTag code={currency.code} />
+                      <BorderChip
+                        data={currency.code}
+                        borderColor={getCurrencyColor0(currency.code) as string}
+                      />
+                    </div>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </Layout02b>
   );

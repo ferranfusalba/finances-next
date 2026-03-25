@@ -28,10 +28,9 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { DragVertical } from "@carbon/icons-react";
 
-import BackgroundChip from "@/components/chips/BackgroundChip";
+import CurrencyTag from "@/components/chips/CurrencyTag";
 
 import { currency } from "@/lib/utils";
-import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
 import { getCountryFlag } from "@/lib/utils/country";
 
 import { Account } from "@/types/Account";
@@ -145,19 +144,7 @@ export default function AccountsOverviewTable({
       header: () => <span>Currency</span>,
       cell: (info) => {
         return (
-          <BackgroundChip
-            data={info.row.original.defaultCurrency as string}
-            backgroundColor={
-              getCurrencyColor0(
-                info.row.original.defaultCurrency as string,
-              ) as string
-            }
-            textColor={
-              getCurrencyColor1(
-                info.row.original.defaultCurrency as string,
-              ) as string
-            }
-          />
+          <CurrencyTag code={info.row.original.defaultCurrency as string} />
         );
       },
       footer: (info) => info.column.id,

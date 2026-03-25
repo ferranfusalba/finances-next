@@ -1,7 +1,6 @@
 import DeleteBudget from "@/components/budgets/delete/DeleteBudget";
 import BudgetTransactionAdd from "@/components/budgets/tables/transactions/BudgetTransactionAdd";
 import BudgetTransactionTable from "@/components/budgets/tables/transactions/BudgetTransactionTable";
-import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
 import Layout02a from "@/components/layouts/Layout02a";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
@@ -13,7 +12,8 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getBudget, getBudgetTransactions } from "@/lib/budgets";
 import { currency } from "@/lib/utils";
-import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import { getCurrencyColor0 } from "@/lib/utils/currency";
+import CurrencyTag from "@/components/chips/CurrencyTag";
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import { getUserForeignCurrencies, getUserTransactionLocations, getUserTransactionTags } from "@/lib/user";
 
@@ -54,7 +54,6 @@ export default async function BudgetLayout({
   ]);
 
   const color0 = getCurrencyColor0(budget.defaultCurrency) ?? "";
-  const color1 = getCurrencyColor1(budget.defaultCurrency) ?? "";
 
   return (
     <Layout02a>
@@ -69,11 +68,7 @@ export default async function BudgetLayout({
             <span>{budget.name}</span>
           </div>
           <div>
-            <BackgroundChip
-              data={budget.defaultCurrency}
-              backgroundColor={color0}
-              textColor={color1}
-            />
+            <CurrencyTag code={budget.defaultCurrency} />
             <span> </span>
             <span>{budget.type}</span>
             <span> </span>

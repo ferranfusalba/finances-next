@@ -1,0 +1,34 @@
+{
+  "ARS": {
+    "color0": "sky-300",
+    "color1": "yellow-400"
+  },
+  "AUD": {
+    "color0": "blue-950",
+    "color1": "slate-50"
+  },
+  "CAD": {
+    "color0": "red-600",
+    "color1": "slate-50"
+  },
+  "CHF": {
+    "color0": "red-700",
+    "color1": "slate-50"
+  },
+  "EUR": {
+    "color0": "blue-800",
+    "color1": "amber-300"
+  },
+  "GBP": {
+    "color0": "blue-950",
+    "color1": "red-700"
+  },
+  "NZD": {
+    "color0": "blue-950",
+    "color1": "red-600"
+  },
+  "USD": {
+    "color0": "lime-900",
+    "color1": "slate-50"
+  }
+}

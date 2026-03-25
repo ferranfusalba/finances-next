@@ -1,23 +1,36 @@
-import currencies_code from "@/statics/currencies_code.json";
+import currenciesOne from "@/statics/currencies-one.json";
+import currenciesCrypto from "@/statics/currencies-crypto.json";
+import currencyColors from "@/statics/currency-colors.json";
 
-const currenciesCode: {
-  [k: string]: {
-    symbol: string;
-    name: string;
-    symbol_native: string;
-    decimal_digits: number;
-    rounding: number;
-    code: string;
-    name_plural: string;
-    color0?: string;
-    color1?: string;
-  };
-} = currencies_code;
+import { Currency } from "@/types/Currency";
 
-export const getCurrencyColor0 = (alpha2Code: string) => {
-  return currenciesCode[alpha2Code]["color0"];
+export const currencies: Currency[] = [
+  ...(currenciesOne as Currency[]),
+  ...(currenciesCrypto as Currency[]),
+].sort((a, b) => a.code.localeCompare(b.code));
+
+export const getCurrencySymbol = (code: string): string => {
+  try {
+    const formatted = new Intl.NumberFormat("en", {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "narrowSymbol",
+    }).formatToParts(0);
+    const symbol = formatted.find((p) => p.type === "currency")?.value;
+    if (symbol && symbol !== code) return symbol;
+  } catch {
+    // unsupported currency code (e.g. crypto)
+  }
+  return code;
 };
 
-export const getCurrencyColor1 = (alpha2Code: string) => {
-  return currenciesCode[alpha2Code]["color1"];
+const colors: Record<string, { color0?: string; color1?: string }> =
+  currencyColors;
+
+export const getCurrencyColor0 = (code: string) => {
+  return colors[code]?.color0;
+};
+
+export const getCurrencyColor1 = (code: string) => {
+  return colors[code]?.color1;
 };

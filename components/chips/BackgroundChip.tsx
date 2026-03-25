@@ -12,9 +12,10 @@ export default function BackgroundChip({
   return (
     <span
       className={cn(
-        "font-mono p-1 rounded-md",
+        "font-mono p-1 h-6 border-solid border-2 rounded-md inline-flex items-center",
+        "border-" + backgroundColor,
         "bg-" + backgroundColor,
-        "text-" + textColor
+        "text-" + textColor,
       )}
     >
       {data}

@@ -31,11 +31,11 @@ describe("getCurrencyColor1", () => {
 });
 
 describe("edge cases", () => {
-  it("throws on invalid currency code for getCurrencyColor0", () => {
-    expect(() => getCurrencyColor0("INVALID")).toThrow();
+  it("returns undefined for invalid currency code for getCurrencyColor0", () => {
+    expect(getCurrencyColor0("INVALID")).toBeUndefined();
   });
 
-  it("throws on invalid currency code for getCurrencyColor1", () => {
-    expect(() => getCurrencyColor1("INVALID")).toThrow();
+  it("returns undefined for invalid currency code for getCurrencyColor1", () => {
+    expect(getCurrencyColor1("INVALID")).toBeUndefined();
   });
 });

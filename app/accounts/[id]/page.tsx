@@ -9,7 +9,6 @@ import AccountTransactionDownload from "@/components/accounts/tables/transaction
 
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import EditAccount from "@/components/accounts/edit/EditAccount";
-import BackgroundChip from "@/components/chips/BackgroundChip";
 import BorderChip from "@/components/chips/BorderChip";
 import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,7 +22,8 @@ import {
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import { currency } from "@/lib/utils";
 import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
-import { getCurrencyColor0, getCurrencyColor1 } from "@/lib/utils/currency";
+import { getCurrencyColor0 } from "@/lib/utils/currency";
+import CurrencyTag from "@/components/chips/CurrencyTag";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
 import {
@@ -104,13 +104,7 @@ export default async function AccountLayout({
               <span className="font-mono">{account.number}</span>
             </div>
             <div>
-              <BackgroundChip
-                data={account.defaultCurrency}
-                backgroundColor={
-                  getCurrencyColor0(account.defaultCurrency) ?? ""
-                }
-                textColor={getCurrencyColor1(account.defaultCurrency) ?? ""}
-              />
+              <CurrencyTag code={account.defaultCurrency} />
               <span> </span>
               <span>{account.type}</span>
               <span> </span>

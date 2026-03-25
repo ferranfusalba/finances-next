@@ -1,0 +1,72 @@
+[
+  {
+    "code": "BTC",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Bitcoin",
+    "minorUnit": 8
+  },
+  {
+    "code": "ETH",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Ethereum",
+    "minorUnit": 18
+  },
+  {
+    "code": "USDT",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Tether",
+    "minorUnit": 6
+  },
+  {
+    "code": "USDC",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "USD Coin",
+    "minorUnit": 6
+  },
+  {
+    "code": "XRP",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "XRP",
+    "minorUnit": 6
+  },
+  {
+    "code": "SOL",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Solana",
+    "minorUnit": 9
+  },
+  {
+    "code": "ADA",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Cardano",
+    "minorUnit": 6
+  },
+  {
+    "code": "DOGE",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Dogecoin",
+    "minorUnit": 8
+  },
+  {
+    "code": "DOT",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Polkadot",
+    "minorUnit": 10
+  },
+  {
+    "code": "MATIC",
+    "numericCode": null,
+    "type": "cryptocurrency",
+    "name": "Polygon",
+    "minorUnit": 18
+  }
+]

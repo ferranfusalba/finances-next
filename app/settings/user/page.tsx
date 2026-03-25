@@ -45,10 +45,9 @@ import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeTo
 import { TwoFactorSection } from "@/components/auth/two-factor-section";
 
 import { countries } from "@/lib/utils/country";
-import currencies from "@/statics/currencies.json";
+import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 import timezones from "@/statics/timezones-iana.json";
 
-import { Currency } from "@/types/Currency";
 import { Timezone } from "@/types/Timezone";
 
 const UserPage = () => {
@@ -85,9 +84,9 @@ const UserPage = () => {
 
   const currencyOptions: ComboboxOption[] = useMemo(
     () =>
-      currencies.map((currency: Currency) => ({
+      currencies.map((currency) => ({
         value: currency.code,
-        label: `${currency.code} - ${currency.name} (${currency.symbol_native})`,
+        label: `${currency.code} - ${currency.name} (${getCurrencySymbol(currency.code)})`,
         searchLabel: `${currency.code} ${currency.name}`,
       })),
     [],
