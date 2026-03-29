@@ -313,7 +313,7 @@ function SalariesChartInner({
   );
 }
 
-export default function SalariesChart({ salaries, accountMap, userLocale }: Props) {
+export default function SalariesChartVisx({ salaries, accountMap, userLocale }: Props) {
   // Only show chart for months that have salary details
   const salariesWithDetails = salaries.filter((s) => s.lines.length > 0);
 

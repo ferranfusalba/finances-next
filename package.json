@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.65",
+  "version": "1.0.66",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@carbon/charts-react": "^1.27.3",
     "@carbon/icons-react": "^11.74.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

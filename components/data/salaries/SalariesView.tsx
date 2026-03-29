@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 
 import SalariesTable from "./SalariesTable";
 import type { SalaryTransaction } from "./SalariesTable";
-import SalariesChart from "./SalariesChart";
+import SalariesChartVisx from "./SalariesChartVisx";
+import SalariesChartCarbon from "./SalariesChartCarbon";
 import SalaryFormDialog from "./SalaryFormDialog";
 import type { Salary } from "@/types/Salary";
 
@@ -89,7 +90,14 @@ export default function SalariesView({
         onEditSalary={handleEditSalary}
       />
       <br />
-      <SalariesChart
+      <SalariesChartVisx
+        salaries={salaries}
+        accountMap={accountMap}
+        userLocale={userLocale}
+      />
+      <br />
+      <br />
+      <SalariesChartCarbon
         salaries={salaries}
         accountMap={accountMap}
         userLocale={userLocale}
