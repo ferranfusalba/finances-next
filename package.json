@@ -1,6 +1,6 @@
 {
   "name": "finances-next",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "private": true,
   "scripts": {
     "dev": "docker compose up -d && next dev",
@@ -39,6 +39,13 @@
     "@tanstack/react-virtual": "^3.13.23",
     "@types/qrcode": "^1.5.6",
     "@vis.gl/react-google-maps": "^1.7.1",
+    "@visx/axis": "^3.12.0",
+    "@visx/event": "^3.12.0",
+    "@visx/group": "^3.12.0",
+    "@visx/responsive": "^3.12.0",
+    "@visx/scale": "^3.12.0",
+    "@visx/shape": "^3.12.0",
+    "@visx/tooltip": "^3.12.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

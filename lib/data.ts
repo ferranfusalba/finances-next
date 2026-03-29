@@ -135,6 +135,7 @@ export async function getSalaries(
               concept: true,
               dateTime: true,
               accountId: true,
+              subcategory: true,
             },
           },
         },

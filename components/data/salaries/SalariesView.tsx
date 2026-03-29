@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 
 import SalariesTable from "./SalariesTable";
 import type { SalaryTransaction } from "./SalariesTable";
+import SalariesChart from "./SalariesChart";
 import SalaryFormDialog from "./SalaryFormDialog";
 import type { Salary } from "@/types/Salary";
 
@@ -44,7 +45,9 @@ export default function SalariesView({
   const [formOpen, setFormOpen] = useState(false);
   const [editingSalary, setEditingSalary] = useState<Salary | null>(null);
   const [editingMonthKey, setEditingMonthKey] = useState("");
-  const [editingTransactions, setEditingTransactions] = useState<SalaryTransaction[]>([]);
+  const [editingTransactions, setEditingTransactions] = useState<
+    SalaryTransaction[]
+  >([]);
   const [deleteConfirm, setDeleteConfirm] = useState<Salary | null>(null);
 
   const handleEditSalary = (
@@ -85,6 +88,12 @@ export default function SalariesView({
         userLocale={userLocale}
         onEditSalary={handleEditSalary}
       />
+      <br />
+      <SalariesChart
+        salaries={salaries}
+        accountMap={accountMap}
+        userLocale={userLocale}
+      />
 
       <SalaryFormDialog
         open={formOpen}
@@ -99,10 +108,14 @@ export default function SalariesView({
         accountMap={accountMap}
         userLocale={userLocale}
         defaultCurrency={defaultCurrency}
-        onDelete={editingSalary ? () => {
-          setFormOpen(false);
-          setDeleteConfirm(editingSalary);
-        } : undefined}
+        onDelete={
+          editingSalary
+            ? () => {
+                setFormOpen(false);
+                setDeleteConfirm(editingSalary);
+              }
+            : undefined
+        }
       />
 
       {/* Delete confirmation dialog */}

@@ -13,6 +13,7 @@ export interface SalaryPaymentTransaction {
   currency: string;
   payee: string;
   concept: string;
+  subcategory: string | null;
   dateTime: Date;
   accountId: string;
 }
