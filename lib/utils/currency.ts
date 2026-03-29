@@ -24,13 +24,16 @@ export const getCurrencySymbol = (code: string): string => {
   return code;
 };
 
-const colors: Record<string, { color0?: string; color1?: string }> =
-  currencyColors;
+const colors: Record<string, string[]> = currencyColors;
+
+export const getCurrencyColors = (code: string): string[] | undefined => {
+  return colors[code];
+};
 
 export const getCurrencyColor0 = (code: string) => {
-  return colors[code]?.color0;
+  return colors[code]?.[0];
 };
 
 export const getCurrencyColor1 = (code: string) => {
-  return colors[code]?.color1;
+  return colors[code]?.[1];
 };

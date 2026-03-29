@@ -1,15 +1,34 @@
 import { describe, expect, it } from "vitest";
 
-import { getCurrencyColor0, getCurrencyColor1 } from "./currency";
+import { getCurrencyColors, getCurrencyColor0, getCurrencyColor1 } from "./currency";
+
+describe("getCurrencyColors", () => {
+  it("returns an array of colors for USD", () => {
+    const colors = getCurrencyColors("USD");
+    expect(colors).toBeDefined();
+    expect(Array.isArray(colors)).toBe(true);
+    expect(colors!.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("returns an array of colors for EUR", () => {
+    const colors = getCurrencyColors("EUR");
+    expect(colors).toBeDefined();
+    expect(Array.isArray(colors)).toBe(true);
+  });
+
+  it("returns undefined for invalid currency code", () => {
+    expect(getCurrencyColors("INVALID")).toBeUndefined();
+  });
+});
 
 describe("getCurrencyColor0", () => {
-  it("returns a color for USD", () => {
+  it("returns first color for USD", () => {
     const color = getCurrencyColor0("USD");
     expect(color).toBeDefined();
     expect(typeof color).toBe("string");
   });
 
-  it("returns a color for EUR", () => {
+  it("returns first color for EUR", () => {
     const color = getCurrencyColor0("EUR");
     expect(color).toBeDefined();
     expect(typeof color).toBe("string");
@@ -17,13 +36,13 @@ describe("getCurrencyColor0", () => {
 });
 
 describe("getCurrencyColor1", () => {
-  it("returns a color for USD", () => {
+  it("returns second color for USD", () => {
     const color = getCurrencyColor1("USD");
     expect(color).toBeDefined();
     expect(typeof color).toBe("string");
   });
 
-  it("returns a color for EUR", () => {
+  it("returns second color for EUR", () => {
     const color = getCurrencyColor1("EUR");
     expect(color).toBeDefined();
     expect(typeof color).toBe("string");

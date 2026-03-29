@@ -54,6 +54,9 @@ export function UserDropdownMenu({ user }: UserDropdownMenuProps) {
           <Link href="/settings">
             <DropdownMenuItem>Settings</DropdownMenuItem>
           </Link>
+          <Link href="/statics">
+            <DropdownMenuItem>Statics</DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled>Support</DropdownMenuItem>

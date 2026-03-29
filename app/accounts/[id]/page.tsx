@@ -22,7 +22,7 @@ import {
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import { currency } from "@/lib/utils";
 import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
-import { getCurrencyColor0 } from "@/lib/utils/currency";
+import { getCurrencyColors } from "@/lib/utils/currency";
 import CurrencyTag from "@/components/chips/CurrencyTag";
 
 import { AccountBudgetParamsProps } from "@/types/AccountBudget";
@@ -112,7 +112,7 @@ export default async function AccountLayout({
                 data={currency(userLocale, account.defaultCurrency).format(
                   account.currentBalance,
                 )}
-                borderColor={getCurrencyColor0(account.defaultCurrency) ?? ""}
+                borderColor={getCurrencyColors(account.defaultCurrency)?.[0] ?? ""}
               />
             </div>
           </div>

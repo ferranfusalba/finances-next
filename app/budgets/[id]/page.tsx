@@ -12,7 +12,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getBudget, getBudgetTransactions } from "@/lib/budgets";
 import { currency } from "@/lib/utils";
-import { getCurrencyColor0 } from "@/lib/utils/currency";
+import { getCurrencyColors } from "@/lib/utils/currency";
 import CurrencyTag from "@/components/chips/CurrencyTag";
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import { getUserForeignCurrencies, getUserTransactionLocations, getUserTransactionTags } from "@/lib/user";
@@ -53,7 +53,7 @@ export default async function BudgetLayout({
     getUserTransactionTags(userId),
   ]);
 
-  const color0 = getCurrencyColor0(budget.defaultCurrency) ?? "";
+  const color0 = getCurrencyColors(budget.defaultCurrency)?.[0] ?? "";
 
   return (
     <Layout02a>

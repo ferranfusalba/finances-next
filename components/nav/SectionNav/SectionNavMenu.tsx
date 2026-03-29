@@ -22,6 +22,7 @@ export default async function SectionNavMenu({
           { "bg-pink-900": type === "budgets" },
           { "bg-lime-900": type === "data" },
           { "bg-stone-900": type === "settings" },
+          { "bg-amber-900": type === "statics" },
           { "bg-fuchsia-900": type === "playground" },
         )}
       >

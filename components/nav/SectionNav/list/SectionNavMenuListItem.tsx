@@ -22,9 +22,10 @@ export default function SectionNavMenuListItem({
   const budgetSelected = "/budgets/" + item.id === pathname;
   const dataSelected = "/data/" + item.id === pathname;
   const settingsSelected = "/settings/" + item.id === pathname;
+  const staticsSelected = "/statics/" + item.id === pathname;
   const playgroundSelected = "/playground/" + item.id === pathname;
 
-  const draggable = type !== "settings";
+  const draggable = type !== "settings" && type !== "statics";
 
   const {
     attributes,
@@ -65,6 +66,10 @@ export default function SectionNavMenuListItem({
         {
           "bg-black border-black dark:bg-white dark:border-white dark:text-stone-900":
             settingsSelected,
+        },
+        {
+          "bg-black border-black dark:bg-white dark:border-white dark:text-amber-900":
+            staticsSelected,
         },
         {
           "bg-black border-black dark:bg-white dark:border-white dark:text-fuchsia-900":
