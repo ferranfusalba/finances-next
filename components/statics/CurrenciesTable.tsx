@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   createColumnHelper,
   flexRender,
@@ -7,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { cn } from "@/lib/utils";
 import { getCountryFlag } from "@/lib/utils/country";
 import { getCurrencySymbol, getCurrencyColors } from "@/lib/utils/currency";
 import CurrencyTag from "@/components/chips/CurrencyTag";
@@ -56,9 +60,13 @@ const columns = [
     header: "Countries",
     cell: (info) =>
       info.row.original.countries?.map((code) => (
-        <span key={code} title={code}>
+        <Link
+          key={code}
+          title={code}
+          href={`/statics/countries?highlightId=${code}&fromLabel=${encodeURIComponent("Currencies")}`}
+        >
           {getCountryFlag(code)}
-        </span>
+        </Link>
       )),
   }),
 ];
@@ -68,6 +76,26 @@ export default function CurrenciesTable({
 }: {
   currencies: Currency[];
 }) {
+  const searchParams = useSearchParams();
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    const hid = searchParams.get("highlightId");
+    if (!hid) return;
+    const match = currencies.find((c) => c.code === hid);
+    if (match) setHighlightedId(match.code);
+  }, [searchParams, currencies]);
+
+  useEffect(() => {
+    if (highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [highlightedId]);
+
   const table = useReactTable({
     data: currencies,
     columns,
@@ -94,15 +122,25 @@ export default function CurrenciesTable({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            const isHighlighted = row.original.code === highlightedId;
+            return (
+              <tr
+                key={row.id}
+                ref={isHighlighted ? highlightRef : undefined}
+                className={cn(
+                  "border-b",
+                  isHighlighted && "bg-yellow-900/40",
+                )}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="p-2">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

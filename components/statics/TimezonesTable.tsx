@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   createColumnHelper,
   flexRender,
@@ -7,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { cn } from "@/lib/utils";
 import { getCountryFlag } from "@/lib/utils/country";
 
 import { Timezone } from "@/types/Timezone";
@@ -35,14 +39,42 @@ const columns = [
     header: "Countries",
     cell: (info) =>
       info.getValue()?.map((code) => (
-        <span key={code} title={code}>
+        <Link
+          key={code}
+          title={code}
+          href={`/statics/countries?highlightId=${code}&fromLabel=${encodeURIComponent("Timezones")}`}
+        >
           {getCountryFlag(code)}
-        </span>
+        </Link>
       )),
   }),
 ];
 
-export default function TimezonesTable({ timezones }: { timezones: Timezone[] }) {
+export default function TimezonesTable({
+  timezones,
+}: {
+  timezones: Timezone[];
+}) {
+  const searchParams = useSearchParams();
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    const hid = searchParams.get("highlightId");
+    if (!hid) return;
+    const match = timezones.find((tz) => tz.id === hid);
+    if (match) setHighlightedId(match.id);
+  }, [searchParams, timezones]);
+
+  useEffect(() => {
+    if (highlightedId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [highlightedId]);
+
   const table = useReactTable({
     data: timezones,
     columns,
@@ -59,22 +91,35 @@ export default function TimezonesTable({ timezones }: { timezones: Timezone[] })
                 <th key={header.id} className="p-2">
                   {header.isPlaceholder
                     ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                 </th>
               ))}
             </tr>
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="p-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            const isHighlighted = row.original.id === highlightedId;
+            return (
+              <tr
+                key={row.id}
+                ref={isHighlighted ? highlightRef : undefined}
+                className={cn(
+                  "border-b",
+                  isHighlighted && "bg-yellow-900/40",
+                )}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="p-2">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
