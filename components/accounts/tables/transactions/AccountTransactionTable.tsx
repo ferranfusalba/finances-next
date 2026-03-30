@@ -120,7 +120,7 @@ export default function AccountTransactionTable(props: Props) {
   const [highlightedTxId, setHighlightedTxId] = useState<string | null>(null);
   const highlightRef = useRef<HTMLTableRowElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [pageSize, setPageSize] = useState(50);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [showFilters, setShowFilters] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -596,11 +596,9 @@ export default function AccountTransactionTable(props: Props) {
       globalFilter: searchQuery,
       columnFilters,
       columnVisibility,
-      pagination: {
-        pageIndex: 0,
-        pageSize,
-      },
+      pagination,
     },
+    onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -688,11 +686,10 @@ export default function AccountTransactionTable(props: Props) {
             <label className="flex items-center gap-1">
               Show
               <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  table.setPageIndex(0);
-                }}
+                value={pagination.pageSize}
+                onChange={(e) =>
+                  setPagination({ pageIndex: 0, pageSize: Number(e.target.value) })
+                }
                 className="bg-slate-800 border border-slate-600 rounded px-1.5 py-0.5 text-sm text-foreground"
               >
                 {PAGE_SIZE_OPTIONS.map((size) => (

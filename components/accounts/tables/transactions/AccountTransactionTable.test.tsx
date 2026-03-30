@@ -211,6 +211,31 @@ describe("AccountTransactionTable", () => {
 
       expect(screen.getByText("1 / 2")).toBeInTheDocument();
     });
+
+    it("navigates to the next page when clicking the next button", async () => {
+      const user = userEvent.setup();
+      const manyTx = Array.from({ length: 30 }, (_, i) =>
+        makeTx({
+          id: `t-${i}`,
+          payee: `Payee ${i}`,
+          dateTime: new Date(`2025-06-${String(i + 1).padStart(2, "0")}T10:00:00Z`),
+        }),
+      );
+
+      renderTable(manyTx);
+
+      // Change page size to 25 so we get 2 pages
+      const select = screen.getByDisplayValue("50");
+      await user.selectOptions(select, "25");
+      expect(screen.getByText("1 / 2")).toBeInTheDocument();
+
+      // Click the next-page button (sibling after the page indicator)
+      const paginationText = screen.getByText("1 / 2");
+      const nextBtn = paginationText.nextElementSibling as HTMLElement;
+      await user.click(nextBtn);
+
+      expect(screen.getByText("2 / 2")).toBeInTheDocument();
+    });
   });
 
   describe("Column Visibility", () => {
