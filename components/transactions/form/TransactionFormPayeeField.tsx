@@ -77,6 +77,7 @@ export default function TransactionFormPayeeField() {
                 controllerField.onChange(value);
               }
             }}
+            ariaLabel="Payee"
             placeholder="Select a payee"
             searchPlaceholder="Search payees..."
             emptyText="No payees found."

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/test";
 import {
   resetTestData,
   seedVerifiedUser,
@@ -59,18 +59,18 @@ test.describe("Account Transactions", () => {
       .fill("E2E Income Test");
 
     // Select type: INCOME
-    await dialog.getByRole("combobox", { name: "Type*" }).click();
+    await dialog.getByRole("combobox", { name: "Type" }).click();
     await page.getByRole("option", { name: "INCOME", exact: true }).click();
 
     // Fill amount
     await dialog.getByPlaceholder("Amount").fill("100.50");
 
     // Select timezone
-    await dialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await dialog.getByRole("combobox", { name: "Timezone" }).click();
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category - select "Add a new category"
-    await dialog.getByRole("combobox", { name: "Category" }).click();
+    await dialog.getByRole("combobox", { name: "Category", exact: true }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("E2E Income Category");
 
@@ -82,7 +82,7 @@ test.describe("Account Transactions", () => {
 
     // Verify toast notification
     await expect(
-      page.getByText("Transaction for E2E Income Test has been added")
+      page.getByText("Transaction for E2E Income Payee has been added")
     ).toBeVisible({ timeout: 10_000 });
   });
 
@@ -107,18 +107,18 @@ test.describe("Account Transactions", () => {
       .fill("E2E Expense Test");
 
     // Select type: EXPENSE
-    await dialog.getByRole("combobox", { name: "Type*" }).click();
+    await dialog.getByRole("combobox", { name: "Type" }).click();
     await page.getByRole("option", { name: "EXPENSE", exact: true }).click();
 
     // Fill amount
     await dialog.getByPlaceholder("Amount").fill("50.25");
 
     // Select timezone
-    await dialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await dialog.getByRole("combobox", { name: "Timezone" }).click();
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category
-    await dialog.getByRole("combobox", { name: "Category" }).click();
+    await dialog.getByRole("combobox", { name: "Category", exact: true }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("E2E Expense Category");
 
@@ -129,7 +129,7 @@ test.describe("Account Transactions", () => {
     await dialog.getByRole("button", { name: "Save" }).click();
 
     await expect(
-      page.getByText("Transaction for E2E Expense Test has been added")
+      page.getByText("Transaction for E2E Expense Payee has been added")
     ).toBeVisible({ timeout: 10_000 });
   });
 
@@ -162,7 +162,7 @@ test.describe("Account Transactions", () => {
       .fill("E2E Transfer Test");
 
     // Select type: TRANSFER
-    await dialog.getByRole("combobox", { name: "Type*" }).click();
+    await dialog.getByRole("combobox", { name: "Type" }).click();
     await page.getByRole("option", { name: "TRANSFER" }).click();
 
     // Select destination account
@@ -177,11 +177,11 @@ test.describe("Account Transactions", () => {
     await dialog.getByPlaceholder("Amount").fill("25.00");
 
     // Select timezone
-    await dialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await dialog.getByRole("combobox", { name: "Timezone" }).click();
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     // Fill category
-    await dialog.getByRole("combobox", { name: "Category" }).click();
+    await dialog.getByRole("combobox", { name: "Category", exact: true }).click();
     await page.getByRole("option", { name: "Add a new category" }).click();
     await dialog.getByPlaceholder("Groceries").fill("Transfers");
 
@@ -192,7 +192,7 @@ test.describe("Account Transactions", () => {
     await dialog.getByRole("button", { name: "Save" }).click();
 
     await expect(
-      page.getByText("Transaction for E2E Transfer Test has been added")
+      page.getByText("Transaction for Transfer has been added")
     ).toBeVisible({ timeout: 10_000 });
 
     // Navigate to destination account and verify the mirror transaction
@@ -224,7 +224,7 @@ test.describe("Account Transactions", () => {
     await dialog.getByRole("button", { name: "Save" }).click();
 
     await expect(
-      page.getByText("Transaction for E2E Income Edited has been updated")
+      page.getByText("Transaction for E2E Income Payee has been updated")
     ).toBeVisible({ timeout: 10_000 });
 
     // Verify updated concept appears in the table
@@ -285,7 +285,7 @@ test.describe("Transfer Sync", () => {
 
     await addDialog.getByPlaceholder(/1x Basler/).fill("Sync Test Original");
 
-    await addDialog.getByRole("combobox", { name: "Type*" }).click();
+    await addDialog.getByRole("combobox", { name: "Type" }).click();
     await page.getByRole("option", { name: "TRANSFER" }).click();
 
     await addDialog
@@ -295,12 +295,12 @@ test.describe("Transfer Sync", () => {
 
     await addDialog.getByPlaceholder("Amount").fill("50.00");
 
-    await addDialog.getByRole("combobox", { name: "Timezone*" }).click();
+    await addDialog.getByRole("combobox", { name: "Timezone" }).click();
     await page.getByRole("option", { name: /UTC/ }).first().click();
 
     await addDialog.getByRole("button", { name: "Save" }).click();
     await expect(
-      page.getByText("Transaction for Sync Test Original has been added")
+      page.getByText("Transaction for Sync Transfer has been added")
     ).toBeVisible({ timeout: 10_000 });
 
     // Edit the transfer from origin: change concept and amount
@@ -324,7 +324,7 @@ test.describe("Transfer Sync", () => {
 
     await editDialog.getByRole("button", { name: "Save" }).click();
     await expect(
-      page.getByText("Transaction for Sync Test Updated has been updated")
+      page.getByText("Transaction for Sync Transfer has been updated")
     ).toBeVisible({ timeout: 10_000 });
 
     // Navigate to destination and verify the mirror was updated

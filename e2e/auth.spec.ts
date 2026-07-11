@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/test";
 import {
   resetTestData,
   seedVerifiedUser,
@@ -68,8 +68,8 @@ test.describe("Authentication", () => {
     await page.locator("nav").getByText("E", { exact: true }).click();
     // Wait for the dropdown menu to appear
     await expect(page.getByRole("menu")).toBeVisible();
-    // Click the "Log out" button inside the dropdown
-    await page.getByRole("button", { name: "Log out" }).click();
+    // Log out is a DropdownMenuItem (role="menuitem"), not a button.
+    await page.getByRole("menuitem", { name: "Log out" }).click();
 
     // signOut clears session and redirects; wait for page to update
     await page.waitForURL("**", { timeout: 10_000 });

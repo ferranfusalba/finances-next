@@ -41,6 +41,8 @@ interface ComboboxProps {
   emptyText?: string
   className?: string
   disabled?: boolean
+  /** Accessible name for the trigger. Defaults to `placeholder`. */
+  ariaLabel?: string
 }
 
 export function Combobox({
@@ -53,6 +55,7 @@ export function Combobox({
   emptyText = "No results found.",
   className,
   disabled,
+  ariaLabel,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -93,6 +96,10 @@ export function Combobox({
         <Button
           variant="outline"
           role="combobox"
+          // `combobox` is not a name-from-content role, so without this the
+          // trigger has NO accessible name — a screen reader announces nothing,
+          // and getByRole("combobox", { name }) matches nothing.
+          aria-label={ariaLabel ?? placeholder}
           aria-expanded={open}
           disabled={disabled}
           className={cn(

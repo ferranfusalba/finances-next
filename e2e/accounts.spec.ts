@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/test";
 import {
   resetTestData,
   seedVerifiedUser,
@@ -35,15 +35,25 @@ test.describe("Accounts", () => {
     await page.getByPlaceholder("N26", { exact: true }).fill("E2E Bank");
     await page.getByPlaceholder("Primary Space").fill("E2E Test Checking");
     await page.getByPlaceholder("N26.PS").fill("E2E.CHK");
-    await page.getByPlaceholder("Checking").fill("Checking");
 
-    // Select country (combobox)
-    await page.getByRole("combobox", { name: "Country" }).click();
+    // These triggers are <button role="combobox">, and `combobox` is NOT a
+    // name-from-content role, so they expose an empty accessible name — matching
+    // them by name finds nothing. Match on the visible placeholder instead.
+    const combobox = (placeholder: string) =>
+      page.getByRole("combobox").filter({ hasText: placeholder });
+
+    // Account type is a fixed enum now, not free text — select, don't type.
+    await combobox("Select an account type").click();
+    await page.getByRole("option", { name: "Checking", exact: true }).click();
+
+    // Select country
+    await combobox("Select a country").click();
     await page.getByRole("option", { name: /Spain/ }).click();
 
-    // Select currency (combobox)
-    await page.getByRole("combobox", { name: "Currency" }).click();
-    await page.getByRole("option", { name: /EUR/ }).click();
+    // Select currency. Anchor the match: several currency labels contain "EUR"
+    // as a substring, and the option label is "<CODE> - <Name> (<symbol>)".
+    await combobox("Select a currency").click();
+    await page.getByRole("option", { name: /^EUR - / }).click();
 
     // Submit
     await page.getByRole("button", { name: "Add" }).click();

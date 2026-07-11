@@ -114,6 +114,7 @@ export default function TransactionFormDateTimeFields() {
               options={timezoneOptions}
               value={field.value || ""}
               onValueChange={field.onChange}
+              ariaLabel="Timezone"
               placeholder="Select a timezone"
               searchPlaceholder="Search timezones..."
               emptyText="No timezones found."

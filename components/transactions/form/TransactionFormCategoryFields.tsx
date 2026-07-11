@@ -125,6 +125,7 @@ export default function TransactionFormCategoryFields() {
                 }
               }}
               disabled={isCategoryDisabled}
+              ariaLabel="Category"
               placeholder={isCategoryDisabled ? "Select a type first" : "Select a category"}
               searchPlaceholder="Search categories..."
               emptyText="No categories found."
@@ -179,6 +180,7 @@ export default function TransactionFormCategoryFields() {
                 }
               }}
               disabled={!category}
+              ariaLabel="Subcategory"
               placeholder={category ? "Select a subcategory" : "Select a category first"}
               searchPlaceholder="Search subcategories..."
               emptyText="No subcategories found."
