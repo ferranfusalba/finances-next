@@ -21,7 +21,6 @@ import {
 } from "@/lib/accounts";
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import { currency } from "@/lib/utils";
-import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 import { getCurrencyColors } from "@/lib/utils/currency";
 import CurrencyTag from "@/components/chips/CurrencyTag";
 
@@ -30,7 +29,6 @@ import {
   getUserDefaultTaxRate,
   getUserForeignCurrencies,
   getUserTransactionCategories,
-  getUserTransactionLocations,
   getUserTransactionPayees,
   getUserTransactionTags,
 } from "@/lib/user";
@@ -61,7 +59,6 @@ export default async function AccountLayout({
     userTransactionPayees,
     userTransactionCategories,
     userForeignCurrencies,
-    userTransactionLocations,
     userTransactionTags,
     userDefaultTaxRate,
     carryForwardBalance,
@@ -71,7 +68,6 @@ export default async function AccountLayout({
     getUserTransactionPayees(userId),
     getUserTransactionCategories(userId),
     getUserForeignCurrencies(userId),
-    getUserTransactionLocations(userId),
     getUserTransactionTags(userId),
     getUserDefaultTaxRate(userId),
     year
@@ -119,7 +115,6 @@ export default async function AccountLayout({
           <div className="col-span-2 md:col-span-1 grid justify-center content-center gap-2">
             <EditAccount
               account={account}
-              accountTypes={getUniqueAccountTypes(userAccounts)}
             />
             <DeleteAccount id={id} />
           </div>
@@ -148,7 +143,6 @@ export default async function AccountLayout({
           })),
           userDefaultTaxRate,
           userForeignCurrencies,
-          userTransactionLocations,
           userTransactionTags,
           hasTransactions: accountTransactions.length > 0,
         }}

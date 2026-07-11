@@ -160,7 +160,11 @@ describe("POST /api/accounts/transactions", () => {
     // Second call is the mirror: negated amount, destination accountId, shared transferId
     const originCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
     const mirrorCall = vi.mocked(db.accountTransaction.create).mock.calls[1][0];
-    expect(mirrorCall.data.amount).toBe(-100);
+    // The request sends an UNSIGNED 100. The server applies the sign, so money
+    // leaves the origin and arrives at the destination. Previously the amount
+    // was written verbatim, so an unsigned API call inflated the origin balance.
+    expect(originCall.data.amount).toBe(-100);
+    expect(mirrorCall.data.amount).toBe(100);
     expect(mirrorCall.data.accountId).toBe("acc-2");
     expect(originCall.data.transferId).toBeDefined();
     expect(mirrorCall.data.transferId).toBe(originCall.data.transferId);
@@ -317,5 +321,83 @@ describe("POST /api/accounts/transactions", () => {
 
     expect(response.status).toBe(500);
     expect(json.error).toBe("DB write failed");
+  });
+
+  describe("server-side sign enforcement", () => {
+    function mockOk(accountType = "CHECKING") {
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.account.findUnique).mockResolvedValue({
+        userId: "user-1",
+        type: accountType,
+      } as never);
+      vi.mocked(db.accountTransaction.create).mockResolvedValue({} as never);
+      vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+        _sum: { amount: 0 },
+      } as never);
+      vi.mocked(db.account.update).mockResolvedValue({} as never);
+    }
+
+    it("forces an EXPENSE negative even when the request sends it positive", async () => {
+      mockOk();
+
+      // The client signs amounts, but nothing stopped a direct API call from
+      // sending +100 for an EXPENSE, which used to be written verbatim and
+      // inflate the balance.
+      await POST(makeRequest({ ...baseTransaction, type: "EXPENSE", amount: 100 }));
+
+      const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+      expect(createCall.data.amount).toBe(-100);
+    });
+
+    it("preserves a NEGATIVE return — the sign must survive", async () => {
+      mockOk("INVESTMENT");
+
+      // March 2026 on Indexa Fondos was -1.099,94. The old Math.abs fallthrough
+      // would have stored +1.099,94, putting the balance ~€2.200 out.
+      await POST(
+        makeRequest({
+          ...baseTransaction,
+          type: "RETURN",
+          amount: -1099.94,
+          payee: "",
+          category: "",
+        })
+      );
+
+      const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+      expect(createCall.data.amount).toBe(-1099.94);
+    });
+
+    it("forces a WITHHOLDING negative", async () => {
+      mockOk("INVESTMENT");
+
+      await POST(makeRequest({ ...baseTransaction, type: "WITHHOLDING", amount: 0.03 }));
+
+      const createCall = vi.mocked(db.accountTransaction.create).mock.calls[0][0];
+      expect(createCall.data.amount).toBe(-0.03);
+    });
+
+    it("rejects RETURN on a non-investment account", async () => {
+      mockOk("CHECKING");
+
+      const response = await POST(
+        makeRequest({ ...baseTransaction, type: "RETURN", amount: 100 })
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects an unknown transaction type instead of treating it as INCOME", async () => {
+      mockOk();
+
+      // `type: "BANANA"` used to persist and fall through to Math.abs().
+      const response = await POST(
+        makeRequest({ ...baseTransaction, type: "BANANA", amount: 100 })
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
   });
 });

@@ -27,6 +27,7 @@ import TransactionFormTaxFields from "@/components/transactions/form/Transaction
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
+import { transactionBucket } from "@/lib/utils/transaction";
 
 import { Account } from "@/types/Account";
 
@@ -87,42 +88,58 @@ export default function TransactionFormContent({
     form.setValue("recurring", presetRecurring ?? "");
   }, [watchedCategory, watchedSubcategory, presetRecurring, form]);
 
+  // RETURN / WITHHOLDING / ROUNDING describe the account's own performance, not
+  // a purchase. Payee, category, tags, location, recurring and tax lines are all
+  // meaningless on them — a market movement has no shop and no VAT. The fields
+  // stay in the schema (they back the Locations page, tag search, CSV export and
+  // the sales-tax report for ordinary transactions); they are simply not shown
+  // here.
+  const isPerformanceRow = transactionBucket(watchedType ?? "") !== "CONTRIBUTION";
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
       <div className="space-y-4">
-        <TransactionFormPayeeField />
+        {!isPerformanceRow && <TransactionFormPayeeField />}
         <TransactionFormBasicFields account={account} hasOpeningTransaction={hasOpeningTransaction} isTransferDestination={isTransferDestination} transferOriginAccountId={transferOriginAccountId} />
         <TransactionFormDateTimeFields />
       </div>
       <div className="space-y-4">
-        <TransactionFormCategoryFields />
-        <FormField
-          control={form.control}
-          name="recurring"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recurring</FormLabel>
-              <Select
-                value={field.value || ""}
-                onValueChange={(val) => field.onChange(val === "NONE" ? "" : val)}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Not recurring" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="NONE">Not recurring</SelectItem>
-                  <SelectItem value="MONTHLY">Monthly</SelectItem>
-                  <SelectItem value="YEARLY">Yearly</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+        {!isPerformanceRow && (
+          <>
+            <TransactionFormCategoryFields />
+            <FormField
+              control={form.control}
+              name="recurring"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Recurring</FormLabel>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={(val) => field.onChange(val === "NONE" ? "" : val)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Not recurring" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="NONE">Not recurring</SelectItem>
+                      <SelectItem value="MONTHLY">Monthly</SelectItem>
+                      <SelectItem value="YEARLY">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          </>
+        )}
         <TransactionFormForeignCurrencyFields accountCurrency={currency} />
-        <TransactionFormMetadataFields />
-        <TransactionFormTaxFields />
+        {!isPerformanceRow && (
+          <>
+            <TransactionFormMetadataFields />
+            <TransactionFormTaxFields />
+          </>
+        )}
       </div>
     </div>
   );

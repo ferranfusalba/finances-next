@@ -2,7 +2,57 @@ export type TransactionType =
   | "INCOME"
   | "EXPENSE"
   | "TRANSFER"
-  | "OPENING";
+  | "OPENING"
+  | "RETURN"
+  | "WITHHOLDING"
+  | "ROUNDING";
+
+export const TRANSACTION_TYPES: TransactionType[] = [
+  "INCOME",
+  "EXPENSE",
+  "TRANSFER",
+  "OPENING",
+  "RETURN",
+  "WITHHOLDING",
+  "ROUNDING",
+];
+
+/** Types only ever posted to an INVESTMENT account. */
+export const INVESTMENT_TRANSACTION_TYPES: TransactionType[] = [
+  "RETURN",
+  "WITHHOLDING",
+  "ROUNDING",
+];
+
+export function isTransactionType(value: string): value is TransactionType {
+  return (TRANSACTION_TYPES as string[]).includes(value);
+}
+
+/**
+ * How each type contributes to the investment decomposition.
+ *
+ *   netContributions = CONTRIBUTION rows
+ *   totalWithholding = WITHHOLDING rows
+ *   totalReturn      = RETURN rows
+ *   roundingAdj      = ROUNDING rows
+ *   balance          = all of the above (= SUM of every row)
+ *
+ * ROUNDING is deliberately its own bucket: a cent of provider rounding drift is
+ * neither money you put in nor money the market made, and must never flatter
+ * either figure.
+ */
+export type TransactionBucket =
+  | "CONTRIBUTION"
+  | "RETURN"
+  | "WITHHOLDING"
+  | "ROUNDING";
+
+export function transactionBucket(type: string): TransactionBucket {
+  if (type === "RETURN") return "RETURN";
+  if (type === "WITHHOLDING") return "WITHHOLDING";
+  if (type === "ROUNDING") return "ROUNDING";
+  return "CONTRIBUTION";
+}
 
 export interface FormTaxLine {
   rate: string;
@@ -19,21 +69,34 @@ export interface ApiTaxLine {
 
 /**
  * Applies the correct sign to a transaction amount based on its type.
- * EXPENSE/TRANSFER → always negative
- * INCOME → always positive
- * OPENING → raw value (user decides sign)
+ *
+ * EXPENSE/TRANSFER/WITHHOLDING → always negative
+ * INCOME                       → always positive
+ * OPENING/RETURN/ROUNDING      → raw value, sign preserved
+ *
+ * RETURN must preserve sign: a losing month is negative (March 2026 was
+ * -1.099,94) and forcing it positive would corrupt the balance by twice the
+ * amount. There is deliberately no fallthrough — an unrecognised type throws
+ * rather than being silently coerced positive.
  */
 export function computeTransactionAmount(
   type: string,
   rawAmount: number
 ): number {
-  if (type === "EXPENSE" || type === "TRANSFER") {
-    return -Math.abs(rawAmount);
+  switch (type) {
+    case "EXPENSE":
+    case "TRANSFER":
+    case "WITHHOLDING":
+      return -Math.abs(rawAmount);
+    case "INCOME":
+      return Math.abs(rawAmount);
+    case "OPENING":
+    case "RETURN":
+    case "ROUNDING":
+      return rawAmount;
+    default:
+      throw new Error(`Unknown transaction type: ${type}`);
   }
-  if (type === "OPENING") {
-    return rawAmount;
-  }
-  return Math.abs(rawAmount);
 }
 
 /**

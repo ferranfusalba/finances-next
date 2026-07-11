@@ -33,23 +33,6 @@ export async function getUserForeignCurrencies(userId: string) {
   return Array.from(codes).sort();
 }
 
-export async function getUserTransactionLocations(userId: string): Promise<TransactionLocation[]> {
-  const accountTransactions = await db.accountTransaction.findMany({
-    where: { Account: { userId }, location: { not: Prisma.DbNull } },
-    select: { location: true },
-  });
-
-  const seen = new Map<string, TransactionLocation>();
-  for (const t of accountTransactions) {
-    const loc = t.location as TransactionLocation | null;
-    if (loc?.placeId && !seen.has(loc.placeId)) {
-      seen.set(loc.placeId, loc);
-    }
-  }
-
-  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
-}
-
 export async function getUserTransactionTags(userId: string) {
   const accountTags = await db.accountTransaction.findMany({
     where: { Account: { userId }, tags: { isEmpty: false } },

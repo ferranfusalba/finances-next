@@ -63,10 +63,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   account: Account;
-  accountTypes: string[];
 }
 
-export default function EditAccount({ account, accountTypes }: Props) {
+export default function EditAccount({ account }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -162,7 +161,7 @@ export default function EditAccount({ account, accountTypes }: Props) {
                 </FormItem>
               )}
             />
-            <AccountTypeField accountTypes={accountTypes} />
+            <AccountTypeField />
             <FormField
               control={form.control}
               name="number"

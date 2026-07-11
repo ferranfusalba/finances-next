@@ -5,6 +5,11 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import { recomputeAccountBalance } from "@/lib/accounts";
+import { toNumber } from "@/lib/utils";
+import {
+  computeTransactionAmount,
+  INVESTMENT_TRANSACTION_TYPES,
+} from "@/lib/utils/transaction";
 import { UpdateAccountTransactionSchema } from "@/schemas";
 
 import { AccountParamsProps } from "@/types/AccountParams";
@@ -34,7 +39,7 @@ export async function PUT(
   try {
     const existing = await db.accountTransaction.findUnique({
       where: { id },
-      select: { accountId: true, type: true, transferId: true, typeTransferDestination: true, typeTransferOrigin: true, dateTime: true },
+      select: { accountId: true, type: true, amount: true, transferId: true, typeTransferDestination: true, typeTransferOrigin: true, dateTime: true },
     });
 
     if (!existing) {
@@ -44,12 +49,33 @@ export async function PUT(
     // Verify user owns the account
     const account = await db.account.findUnique({
       where: { id: existing.accountId },
-      select: { userId: true },
+      select: { userId: true, type: true },
     });
 
     if (!account || account.userId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
+    const effectiveType = data.type ?? existing.type;
+
+    // RETURN / WITHHOLDING / ROUNDING only make sense on an investment account.
+    if (
+      INVESTMENT_TRANSACTION_TYPES.includes(effectiveType as never) &&
+      account.type !== "INVESTMENT"
+    ) {
+      return NextResponse.json(
+        { error: `${effectiveType} is only valid on an INVESTMENT account` },
+        { status: 400 }
+      );
+    }
+
+    // Re-derive the sign server-side from the effective type. Also covers a type
+    // change that arrives without a new amount (e.g. INCOME -> EXPENSE), which
+    // would otherwise leave the old sign in place.
+    const signedAmount = computeTransactionAmount(
+      effectiveType,
+      data.amount ?? toNumber(existing.amount)
+    );
 
     // Delete existing tax lines, they'll be re-created
     await db.taxLine.deleteMany({
@@ -67,6 +93,7 @@ export async function PUT(
       where: { id },
       data: {
         ...transactionData,
+        amount: signedAmount,
         ...(location !== undefined ? { location: location ?? Prisma.DbNull } : {}),
         ...(taxLines?.length ? {
           taxLines: {
@@ -134,7 +161,7 @@ export async function PUT(
             data: {
               payee: transactionData.payee,
               concept: transactionData.concept,
-              amount: transactionData.amount !== undefined ? -transactionData.amount : undefined,
+              amount: -signedAmount,
               currency: transactionData.currency,
               dateTime: transactionData.dateTime,
               timezoneId: transactionData.timezoneId,

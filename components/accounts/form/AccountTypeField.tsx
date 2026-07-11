@@ -1,87 +1,72 @@
 "use client";
 
-import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-import { Input } from "@/components/ui/input";
 import {
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
-import { AddAlt } from "@carbon/icons-react";
 
-import { cn } from "@/lib/utils";
+import { ACCOUNT_TYPES } from "@/schemas";
 
-interface Props {
-  accountTypes: string[];
-}
+/**
+ * Account type is a fixed enum, not free text. Only INVESTMENT changes
+ * behaviour (it accepts RETURN / WITHHOLDING / ROUNDING rows, so its balance
+ * tracks market value); the rest behave identically to one another.
+ */
+const LABELS: Record<(typeof ACCOUNT_TYPES)[number], string> = {
+  CHECKING: "Checking",
+  SAVINGS: "Savings",
+  CASH: "Cash",
+  PREPAID: "Prepaid",
+  INVESTMENT: "Investment",
+};
 
-const ADD_NEW_VALUE = "__new__";
+const DESCRIPTIONS: Record<(typeof ACCOUNT_TYPES)[number], string> = {
+  CHECKING: "Day-to-day current account",
+  SAVINGS: "Interest-bearing deposit",
+  CASH: "Physical cash",
+  PREPAID: "Restricted, employer-funded balance",
+  INVESTMENT: "Brokerage, fund or wallet — records returns and retenciones",
+};
 
-export default function AccountTypeField({ accountTypes }: Props) {
+const options: ComboboxOption[] = ACCOUNT_TYPES.map((type) => ({
+  value: type,
+  label: LABELS[type],
+}));
+
+export default function AccountTypeField() {
   const form = useFormContext();
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newType, setNewType] = useState("");
-
-  const options: ComboboxOption[] = [
-    { value: ADD_NEW_VALUE, label: "Add a new type", icon: <AddAlt className="mr-2 h-4 w-4" /> },
-    ...accountTypes
-      .sort((a, b) => a.localeCompare(b))
-      .map((type) => ({ value: type, label: type })),
-  ];
 
   return (
     <Controller
       control={form.control}
       name="type"
-      render={({ field: controllerField }) => (
-        <FormItem
-          className={cn({
-            "border rounded-lg p-4": isAddingNew,
-          })}
-        >
-          <FormLabel>Account Type*</FormLabel>
-          <Combobox
-            options={options}
-            value={isAddingNew ? ADD_NEW_VALUE : controllerField.value || ""}
-            onValueChange={(value) => {
-              if (value === ADD_NEW_VALUE) {
-                setIsAddingNew(true);
-                setNewType("");
-                controllerField.onChange("");
-              } else {
-                setIsAddingNew(false);
-                setNewType("");
-                controllerField.onChange(value);
-              }
-            }}
-            placeholder="Select an account type"
-            searchPlaceholder="Search account types..."
-            emptyText="No account types found."
-          />
+      render={({ field: controllerField }) => {
+        const value = controllerField.value as string;
 
-          {isAddingNew && (
-            <div className="mt-2">
-              <FormLabel htmlFor="new-account-type">New Type</FormLabel>
-              <Input
-                id="new-account-type"
-                type="text"
-                placeholder="Checking"
-                value={newType}
-                className="mt-2"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setNewType(value);
-                  controllerField.onChange(value);
-                }}
-              />
-            </div>
-          )}
-          <FormMessage aria-live="polite" />
-        </FormItem>
-      )}
+        return (
+          <FormItem>
+            <FormLabel>Account Type*</FormLabel>
+            <Combobox
+              options={options}
+              value={value || ""}
+              onValueChange={controllerField.onChange}
+              placeholder="Select an account type"
+              searchPlaceholder="Search account types..."
+              emptyText="No account types found."
+            />
+            {value in DESCRIPTIONS && (
+              <p className="text-muted-foreground mt-1 text-xs select-none">
+                {DESCRIPTIONS[value as keyof typeof DESCRIPTIONS]}
+              </p>
+            )}
+            <FormMessage aria-live="polite" />
+          </FormItem>
+        );
+      }}
     />
   );
 }

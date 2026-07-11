@@ -41,12 +41,27 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
     (a) => a.name !== account?.name,
   );
 
+  const isInvestment = account?.type === "INVESTMENT";
+
+  // RETURN and ROUNDING may be negative — March 2026 on Indexa Fondos was
+  // -1.099,94 — so they join OPENING in escaping the min=0 constraint.
+  const allowsNegativeAmount =
+    selectedType === "OPENING" ||
+    selectedType === "RETURN" ||
+    selectedType === "ROUNDING";
+
   const handleAmountPlaceholder = () => {
     switch (form.getValues().type) {
       case "":
         return "Select a type first";
       case "OPENING":
         return "Amount (positive or negative)";
+      case "RETURN":
+        return "Return (negative if the month lost value)";
+      case "WITHHOLDING":
+        return "Amount withheld (retenciones)";
+      case "ROUNDING":
+        return "Cent adjustment (positive or negative)";
       default:
         return "Amount";
     }
@@ -86,7 +101,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
               disabled={isTransferDestination}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger aria-label="Type">
                   <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
               </FormControl>
@@ -96,6 +111,13 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                 <SelectItem value="TRANSFER">TRANSFER</SelectItem>
                 {!hasOpeningTransaction && (
                   <SelectItem value="OPENING">OPENING</SelectItem>
+                )}
+                {isInvestment && (
+                  <>
+                    <SelectItem value="RETURN">RETURN</SelectItem>
+                    <SelectItem value="WITHHOLDING">WITHHOLDING</SelectItem>
+                    <SelectItem value="ROUNDING">ROUNDING</SelectItem>
+                  </>
                 )}
               </SelectContent>
             </Select>
@@ -130,7 +152,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger aria-label="Transfer to Destination Account">
                       <SelectValue placeholder="Select destination account" />
                     </SelectTrigger>
                   </FormControl>
@@ -189,7 +211,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                 inputMode="decimal"
                 step="0.01"
                 disabled={selectedType === ""}
-                min={selectedType === "OPENING" ? undefined : 0}
+                min={allowsNegativeAmount ? undefined : 0}
                 placeholder={handleAmountPlaceholder()}
                 {...field}
               />

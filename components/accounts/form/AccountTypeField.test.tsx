@@ -6,25 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import AccountTypeField from "./AccountTypeField";
+import { AccountTypeSchema } from "@/schemas";
 
-const schema = z.object({ type: z.string().min(1) });
+const schema = z.object({ type: AccountTypeSchema });
 
-function Wrapper({
-  accountTypes,
-  defaultType = "",
-}: {
-  accountTypes: string[];
-  defaultType?: string;
-}) {
+function Wrapper({ defaultType = "" }: { defaultType?: string }) {
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { type: defaultType },
+    defaultValues: { type: defaultType as never },
   });
 
   return (
     <FormProvider {...form}>
       <form>
-        <AccountTypeField accountTypes={accountTypes} />
+        <AccountTypeField />
       </form>
     </FormProvider>
   );
@@ -32,64 +27,59 @@ function Wrapper({
 
 describe("AccountTypeField", () => {
   it("renders the combobox trigger with label", () => {
-    render(<Wrapper accountTypes={["Checking", "Savings"]} />);
+    render(<Wrapper />);
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
     expect(screen.getByText("Account Type*")).toBeInTheDocument();
   });
 
   it("shows placeholder when no default type", () => {
-    render(<Wrapper accountTypes={["Checking"]} />);
+    render(<Wrapper />);
 
     expect(screen.getByText("Select an account type")).toBeInTheDocument();
   });
 
   it("shows the default type value when provided", () => {
-    render(<Wrapper accountTypes={["Checking"]} defaultType="Checking" />);
+    render(<Wrapper defaultType="CHECKING" />);
 
     expect(screen.getByRole("combobox")).toHaveTextContent("Checking");
   });
 
-  it("opens dropdown and shows options when clicked", async () => {
+  it("offers exactly the five enum members, and no free-text escape hatch", async () => {
     const user = userEvent.setup();
-    render(<Wrapper accountTypes={["Checking", "Savings"]} />);
-
-    await user.click(screen.getByRole("combobox"));
-
-    expect(screen.getByText("Add a new type")).toBeInTheDocument();
-    expect(screen.getByText("Checking")).toBeInTheDocument();
-    expect(screen.getByText("Savings")).toBeInTheDocument();
-  });
-
-  it("shows options sorted alphabetically with 'Add a new type' first", async () => {
-    const user = userEvent.setup();
-    render(
-      <Wrapper accountTypes={["Savings", "Checking", "Investment"]} />,
-    );
+    render(<Wrapper />);
 
     await user.click(screen.getByRole("combobox"));
 
     const items = screen.getAllByRole("option");
-    expect(items[0]).toHaveTextContent("Add a new type");
-    expect(items[1]).toHaveTextContent("Checking");
-    expect(items[2]).toHaveTextContent("Investment");
-    expect(items[3]).toHaveTextContent("Savings");
+    expect(items.map((i) => i.textContent)).toEqual([
+      "Checking",
+      "Savings",
+      "Cash",
+      "Prepaid",
+      "Investment",
+    ]);
+
+    // The old field let the user invent a type by typing one in. Account type
+    // now drives behaviour, so it can no longer be arbitrary.
+    expect(screen.queryByText("Add a new type")).not.toBeInTheDocument();
   });
 
-  it("shows only 'Add a new type' when no account types exist", async () => {
+  it("explains what the selected type does", async () => {
     const user = userEvent.setup();
-    render(<Wrapper accountTypes={[]} />);
+    render(<Wrapper />);
 
     await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getByRole("option", { name: "Investment" }));
 
-    const items = screen.getAllByRole("option");
-    expect(items).toHaveLength(1);
-    expect(items[0]).toHaveTextContent("Add a new type");
+    expect(
+      screen.getByText(/records returns and retenciones/i),
+    ).toBeInTheDocument();
   });
 
   it("has search input in dropdown", async () => {
     const user = userEvent.setup();
-    render(<Wrapper accountTypes={["Checking"]} />);
+    render(<Wrapper />);
 
     await user.click(screen.getByRole("combobox"));
 

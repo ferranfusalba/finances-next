@@ -39,7 +39,6 @@ const defaultContextValue = {
   userTransactionCategories: [],
   userDefaultTaxRate: 0,
   userForeignCurrencies: [],
-  userTransactionLocations: [],
   userTransactionTags: [],
   hasTransactions: true,
 };

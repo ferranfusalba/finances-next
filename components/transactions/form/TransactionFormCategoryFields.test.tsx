@@ -53,7 +53,6 @@ const defaultContextValue = {
   userTransactionCategories: mockCategories,
   userDefaultTaxRate: 0,
   userForeignCurrencies: [],
-  userTransactionLocations: [],
   userTransactionTags: [],
   hasTransactions: false,
 };

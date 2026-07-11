@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type AccountType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -89,7 +89,7 @@ export async function createTestAccount(
     name: string;
     code: string;
     bankName: string;
-    type: string;
+    type: AccountType;
     defaultCurrency: string;
     country: string;
   }> = {}
@@ -100,7 +100,7 @@ export async function createTestAccount(
       code: overrides.code ?? `TST-${Date.now()}`,
       bankName: overrides.bankName ?? "Test Bank",
       active: true,
-      type: overrides.type ?? "Checking",
+      type: overrides.type ?? "CHECKING",
       defaultCurrency: overrides.defaultCurrency ?? "EUR",
       country: overrides.country ?? "ES",
       userId,

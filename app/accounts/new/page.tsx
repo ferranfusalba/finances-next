@@ -5,7 +5,6 @@ import Layout02a from "@/components/layouts/Layout02a";
 
 import { getAccounts } from "@/lib/accounts";
 import getUser from "@/lib/user";
-import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 
 export default async function NewAccount() {
   const serverSession = await auth();
@@ -16,14 +15,12 @@ export default async function NewAccount() {
     getUser(userEmail),
     getAccounts(userId),
   ]);
-  const accountTypes = getUniqueAccountTypes(accounts);
 
   return (
     <Layout02a>
       <h2 className="text-center py-6">New Account</h2>
       <NewAccountForm
         defaultCurrency={user?.userCurrency || ""}
-        accountTypes={accountTypes}
       />
     </Layout02a>
   );

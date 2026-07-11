@@ -39,7 +39,6 @@ const currencyOptions = currencies.map((currency) => ({
 
 interface Props {
   defaultCurrency: string;
-  accountTypes: string[];
 }
 
 export default function NewAccountForm(props: Props) {
@@ -187,7 +186,7 @@ export default function NewAccountForm(props: Props) {
             )}
           />
           {/* Type */}
-          <AccountTypeField accountTypes={props.accountTypes} />
+          <AccountTypeField />
           {/* Currency */}
           <FormField
             control={form.control}

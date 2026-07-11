@@ -1,5 +1,25 @@
 import * as z from "zod";
 
+import { TRANSACTION_TYPES } from "@/lib/utils/transaction";
+
+export const ACCOUNT_TYPES = [
+  "CHECKING",
+  "SAVINGS",
+  "CASH",
+  "PREPAID",
+  "INVESTMENT",
+] as const;
+
+export type AccountTypeValue = (typeof ACCOUNT_TYPES)[number];
+
+export const AccountTypeSchema = z.enum(ACCOUNT_TYPES);
+
+// Reject unknown types outright. Previously `z.string().min(1)`, which let
+// `type: "BANANA"` persist and be treated as INCOME by the sign fallthrough.
+export const TransactionTypeSchema = z.enum(
+  TRANSACTION_TYPES as [string, ...string[]],
+);
+
 export const SettingsSchema = z
   .object({
     name: z.optional(z.string()),
@@ -100,7 +120,7 @@ export const CreateAccountSchema = z.object({
   code: z.string().min(1),
   bankName: z.string().default(""),
   active: z.boolean(),
-  type: z.string().min(1),
+  type: AccountTypeSchema,
   description: z.string().nullable().optional(),
   defaultCurrency: z.string().default(""),
   currentBalance: z.number().default(0),
@@ -113,7 +133,7 @@ export const UpdateAccountSchema = z.object({
   code: z.string().min(1).optional(),
   bankName: z.string().optional(),
   active: z.boolean().optional(),
-  type: z.string().min(1).optional(),
+  type: AccountTypeSchema.optional(),
   description: z.string().nullable().optional(),
   defaultCurrency: z.string().optional(),
   currentBalance: z.number().optional(),
@@ -126,7 +146,7 @@ export const CreateAccountTransactionSchema = z.object({
   payee: z.string().default(""),
   concept: z.string().default(""),
   recurring: z.string().nullable().optional(),
-  type: z.string().min(1),
+  type: TransactionTypeSchema,
   typeTransferOrigin: z.string().nullable().optional(),
   typeTransferDestination: z.string().nullable().optional(),
   currency: z.string().min(1),
@@ -155,7 +175,7 @@ export const UpdateAccountTransactionSchema = z.object({
   payee: z.string().optional(),
   concept: z.string().optional(),
   recurring: z.string().nullable().optional(),
-  type: z.string().min(1).optional(),
+  type: TransactionTypeSchema.optional(),
   typeTransferOrigin: z.string().nullable().optional(),
   typeTransferDestination: z.string().nullable().optional(),
   currency: z.string().min(1).optional(),

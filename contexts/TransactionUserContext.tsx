@@ -34,7 +34,6 @@ interface TransactionUserContextValue {
   }>;
   userDefaultTaxRate: number;
   userForeignCurrencies: string[];
-  userTransactionLocations: TransactionLocation[];
   userTransactionTags: string[];
   hasTransactions: boolean;
 }

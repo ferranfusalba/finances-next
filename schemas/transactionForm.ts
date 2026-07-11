@@ -1,8 +1,10 @@
 import { z } from "zod";
 
+import { TRANSACTION_TYPES } from "@/lib/utils/transaction";
+
 const baseFields = {
   concept: z.string(),
-  type: z.string().min(1, {
+  type: z.enum(TRANSACTION_TYPES as [string, ...string[]], {
     message: "Transaction Type is required.",
   }),
   currency: z.string().min(3, {

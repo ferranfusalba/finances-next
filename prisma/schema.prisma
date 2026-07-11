@@ -16,6 +16,17 @@ enum UserRole {
   USER
 }
 
+// Only INVESTMENT changes behaviour: its balance is driven by RETURN /
+// WITHHOLDING rows posted from a provider statement. The rest are
+// transaction-driven and behave identically to one another.
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CASH
+  PREPAID
+  INVESTMENT
+}
+
 model User {
   id                        String                    @id @default(cuid())
   name                      String?
@@ -216,7 +227,7 @@ model Account {
   code            String
   bankName        String               @default("")
   active          Boolean
-  type            String
+  type            AccountType
   description     String?
   defaultCurrency String               @default("")
   currentBalance  Decimal              @default(0)
@@ -230,3 +241,4 @@ model Account {
 
   @@unique([userId, code])
 }
+
