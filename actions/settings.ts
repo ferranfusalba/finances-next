@@ -23,20 +23,28 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     return { error: "Unauthorized" };
   }
 
-  if (user.isOAuth) {
-    values.email = undefined;
-    values.password = undefined;
-    values.newPassword = undefined;
+  const parsed = SettingsSchema.safeParse(values);
+
+  if (!parsed.success) {
+    return { error: "Invalid fields!" };
   }
 
-  if (values.email && values.email !== user.email) {
-    const existingUser = await getUserByEmail(values.email);
+  const data = parsed.data;
+
+  if (user.isOAuth) {
+    data.email = undefined;
+    data.password = undefined;
+    data.newPassword = undefined;
+  }
+
+  if (data.email && data.email !== user.email) {
+    const existingUser = await getUserByEmail(data.email);
 
     if (existingUser && existingUser.id !== user.id) {
       return { error: "Email already in use" };
     }
 
-    const verificationToken = await generateVerificationToken(values.email);
+    const verificationToken = await generateVerificationToken(data.email);
 
     await sendVerificationEmail(
       verificationToken.email,
@@ -46,11 +54,12 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     return { success: "Verification email sent" };
   }
 
+  let hashedPassword: string | undefined;
   let passwordChanged = false;
 
-  if (values.password && values.newPassword && dbUser.password) {
+  if (data.password && data.newPassword && dbUser.password) {
     const passwordMatch = await bcrypt.compare(
-      values.password,
+      data.password,
       dbUser.password
     );
 
@@ -58,16 +67,23 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
       return { error: "Incorrect password" };
     }
 
-    const hashedPassword = await bcrypt.hash(values.newPassword, 10);
-    values.password = hashedPassword;
-    values.newPassword = undefined;
+    hashedPassword = await bcrypt.hash(data.newPassword, 10);
     passwordChanged = true;
   }
 
+  // Explicit allow-list: never spread client input into the update. This
+  // prevents mass-assignment of privileged fields (role, twoFactorEnabled,
+  // emailVerified, or a plaintext password).
   await db.user.update({
     where: { id: dbUser.id },
     data: {
-      ...values,
+      name: data.name,
+      userCountry: data.userCountry,
+      userCurrency: data.userCurrency,
+      userTimezone: data.userTimezone,
+      userLocale: data.userLocale,
+      weekStartsOn: data.weekStartsOn,
+      ...(hashedPassword ? { password: hashedPassword } : {}),
       preferencesSet: true,
     },
   });

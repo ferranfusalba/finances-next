@@ -19,7 +19,6 @@ export default function SectionNavMenuListItem({
 }) {
   const pathname = usePathname();
   const accountSelected = "/accounts/" + item.id === pathname;
-  const budgetSelected = "/budgets/" + item.id === pathname;
   const dataSelected = "/data/" + item.id === pathname;
   const settingsSelected = "/settings/" + item.id === pathname;
   const staticsSelected = "/statics/" + item.id === pathname;
@@ -54,10 +53,6 @@ export default function SectionNavMenuListItem({
         {
           "bg-black border-black dark:bg-white dark:border-white dark:text-sky-900":
             accountSelected,
-        },
-        {
-          "bg-black border-black dark:bg-white dark:border-white dark:text-pink-900":
-            budgetSelected,
         },
         {
           "bg-black border-black dark:bg-white dark:border-white dark:text-lime-900":

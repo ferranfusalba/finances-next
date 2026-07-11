@@ -22,14 +22,8 @@ export async function resetTestData() {
       where: { Account: { userId: user.id } },
     });
 
-    // Delete budget transactions for user's budgets
-    await prisma.budgetTransaction.deleteMany({
-      where: { Budget: { userId: user.id } },
-    });
-
-    // Delete accounts and budgets
+    // Delete accounts
     await prisma.account.deleteMany({ where: { userId: user.id } });
-    await prisma.budget.deleteMany({ where: { userId: user.id } });
 
     // Delete user's payees, categories, subcategories
     const categories = await prisma.userTransactionCategory.findMany({
@@ -109,29 +103,6 @@ export async function createTestAccount(
       type: overrides.type ?? "Checking",
       defaultCurrency: overrides.defaultCurrency ?? "EUR",
       country: overrides.country ?? "ES",
-      userId,
-    },
-  });
-}
-
-export async function createTestBudget(
-  userId: string,
-  overrides: Partial<{
-    name: string;
-    code: string;
-    type: string;
-    defaultCurrency: string;
-    initialBalance: number;
-  }> = {}
-) {
-  return prisma.budget.create({
-    data: {
-      name: overrides.name ?? "Test Budget",
-      code: overrides.code ?? `BDG-${Date.now()}`,
-      active: true,
-      type: overrides.type ?? "Monthly",
-      defaultCurrency: overrides.defaultCurrency ?? "EUR",
-      initialBalance: overrides.initialBalance ?? 1000,
       userId,
     },
   });

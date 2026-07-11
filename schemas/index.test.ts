@@ -8,11 +8,8 @@ import {
   SettingsSchema,
   CreateAccountSchema,
   UpdateAccountSchema,
-  CreateBudgetSchema,
-  UpdateBudgetSchema,
   CreateAccountTransactionSchema,
   UpdateAccountTransactionSchema,
-  CreateBudgetTransactionSchema,
 } from "./index";
 
 describe("LoginSchema", () => {
@@ -120,7 +117,6 @@ describe("NewPasswordSchema", () => {
 
 describe("SettingsSchema", () => {
   const validBase = {
-    role: "USER" as const,
     userCountry: "US",
     userCurrency: "USD",
     userTimezone: "America/New_York",
@@ -170,12 +166,15 @@ describe("SettingsSchema", () => {
     }
   });
 
-  it("rejects invalid role", () => {
+  it("strips privileged fields like role instead of accepting them", () => {
     const result = SettingsSchema.safeParse({
       ...validBase,
-      role: "SUPERADMIN",
+      role: "ADMIN",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect("role" in result.data).toBe(false);
+    }
   });
 
   it("rejects invalid email format", () => {
@@ -251,7 +250,6 @@ describe("boundary cases", () => {
 
   it("SettingsSchema rejects short password in password change", () => {
     const result = SettingsSchema.safeParse({
-      role: "USER" as const,
       userCountry: "US",
       userCurrency: "USD",
       userTimezone: "America/New_York",
@@ -265,7 +263,6 @@ describe("boundary cases", () => {
 
   it("SettingsSchema rejects short newPassword in password change", () => {
     const result = SettingsSchema.safeParse({
-      role: "USER" as const,
       userCountry: "US",
       userCurrency: "USD",
       userTimezone: "America/New_York",
@@ -383,96 +380,6 @@ describe("UpdateAccountSchema", () => {
 
   it("accepts currentBalance update", () => {
     const result = UpdateAccountSchema.safeParse({ currentBalance: 1500.50 });
-    expect(result.success).toBe(true);
-  });
-});
-
-describe("CreateBudgetSchema", () => {
-  const validBudget = {
-    name: "Marketing",
-    code: "MKT",
-    active: true,
-    type: "MONTHLY",
-    initialBalance: 1000,
-    userId: "user-1",
-  };
-
-  it("accepts a valid budget", () => {
-    const result = CreateBudgetSchema.safeParse(validBudget);
-    expect(result.success).toBe(true);
-  });
-
-  it("defaults defaultCurrency to empty string when omitted", () => {
-    const result = CreateBudgetSchema.safeParse(validBudget);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.defaultCurrency).toBe("");
-    }
-  });
-
-  it("rejects missing name", () => {
-    const { name: _, ...withoutName } = validBudget;
-    const result = CreateBudgetSchema.safeParse(withoutName);
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing code", () => {
-    const { code: _, ...withoutCode } = validBudget;
-    const result = CreateBudgetSchema.safeParse(withoutCode);
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing initialBalance", () => {
-    const { initialBalance: _, ...withoutBalance } = validBudget;
-    const result = CreateBudgetSchema.safeParse(withoutBalance);
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects empty type", () => {
-    const result = CreateBudgetSchema.safeParse({ ...validBudget, type: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts nullable description", () => {
-    const result = CreateBudgetSchema.safeParse({
-      ...validBudget,
-      description: null,
-    });
-    expect(result.success).toBe(true);
-  });
-});
-
-describe("UpdateBudgetSchema", () => {
-  it("accepts partial update with just name", () => {
-    const result = UpdateBudgetSchema.safeParse({ name: "New Budget" });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts empty object (all fields optional)", () => {
-    const result = UpdateBudgetSchema.safeParse({});
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects empty name when provided", () => {
-    const result = UpdateBudgetSchema.safeParse({ name: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects empty code when provided", () => {
-    const result = UpdateBudgetSchema.safeParse({ code: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts order field", () => {
-    const result = UpdateBudgetSchema.safeParse({ order: 3 });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts initialBalance and currentBalance updates", () => {
-    const result = UpdateBudgetSchema.safeParse({
-      initialBalance: 2000,
-      currentBalance: 1500,
-    });
     expect(result.success).toBe(true);
   });
 });
@@ -673,84 +580,6 @@ describe("CreateAccountTransactionSchema", () => {
     if (result.success) {
       expect(result.data.recurring).toBeNull();
     }
-  });
-});
-
-describe("CreateBudgetTransactionSchema", () => {
-  const validTransaction = {
-    concept: "Office supplies",
-    type: "EXPENSE",
-    currency: "USD",
-    amount: -30,
-    budgetId: "bgt-1",
-    dateTime: "2024-01-15T10:00:00Z",
-    notes: "",
-  };
-
-  it("accepts a valid transaction", () => {
-    const result = CreateBudgetTransactionSchema.safeParse(validTransaction);
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts empty concept (optional)", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      concept: "",
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects missing budgetId", () => {
-    const { budgetId: _, ...withoutBudgetId } = validTransaction;
-    const result = CreateBudgetTransactionSchema.safeParse(withoutBudgetId);
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts tags as string array", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      tags: ["project-x"],
-    });
-    expect(result.success).toBe(true);
-    if (result.success) expect(result.data.tags).toEqual(["project-x"]);
-  });
-
-  it("rejects tags as plain string", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      tags: "project-x",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("accepts a valid location object", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      location: {
-        name: "Madrid Office",
-        address: "Madrid, Spain",
-        lat: 40.416,
-        lng: -3.703,
-        placeId: "mapbox-456",
-      },
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("accepts null location", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      location: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejects location as plain string", () => {
-    const result = CreateBudgetTransactionSchema.safeParse({
-      ...validTransaction,
-      location: "Madrid",
-    });
-    expect(result.success).toBe(false);
   });
 });
 

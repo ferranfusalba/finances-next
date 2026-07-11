@@ -4,25 +4,14 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
+import { recomputeAccountBalance } from "@/lib/accounts";
 import { UpdateAccountTransactionSchema } from "@/schemas";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
-
-async function recomputeBalance(accountId: string) {
-  const result = await db.accountTransaction.aggregate({
-    where: { accountId },
-    _sum: { amount: true },
-  });
-
-  await db.account.update({
-    where: { id: accountId },
-    data: { currentBalance: result._sum.amount ?? 0 },
-  });
-}
+import { AccountParamsProps } from "@/types/AccountParams";
 
 export async function PUT(
   request: NextRequest,
-  { params }: AccountBudgetParamsProps
+  { params }: AccountParamsProps
 ) {
   const user = await currentUser();
   if (!user?.id) {
@@ -67,7 +56,12 @@ export async function PUT(
       where: { accountTransactionId: id },
     });
 
-    const { taxLines, location, ...transactionData } = data;
+    // accountId is intentionally excluded from the update: a transaction must
+    // not be reparented to a different account via this endpoint (which would
+    // allow moving it into another user's account). It stays on its existing,
+    // ownership-verified account.
+    const { taxLines, location, accountId, ...transactionData } = data;
+    void accountId;
 
     const updated = await db.accountTransaction.update({
       where: { id },
@@ -153,12 +147,12 @@ export async function PUT(
               typeTransferDestination: transactionData.typeTransferDestination,
             },
           });
-          await recomputeBalance(mirrorAccountId);
+          await recomputeAccountBalance(mirrorAccountId);
         }
       }
     }
 
-    await recomputeBalance(existing.accountId);
+    await recomputeAccountBalance(existing.accountId);
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -169,7 +163,7 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: AccountBudgetParamsProps
+  { params }: AccountParamsProps
 ) {
   const user = await currentUser();
   if (!user?.id) {
@@ -201,7 +195,7 @@ export async function DELETE(
       where: { id },
     });
 
-    await recomputeBalance(transaction.accountId);
+    await recomputeAccountBalance(transaction.accountId);
 
     // Delete mirror transaction for transfers
     if (transaction.type === "TRANSFER" && transaction.transferId) {
@@ -221,7 +215,7 @@ export async function DELETE(
           await db.accountTransaction.delete({
             where: { id: mirror.id },
           });
-          await recomputeBalance(mirrorAccountId);
+          await recomputeAccountBalance(mirrorAccountId);
         }
       }
     }

@@ -77,18 +77,6 @@ export function buildAccountTransactionSchema() {
     );
 }
 
-export function buildBudgetTransactionSchema() {
-  return z
-    .object({
-      ...baseFields,
-    })
-    .refine(foreignCurrencyRefine.refineFn, foreignCurrencyRefine.options);
-}
-
 export type AccountTransactionFormValues = z.infer<
   ReturnType<typeof buildAccountTransactionSchema>
->;
-
-export type BudgetTransactionFormValues = z.infer<
-  ReturnType<typeof buildBudgetTransactionSchema>
 >;

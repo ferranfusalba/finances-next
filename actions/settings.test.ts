@@ -43,7 +43,6 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { settings } from "./settings";
 
 const validValues = {
-  role: "USER" as const,
   userCountry: "US",
   userCurrency: "USD",
   userTimezone: "America/New_York",
@@ -225,6 +224,34 @@ describe("settings", () => {
       where: { id: "user-1" },
       data: expect.objectContaining({ name: "New Name", preferencesSet: true }),
     });
+  });
+
+  it("does not persist privileged fields from client input (mass-assignment)", async () => {
+    vi.mocked(currentUser).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
+    vi.mocked(getUserById).mockResolvedValue({
+      id: "user-1",
+      email: "user@example.com",
+    } as never);
+    vi.mocked(db.user.update).mockResolvedValue({} as never);
+
+    const result = await settings({
+      ...validValues,
+      role: "ADMIN",
+      twoFactorEnabled: false,
+      emailVerified: new Date(),
+      preferencesSet: false,
+    } as never);
+
+    expect(result).toEqual({ success: "Settings Updated" });
+    const updateData = vi.mocked(db.user.update).mock.calls[0][0].data as Record<string, unknown>;
+    expect(updateData.role).toBeUndefined();
+    expect(updateData.twoFactorEnabled).toBeUndefined();
+    expect(updateData.emailVerified).toBeUndefined();
+    // preferencesSet is set by the action itself, never taken from the client.
+    expect(updateData.preferencesSet).toBe(true);
   });
 
   it("persists weekStartsOn preference", async () => {

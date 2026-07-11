@@ -5,9 +5,6 @@ vi.mock("@/lib/db", () => ({
     account: {
       update: vi.fn(),
     },
-    budget: {
-      update: vi.fn(),
-    },
     $transaction: vi.fn(),
   },
 }));
@@ -53,7 +50,7 @@ describe("POST /api/reorder", () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json.error).toBe("Invalid type. Must be 'accounts' or 'budgets'");
+    expect(json.error).toBe("Invalid type. Must be 'accounts'");
   });
 
   it("returns 400 when items is not an array", async () => {
@@ -105,28 +102,6 @@ describe("POST /api/reorder", () => {
     expect(db.account.update).toHaveBeenCalledWith({
       where: { id: "acc-2", userId: "user-1" },
       data: { order: 1 },
-    });
-  });
-
-  it("reorders budgets scoped to user via $transaction", async () => {
-    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.$transaction).mockResolvedValue(undefined as never);
-
-    const items = [
-      { id: "bgt-1", order: 0 },
-      { id: "bgt-2", order: 1 },
-      { id: "bgt-3", order: 2 },
-    ];
-
-    const response = await POST(makeRequest({ type: "budgets", items }));
-    const json = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(json.success).toBe(true);
-    expect(db.budget.update).toHaveBeenCalledTimes(3);
-    expect(db.budget.update).toHaveBeenCalledWith({
-      where: { id: "bgt-1", userId: "user-1" },
-      data: { order: 0 },
     });
   });
 

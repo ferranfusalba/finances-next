@@ -38,8 +38,6 @@ import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 
-import { UserRole } from "@prisma/client";
-
 import { SettingsSchema } from "@/schemas";
 import { ModeToggle } from "@/components/nav/TopNav/components/ModeToggle/ModeToggle";
 import { TwoFactorSection } from "@/components/auth/two-factor-section";
@@ -63,7 +61,6 @@ const UserPage = () => {
       newPassword: undefined,
       name: user?.name || undefined,
       email: user?.email || undefined,
-      role: user?.role || undefined,
       userCountry: user?.userCountry || undefined,
       userCurrency: user?.userCurrency || undefined,
       userTimezone: user?.userTimezone || undefined,
@@ -234,31 +231,6 @@ const UserPage = () => {
                 <CardTitle>Preferences</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select
-                        disabled={isPending}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                          <SelectItem value={UserRole.USER}>User</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="userCountry"

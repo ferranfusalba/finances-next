@@ -6,9 +6,6 @@ vi.mock("@/lib/db", () => ({
     accountTransaction: {
       findMany: vi.fn(),
     },
-    budgetTransaction: {
-      findMany: vi.fn(),
-    },
   },
 }));
 
@@ -26,7 +23,6 @@ describe("getUserTransactionLocations", () => {
 
   it("returns empty array when no locations exist", async () => {
     vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([]);
 
     const result = await getUserTransactionLocations("user-1");
 
@@ -38,7 +34,6 @@ describe("getUserTransactionLocations", () => {
       loc("Zürich, CH", "zurich"),
       loc("Barcelona, ES", "barcelona"),
     ] as never);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([]);
 
     const result = await getUserTransactionLocations("user-1");
 
@@ -48,25 +43,10 @@ describe("getUserTransactionLocations", () => {
     ]);
   });
 
-  it("aggregates locations from budget transactions", async () => {
-    vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([
-      loc("Madrid, ES", "madrid"),
-    ] as never);
-
-    const result = await getUserTransactionLocations("user-1");
-
-    expect(result).toEqual([
-      { name: "Madrid, ES", address: "", lat: 0, lng: 0, placeId: "madrid" },
-    ]);
-  });
-
-  it("deduplicates locations across both transaction types by placeId", async () => {
+  it("deduplicates locations by placeId", async () => {
     vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
       loc("Zürich, CH", "zurich"),
       loc("Barcelona, ES", "barcelona"),
-    ] as never);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([
       loc("Zürich, CH", "zurich"),
       loc("London, UK", "london"),
     ] as never);
@@ -85,8 +65,6 @@ describe("getUserTransactionLocations", () => {
     vi.mocked(db.accountTransaction.findMany).mockResolvedValue([
       loc("Zürich, CH", "zurich"),
       loc("Andorra la Vella, AD", "andorra"),
-    ] as never);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([
       loc("Madrid, ES", "madrid"),
     ] as never);
 
@@ -101,16 +79,11 @@ describe("getUserTransactionLocations", () => {
 
   it("queries with correct filters", async () => {
     vi.mocked(db.accountTransaction.findMany).mockResolvedValue([]);
-    vi.mocked(db.budgetTransaction.findMany).mockResolvedValue([]);
 
     await getUserTransactionLocations("user-1");
 
     expect(db.accountTransaction.findMany).toHaveBeenCalledWith({
       where: { Account: { userId: "user-1" }, location: { not: Prisma.DbNull } },
-      select: { location: true },
-    });
-    expect(db.budgetTransaction.findMany).toHaveBeenCalledWith({
-      where: { Budget: { userId: "user-1" }, location: { not: Prisma.DbNull } },
       select: { location: true },
     });
   });

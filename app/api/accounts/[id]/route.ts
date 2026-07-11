@@ -5,10 +5,10 @@ import { db } from "@/lib/db";
 import { toNumber } from "@/lib/utils";
 import { currentUser } from "@/lib/auth";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import { AccountParamsProps } from "@/types/AccountParams";
 import { UpdateAccountSchema } from "@/schemas";
 
-export async function GET(_request: NextRequest, { params }: AccountBudgetParamsProps) {
+export async function GET(_request: NextRequest, { params }: AccountParamsProps) {
   const user = await currentUser();
   if (!user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,7 +33,7 @@ export async function GET(_request: NextRequest, { params }: AccountBudgetParams
   });
 }
 
-export async function PUT(request: NextRequest, { params }: AccountBudgetParamsProps) {
+export async function PUT(request: NextRequest, { params }: AccountParamsProps) {
   const user = await currentUser();
   if (!user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest, { params }: AccountBudgetParamsP
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: AccountBudgetParamsProps
+  { params }: AccountParamsProps
 ) {
   const user = await currentUser();
   if (!user?.id) {

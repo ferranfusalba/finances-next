@@ -19,7 +19,6 @@ export default async function SectionNavMenu({
         className={cn(
           "flex sticky top-0 z-9 w-full",
           { "bg-sky-900": type === "accounts" },
-          { "bg-pink-900": type === "budgets" },
           { "bg-lime-900": type === "data" },
           { "bg-stone-900": type === "settings" },
           { "bg-amber-900": type === "statics" },

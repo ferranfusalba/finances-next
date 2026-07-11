@@ -10,7 +10,7 @@ import AccountTransactionDownload from "@/components/accounts/tables/transaction
 import DeleteAccount from "@/components/accounts/delete/DeleteAccount";
 import EditAccount from "@/components/accounts/edit/EditAccount";
 import BorderChip from "@/components/chips/BorderChip";
-import LayoutAccountBudgetHeader from "@/components/layouts/account-budget/LayoutAccountBudgetHeader";
+import LayoutAccountHeader from "@/components/layouts/account/LayoutAccountHeader";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import {
@@ -25,7 +25,7 @@ import { getUniqueAccountTypes } from "@/lib/utils/accountTypes";
 import { getCurrencyColors } from "@/lib/utils/currency";
 import CurrencyTag from "@/components/chips/CurrencyTag";
 
-import { AccountBudgetParamsProps } from "@/types/AccountBudget";
+import { AccountParamsProps } from "@/types/AccountParams";
 import {
   getUserDefaultTaxRate,
   getUserForeignCurrencies,
@@ -41,18 +41,18 @@ import Layout02a1 from "@/components/layouts/Layout02a1";
 export default async function AccountLayout({
   params,
   searchParams,
-}: AccountBudgetParamsProps) {
+}: AccountParamsProps) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const year = parseYearParam(resolvedSearchParams.year as string | undefined);
 
   const [account, serverSession] = await Promise.all([getAccount(id), auth()]);
 
-  if (!account) {
+  const userId = serverSession?.user?.id as string;
+
+  if (!account || account.userId !== userId) {
     notFound();
   }
-
-  const userId = serverSession?.user?.id as string;
   const userLocale = serverSession?.user?.userLocale ?? "en-US";
 
   const [
@@ -85,7 +85,7 @@ export default async function AccountLayout({
   return (
     <>
       <Layout02a1>
-        <LayoutAccountBudgetHeader>
+        <LayoutAccountHeader>
           <div className="col-span-2 md:col-span-1 grid justify-center content-center">
             <Avatar>
               <AvatarFallback>{account.bankName[0]}</AvatarFallback>
@@ -123,7 +123,7 @@ export default async function AccountLayout({
             />
             <DeleteAccount id={id} />
           </div>
-        </LayoutAccountBudgetHeader>
+        </LayoutAccountHeader>
       </Layout02a1>
       <TransactionUserProvider
         value={{

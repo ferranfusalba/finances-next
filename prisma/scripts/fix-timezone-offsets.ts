@@ -33,7 +33,7 @@ function getTimezoneOffset(ianaId: string, date: Date): string {
 }
 
 async function fixTable(
-  table: "accountTransaction" | "budgetTransaction",
+  table: "accountTransaction",
 ) {
   const transactions = await (db[table] as typeof db.accountTransaction).findMany({
     select: { id: true, dateTime: true, timezoneId: true },
@@ -83,7 +83,6 @@ async function fixUsers() {
 async function main() {
   console.log("Fixing timezone data...\n");
   await fixTable("accountTransaction");
-  await fixTable("budgetTransaction");
   await fixUsers();
   console.log("\nDone!");
 }

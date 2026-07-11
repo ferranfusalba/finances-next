@@ -1,5 +1,4 @@
 import { Account } from "./Account";
-import { Budget } from "./Budget";
 
 export interface User {
   id: string;
@@ -12,7 +11,6 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   accounts?: Array<Account> | null;
-  budgets?: Array<Budget> | null;
   userCountry?: string | null;
   userCurrency?: string | null;
   userTimezone?: string | null;

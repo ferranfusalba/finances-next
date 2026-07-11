@@ -339,7 +339,6 @@ export default function AccountTransactionAdd(props: Props) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <TransactionFormContent
-              variant="account"
               account={props.account}
               hasOpeningTransaction={props.hasOpeningTransaction}
               isTransferDestination={isTransferDestination}

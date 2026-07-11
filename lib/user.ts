@@ -19,24 +19,14 @@ export async function getUserTransactionPayees(id: string) {
 }
 
 export async function getUserForeignCurrencies(userId: string) {
-  const [accountCurrencies, budgetCurrencies] = await Promise.all([
-    db.accountTransaction.findMany({
-      where: { Account: { userId }, foreignCurrency: { not: "" } },
-      select: { foreignCurrency: true },
-      distinct: ["foreignCurrency"],
-    }),
-    db.budgetTransaction.findMany({
-      where: { Budget: { userId }, foreignCurrency: { not: "" } },
-      select: { foreignCurrency: true },
-      distinct: ["foreignCurrency"],
-    }),
-  ]);
+  const accountCurrencies = await db.accountTransaction.findMany({
+    where: { Account: { userId }, foreignCurrency: { not: "" } },
+    select: { foreignCurrency: true },
+    distinct: ["foreignCurrency"],
+  });
 
   const codes = new Set<string>();
   for (const t of accountCurrencies) {
-    if (t.foreignCurrency) codes.add(t.foreignCurrency);
-  }
-  for (const t of budgetCurrencies) {
     if (t.foreignCurrency) codes.add(t.foreignCurrency);
   }
 
@@ -44,19 +34,13 @@ export async function getUserForeignCurrencies(userId: string) {
 }
 
 export async function getUserTransactionLocations(userId: string): Promise<TransactionLocation[]> {
-  const [accountTransactions, budgetTransactions] = await Promise.all([
-    db.accountTransaction.findMany({
-      where: { Account: { userId }, location: { not: Prisma.DbNull } },
-      select: { location: true },
-    }),
-    db.budgetTransaction.findMany({
-      where: { Budget: { userId }, location: { not: Prisma.DbNull } },
-      select: { location: true },
-    }),
-  ]);
+  const accountTransactions = await db.accountTransaction.findMany({
+    where: { Account: { userId }, location: { not: Prisma.DbNull } },
+    select: { location: true },
+  });
 
   const seen = new Map<string, TransactionLocation>();
-  for (const t of [...accountTransactions, ...budgetTransactions]) {
+  for (const t of accountTransactions) {
     const loc = t.location as TransactionLocation | null;
     if (loc?.placeId && !seen.has(loc.placeId)) {
       seen.set(loc.placeId, loc);
@@ -67,22 +51,13 @@ export async function getUserTransactionLocations(userId: string): Promise<Trans
 }
 
 export async function getUserTransactionTags(userId: string) {
-  const [accountTags, budgetTags] = await Promise.all([
-    db.accountTransaction.findMany({
-      where: { Account: { userId }, tags: { isEmpty: false } },
-      select: { tags: true },
-    }),
-    db.budgetTransaction.findMany({
-      where: { Budget: { userId }, tags: { isEmpty: false } },
-      select: { tags: true },
-    }),
-  ]);
+  const accountTags = await db.accountTransaction.findMany({
+    where: { Account: { userId }, tags: { isEmpty: false } },
+    select: { tags: true },
+  });
 
   const tags = new Set<string>();
   for (const t of accountTags) {
-    for (const tag of t.tags) tags.add(tag);
-  }
-  for (const t of budgetTags) {
     for (const tag of t.tags) tags.add(tag);
   }
 

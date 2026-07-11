@@ -5,8 +5,6 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import {
-  FormControl,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -19,13 +17,9 @@ import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { cn } from "@/lib/utils";
 import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
 
-interface Props {
-  variant: "account" | "budget";
-}
-
 const ADD_NEW_VALUE = "__new__";
 
-export default function TransactionFormCategoryFields({ variant }: Props) {
+export default function TransactionFormCategoryFields() {
   const form = useFormContext();
   const { userTransactionCategories } = useTransactionUser();
 
@@ -46,10 +40,8 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
   useEffect(() => {
     if (prevCategory.current === category) return;
     prevCategory.current = category;
-    if (variant === "account") {
-      form.setValue("subcategory", "");
-    }
-  }, [category, form, variant]);
+    form.setValue("subcategory", "");
+  }, [category, form]);
 
   // Clear category and subcategory when transaction type changes
   useEffect(() => {
@@ -60,56 +52,11 @@ export default function TransactionFormCategoryFields({ variant }: Props) {
     }
     if (prevCategoryType.current === categoryType) return;
     prevCategoryType.current = categoryType;
-    if (variant === "account") {
-      form.setValue("category", "");
-      form.setValue("subcategory", "");
-      setIsAddingNewCategory(false);
-      setIsAddingNewSubcategory(false);
-    }
-  }, [categoryType, form, variant]);
-
-  if (variant === "budget") {
-    return (
-      <>
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input
-                  id="category"
-                  type="text"
-                  placeholder="Digital Subscriptions"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="subcategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subcategory</FormLabel>
-              <FormControl>
-                <Input
-                  id="subcategory"
-                  type="text"
-                  placeholder="YouTube Premium"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </>
-    );
-  }
+    form.setValue("category", "");
+    form.setValue("subcategory", "");
+    setIsAddingNewCategory(false);
+    setIsAddingNewSubcategory(false);
+  }, [categoryType, form]);
 
   const categories = userTransactionCategories
     ?.filter((cat) => cat.name && cat.type === categoryType)

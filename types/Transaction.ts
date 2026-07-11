@@ -39,8 +39,3 @@ export interface AccountTransaction extends Transaction {
   typeTransferDestination?: string | null;
   typeTransferOrigin?: string | null;
 }
-
-export interface BudgetTransaction extends Transaction {
-  balance: number;
-  budgetId: string;
-}

@@ -31,7 +31,6 @@ import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
 import { Account } from "@/types/Account";
 
 interface Props {
-  variant: "account" | "budget";
   account?: Account | null;
   defaultCurrency?: string;
   hasOpeningTransaction?: boolean;
@@ -40,7 +39,6 @@ interface Props {
 }
 
 export default function TransactionFormContent({
-  variant,
   account,
   defaultCurrency,
   hasOpeningTransaction,
@@ -74,7 +72,6 @@ export default function TransactionFormContent({
   const prevSubcategory = useRef(watchedSubcategory);
 
   useEffect(() => {
-    if (variant !== "account") return;
     if (isInitialMount.current) {
       isInitialMount.current = false;
       prevCategory.current = watchedCategory;
@@ -88,46 +85,44 @@ export default function TransactionFormContent({
     prevCategory.current = watchedCategory;
     prevSubcategory.current = watchedSubcategory;
     form.setValue("recurring", presetRecurring ?? "");
-  }, [watchedCategory, watchedSubcategory, presetRecurring, form, variant]);
+  }, [watchedCategory, watchedSubcategory, presetRecurring, form]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
       <div className="space-y-4">
-        {variant === "account" && <TransactionFormPayeeField />}
-        <TransactionFormBasicFields variant={variant} account={account} hasOpeningTransaction={hasOpeningTransaction} isTransferDestination={isTransferDestination} transferOriginAccountId={transferOriginAccountId} />
+        <TransactionFormPayeeField />
+        <TransactionFormBasicFields account={account} hasOpeningTransaction={hasOpeningTransaction} isTransferDestination={isTransferDestination} transferOriginAccountId={transferOriginAccountId} />
         <TransactionFormDateTimeFields />
       </div>
       <div className="space-y-4">
-        <TransactionFormCategoryFields variant={variant} />
-        {variant === "account" && (
-          <FormField
-            control={form.control}
-            name="recurring"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Recurring</FormLabel>
-                <Select
-                  value={field.value || ""}
-                  onValueChange={(val) => field.onChange(val === "NONE" ? "" : val)}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Not recurring" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="NONE">Not recurring</SelectItem>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-        )}
+        <TransactionFormCategoryFields />
+        <FormField
+          control={form.control}
+          name="recurring"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Recurring</FormLabel>
+              <Select
+                value={field.value || ""}
+                onValueChange={(val) => field.onChange(val === "NONE" ? "" : val)}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Not recurring" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="NONE">Not recurring</SelectItem>
+                  <SelectItem value="MONTHLY">Monthly</SelectItem>
+                  <SelectItem value="YEARLY">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
         <TransactionFormForeignCurrencyFields accountCurrency={currency} />
         <TransactionFormMetadataFields />
-        {variant === "account" && <TransactionFormTaxFields />}
+        <TransactionFormTaxFields />
       </div>
     </div>
   );

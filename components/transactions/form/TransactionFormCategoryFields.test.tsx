@@ -71,7 +71,7 @@ function Wrapper({ defaultType = "" }: { defaultType?: string }) {
     <TransactionUserProvider value={defaultContextValue}>
       <FormProvider {...form}>
         <form>
-          <TransactionFormCategoryFields variant="account" />
+          <TransactionFormCategoryFields />
         </form>
       </FormProvider>
     </TransactionUserProvider>

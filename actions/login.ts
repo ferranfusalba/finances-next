@@ -10,9 +10,6 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { getUserByEmail } from "@/data/user";
 import { sendVerificationEmail } from "@/lib/mail";
 import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
-import { decryptSecret, verifyTotpCode } from "@/lib/totp";
-import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
 
 const limiter = createRateLimiter({
   name: "login",
@@ -54,50 +51,29 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { success: "Confirmation email sent" };
   }
 
-  // Two-factor authentication check
-  if (existingUser.twoFactorEnabled && existingUser.totpSecret) {
-    if (!code) {
-      return { twoFactor: true };
-    }
-
-    const secret = decryptSecret(existingUser.totpSecret);
-    const isValidTotp = verifyTotpCode(secret, code);
-
-    if (!isValidTotp) {
-      // Try backup codes
-      const backupCodes = await db.twoFactorBackupCode.findMany({
-        where: { userId: existingUser.id },
-      });
-
-      let backupMatch = false;
-      for (const backupCode of backupCodes) {
-        const match = await bcrypt.compare(code, backupCode.code);
-        if (match) {
-          await db.twoFactorBackupCode.delete({
-            where: { id: backupCode.id },
-          });
-          backupMatch = true;
-          break;
-        }
-      }
-
-      if (!backupMatch) {
-        return { error: "Invalid code" };
-      }
-    }
+  // Prompt for a two-factor code when needed. The code itself is verified in
+  // the credentials `authorize()` callback (the actual security boundary), so
+  // it is passed through to `signIn` below rather than checked here.
+  if (existingUser.twoFactorEnabled && existingUser.totpSecret && !code) {
+    return { twoFactor: true };
   }
 
   try {
     await signIn("credentials", {
       email,
       password,
+      code,
       redirectTo: DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return { error: "Invalid credentials! " };
+          // authorize() returns null for a bad password or a bad 2FA code.
+          if (existingUser.twoFactorEnabled && code) {
+            return { error: "Invalid code" };
+          }
+          return { error: "Invalid credentials!" };
         default:
           return { error: "Something went wrong!" };
       }

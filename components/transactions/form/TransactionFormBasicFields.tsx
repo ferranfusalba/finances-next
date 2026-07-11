@@ -25,14 +25,13 @@ import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { Account } from "@/types/Account";
 
 interface Props {
-  variant: "account" | "budget";
   account?: Account | null;
   hasOpeningTransaction?: boolean;
   isTransferDestination?: boolean;
   transferOriginAccountId?: string;
 }
 
-export default function TransactionFormBasicFields({ variant, account, hasOpeningTransaction, isTransferDestination, transferOriginAccountId }: Props) {
+export default function TransactionFormBasicFields({ account, hasOpeningTransaction, isTransferDestination, transferOriginAccountId }: Props) {
   const form = useFormContext();
   const { userAccounts } = useTransactionUser();
 
@@ -43,7 +42,6 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
   );
 
   const handleAmountPlaceholder = () => {
-    if (variant === "budget") return "Amount";
     switch (form.getValues().type) {
       case "":
         return "Select a type first";
@@ -95,14 +93,8 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
               <SelectContent>
                 <SelectItem value="INCOME">INCOME</SelectItem>
                 <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                {variant === "account" ? (
-                  <SelectItem value="TRANSFER">TRANSFER</SelectItem>
-                ) : (
-                  <SelectItem value="TRANSFER" disabled>
-                    TRANSFER
-                  </SelectItem>
-                )}
-                {variant === "account" && !hasOpeningTransaction && (
+                <SelectItem value="TRANSFER">TRANSFER</SelectItem>
+                {!hasOpeningTransaction && (
                   <SelectItem value="OPENING">OPENING</SelectItem>
                 )}
               </SelectContent>
@@ -111,7 +103,7 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
           </FormItem>
         )}
       />
-      {variant === "account" && selectedType === "TRANSFER" && (
+      {selectedType === "TRANSFER" && (
         isTransferDestination ? (
           <FormItem>
             <FormLabel>Transfer from Origin Account</FormLabel>
@@ -196,7 +188,7 @@ export default function TransactionFormBasicFields({ variant, account, hasOpenin
                 type="number"
                 inputMode="decimal"
                 step="0.01"
-                disabled={variant === "account" && selectedType === ""}
+                disabled={selectedType === ""}
                 min={selectedType === "OPENING" ? undefined : 0}
                 placeholder={handleAmountPlaceholder()}
                 {...field}

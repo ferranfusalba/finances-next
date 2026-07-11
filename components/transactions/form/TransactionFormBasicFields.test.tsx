@@ -56,13 +56,11 @@ const defaultContextValue = {
 
 function Wrapper({
   hasOpeningTransaction = false,
-  variant = "account",
   isTransferDestination = false,
   transferOriginAccountId,
   defaultType = "",
 }: {
   hasOpeningTransaction?: boolean;
-  variant?: "account" | "budget";
   isTransferDestination?: boolean;
   transferOriginAccountId?: string;
   defaultType?: string;
@@ -82,7 +80,6 @@ function Wrapper({
       <FormProvider {...form}>
         <form>
           <TransactionFormBasicFields
-            variant={variant}
             account={defaultContextValue.userAccounts[0]}
             hasOpeningTransaction={hasOpeningTransaction}
             isTransferDestination={isTransferDestination}
@@ -117,9 +114,9 @@ describe("TransactionFormBasicFields", () => {
     expect(optionTexts).not.toContain("OPENING");
   });
 
-  it("shows account-specific type options in account variant", async () => {
+  it("shows all account type options", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<Wrapper variant="account" />);
+    render(<Wrapper />);
 
     await user.click(screen.getByText("Select a type"));
 
@@ -129,19 +126,6 @@ describe("TransactionFormBasicFields", () => {
     expect(optionTexts).toContain("EXPENSE");
     expect(optionTexts).toContain("TRANSFER");
     expect(optionTexts).toContain("OPENING");
-  });
-
-  it("hides account-only types in budget variant", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<Wrapper variant="budget" />);
-
-    await user.click(screen.getByText("Select a type"));
-
-    const options = screen.getAllByRole("option");
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).toContain("INCOME");
-    expect(optionTexts).toContain("EXPENSE");
-    expect(optionTexts).not.toContain("OPENING");
   });
 
   it("disables type select when editing transfer from destination side", () => {

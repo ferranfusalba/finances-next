@@ -30,7 +30,6 @@ model User {
   createdAt                 DateTime                  @default(now())
   updatedAt                 DateTime                  @updatedAt
   accounts                  Account[]
-  budgets                   Budget[]
   salaries                  Salary[]
   userCountry               String                    @default("") @map("defaultCountry")
   userCurrency              String                    @default("") @map("defaultCurrency")
@@ -127,31 +126,31 @@ model PasswordResetToken {
 }
 
 model AccountTransaction {
-  id                          String          @id @default(uuid())
-  createdAt                   DateTime        @default(now())
-  updatedAt                   DateTime        @updatedAt
-  payee                       String          @default("")
+  id                          String         @id @default(uuid())
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
+  payee                       String         @default("")
   concept                     String
   type                        String
-  typeTransferOrigin          String?         @default("")
-  typeTransferDestination     String?         @default("")
+  typeTransferOrigin          String?        @default("")
+  typeTransferDestination     String?        @default("")
   transferId                  String?
   currency                    String
   amount                      Decimal
-  foreignCurrency             String?         @default("")
-  foreignCurrencyAmount       Decimal?        @default(0.00)
-  foreignCurrencyExchangeRate Decimal?        @default(0.00)
-  category                    String          @default("")
-  subcategory                 String?         @default("")
+  foreignCurrency             String?        @default("")
+  foreignCurrencyAmount       Decimal?       @default(0.00)
+  foreignCurrencyExchangeRate Decimal?       @default(0.00)
+  category                    String         @default("")
+  subcategory                 String?        @default("")
   tags                        String[]
-  dateTime                    DateTime        @default(now())
-  timezoneId                  String?         @default("") @map("timezone")
-  timezoneOffset              String?         @default("")
+  dateTime                    DateTime       @default(now())
+  timezoneId                  String?        @default("") @map("timezone")
+  timezoneOffset              String?        @default("")
   location                    Json?
   notes                       String
   recurring                   String?
   taxLines                    TaxLine[]
-  Account                     Account?        @relation(fields: [accountId], references: [id])
+  Account                     Account?       @relation(fields: [accountId], references: [id])
   accountId                   String
   salaryPayment               SalaryPayment?
 
@@ -166,32 +165,6 @@ model TaxLine {
   taxAmount            Decimal
   accountTransaction   AccountTransaction @relation(fields: [accountTransactionId], references: [id], onDelete: Cascade)
   accountTransactionId String
-}
-
-model BudgetTransaction {
-  id                          String   @id @default(uuid())
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
-  concept                     String
-  type                        String
-  currency                    String
-  amount                      Decimal
-  balance                     Decimal
-  foreignCurrency             String?  @default("")
-  foreignCurrencyAmount       Decimal? @default(0.00)
-  foreignCurrencyExchangeRate Decimal? @default(0.00)
-  category                    String   @default("")
-  subcategory                 String?  @default("")
-  tags                        String[]
-  dateTime                    DateTime @default(now())
-  timezoneId                  String?  @default("") @map("timezone")
-  timezoneOffset              String?  @default("")
-  location                    Json?
-  notes                       String
-  Budget                      Budget?  @relation(fields: [budgetId], references: [id])
-  budgetId                    String
-
-  @@index([budgetId, dateTime])
 }
 
 model Salary {
@@ -254,26 +227,6 @@ model Account {
   User            User?                @relation(fields: [userId], references: [id])
   userId          String?
   transactions    AccountTransaction[]
-
-  @@unique([userId, code])
-}
-
-model Budget {
-  id              String              @id @default(uuid())
-  order           Int                 @default(autoincrement())
-  name            String
-  code            String
-  active          Boolean
-  type            String
-  description     String?
-  defaultCurrency String              @default("")
-  initialBalance  Decimal
-  currentBalance  Decimal             @default(0)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  User            User?               @relation(fields: [userId], references: [id])
-  userId          String?
-  transactions    BudgetTransaction[]
 
   @@unique([userId, code])
 }

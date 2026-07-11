@@ -4,19 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
+import { recomputeAccountBalance } from "@/lib/accounts";
 import { CreateAccountTransactionSchema } from "@/schemas";
-
-async function recomputeBalance(accountId: string) {
-  const result = await db.accountTransaction.aggregate({
-    where: { accountId },
-    _sum: { amount: true },
-  });
-
-  await db.account.update({
-    where: { id: accountId },
-    data: { currentBalance: result._sum.amount ?? 0 },
-  });
-}
 
 export async function POST(request: NextRequest) {
   const user = await currentUser();
@@ -101,7 +90,7 @@ export async function POST(request: NextRequest) {
       data: transactionData,
     });
 
-    await recomputeBalance(data.accountId);
+    await recomputeAccountBalance(data.accountId);
 
     // For transfers, create the mirror transaction on the destination account
     if (data.type === "TRANSFER" && data.typeTransferDestination) {
@@ -124,7 +113,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      await recomputeBalance(data.typeTransferDestination);
+      await recomputeAccountBalance(data.typeTransferDestination);
     }
 
     return NextResponse.json(newTransaction);

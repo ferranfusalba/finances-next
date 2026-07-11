@@ -1,4 +1,4 @@
-export interface AccountBudgetParamsProps {
+export interface AccountParamsProps {
   params: Promise<{
     id: string;
   }>;

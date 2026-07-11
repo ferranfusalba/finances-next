@@ -166,7 +166,7 @@ describe("login", () => {
       password: "wrong",
     });
 
-    expect(result).toEqual({ error: "Invalid credentials! " });
+    expect(result).toEqual({ error: "Invalid credentials!" });
   });
 
   it("returns generic error for other AuthError types", async () => {
@@ -223,7 +223,9 @@ describe("login", () => {
     expect(signIn).not.toHaveBeenCalled();
   });
 
-  it("proceeds to signIn when valid TOTP code provided", async () => {
+  it("passes the code through to signIn when a code is provided", async () => {
+    // Verification/consumption of the code happens in authorize(), so the
+    // action just forwards it rather than checking it.
     vi.mocked(getUserByEmail).mockResolvedValue({
       id: "user-1",
       email: "user@example.com",
@@ -232,7 +234,6 @@ describe("login", () => {
       twoFactorEnabled: true,
       totpSecret: "encrypted-secret",
     } as never);
-    vi.mocked(verifyTotpCode).mockReturnValue(true);
     vi.mocked(signIn).mockResolvedValue(undefined);
 
     await login({
@@ -244,11 +245,12 @@ describe("login", () => {
     expect(signIn).toHaveBeenCalledWith("credentials", {
       email: "user@example.com",
       password: "password123",
+      code: "123456",
       redirectTo: "/",
     });
   });
 
-  it("returns error when invalid TOTP code and no matching backup code", async () => {
+  it("returns 'Invalid code' when 2FA sign-in is rejected with a code present", async () => {
     vi.mocked(getUserByEmail).mockResolvedValue({
       id: "user-1",
       email: "user@example.com",
@@ -257,8 +259,10 @@ describe("login", () => {
       twoFactorEnabled: true,
       totpSecret: "encrypted-secret",
     } as never);
-    vi.mocked(verifyTotpCode).mockReturnValue(false);
-    vi.mocked(db.twoFactorBackupCode.findMany).mockResolvedValue([]);
+
+    const authError = new AuthError();
+    authError.type = "CredentialsSignin";
+    vi.mocked(signIn).mockRejectedValue(authError);
 
     const result = await login({
       email: "user@example.com",
@@ -267,35 +271,5 @@ describe("login", () => {
     });
 
     expect(result).toEqual({ error: "Invalid code" });
-    expect(signIn).not.toHaveBeenCalled();
-  });
-
-  it("accepts a valid backup code and deletes it", async () => {
-    vi.mocked(getUserByEmail).mockResolvedValue({
-      id: "user-1",
-      email: "user@example.com",
-      password: "hashed",
-      emailVerified: new Date(),
-      twoFactorEnabled: true,
-      totpSecret: "encrypted-secret",
-    } as never);
-    vi.mocked(verifyTotpCode).mockReturnValue(false);
-    vi.mocked(db.twoFactorBackupCode.findMany).mockResolvedValue([
-      { id: "bc-1", userId: "user-1", code: "hashed-backup" },
-    ]);
-    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
-    vi.mocked(db.twoFactorBackupCode.delete).mockResolvedValue({} as never);
-    vi.mocked(signIn).mockResolvedValue(undefined);
-
-    await login({
-      email: "user@example.com",
-      password: "password123",
-      code: "abc12345",
-    });
-
-    expect(db.twoFactorBackupCode.delete).toHaveBeenCalledWith({
-      where: { id: "bc-1" },
-    });
-    expect(signIn).toHaveBeenCalled();
   });
 });

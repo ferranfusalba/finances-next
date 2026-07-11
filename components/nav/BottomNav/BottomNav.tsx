@@ -1,4 +1,4 @@
-import { TableBuilt, Currency, ChartLineData } from "@carbon/icons-react";
+import { Currency, ChartLineData } from "@carbon/icons-react";
 
 import BottomNavSection from "@/components/nav/BottomNav/BottomNavSection";
 
@@ -14,7 +14,6 @@ const routes: Array<Section> = [
     name: "Accounts",
     icon: <Currency />,
   },
-  { path: "/budgets", name: "Budgets", icon: <TableBuilt /> },
   { path: "/data", name: "Data", icon: <ChartLineData /> },
 ];
 
@@ -24,7 +23,7 @@ export default function BottomNav() {
       aria-label="Sections"
       className="h-12 items-center bg-white dark:bg-black border-t border-t-gray-400 shadow-gray-400"
     >
-      <ul className="grid grid-cols-3 md:flex w-full h-full">
+      <ul className="grid grid-cols-2 md:flex w-full h-full">
         {routes.map((route) => {
           return <BottomNavSection key={route.path} section={route} />;
         })}

@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 export default function SectionNavMenuAdd({ type }: { type: string }) {
   const pathname = usePathname();
   const newAccountSelected = pathname === "/accounts/new";
-  const newBudgetSelected = pathname === "/budgets/new";
 
   return (
     <>
@@ -20,10 +19,6 @@ export default function SectionNavMenuAdd({ type }: { type: string }) {
             {
               "bg-black border-black text-white dark:bg-white dark:border-white dark:text-sky-900":
                 newAccountSelected,
-            },
-            {
-              "bg-black border-black text-white dark:bg-white dark:border-white dark:text-pink-900":
-                newBudgetSelected,
             }
           )}
         >

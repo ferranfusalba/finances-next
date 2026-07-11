@@ -1,10 +1,8 @@
-import { UserRole } from "@prisma/client";
 import * as z from "zod";
 
 export const SettingsSchema = z
   .object({
     name: z.optional(z.string()),
-    role: z.enum([UserRole.ADMIN, UserRole.USER]),
     email: z.optional(z.string().email()),
     password: z.optional(z.string().min(6)),
     newPassword: z.optional(z.string().min(6)),
@@ -124,28 +122,6 @@ export const UpdateAccountSchema = z.object({
   order: z.number().optional(),
 });
 
-export const CreateBudgetSchema = z.object({
-  name: z.string().min(1),
-  code: z.string().min(1),
-  active: z.boolean(),
-  type: z.string().min(1),
-  description: z.string().nullable().optional(),
-  defaultCurrency: z.string().default(""),
-  initialBalance: z.number(),
-});
-
-export const UpdateBudgetSchema = z.object({
-  name: z.string().min(1).optional(),
-  code: z.string().min(1).optional(),
-  active: z.boolean().optional(),
-  type: z.string().min(1).optional(),
-  description: z.string().nullable().optional(),
-  defaultCurrency: z.string().optional(),
-  initialBalance: z.number().optional(),
-  currentBalance: z.number().optional(),
-  order: z.number().optional(),
-});
-
 export const CreateAccountTransactionSchema = z.object({
   payee: z.string().default(""),
   concept: z.string().default(""),
@@ -204,21 +180,3 @@ export const UpdateAccountTransactionSchema = z.object({
   accountId: z.string().min(1).optional(),
 });
 
-export const CreateBudgetTransactionSchema = z.object({
-  concept: z.string().default(""),
-  type: z.string().min(1),
-  currency: z.string().min(1),
-  amount: z.number(),
-  foreignCurrency: z.string().nullable().optional(),
-  foreignCurrencyAmount: z.number().nullable().optional(),
-  foreignCurrencyExchangeRate: z.number().nullable().optional(),
-  category: z.string().default(""),
-  subcategory: z.string().nullable().optional(),
-  tags: z.array(z.string()).optional(),
-  dateTime: z.string().or(z.date()),
-  timezoneId: z.string().nullable().optional(),
-  timezoneOffset: z.string().nullable().optional(),
-  location: TransactionLocationSchema.nullable().optional(),
-  notes: z.string(),
-  budgetId: z.string().min(1),
-});

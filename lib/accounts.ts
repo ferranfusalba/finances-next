@@ -20,6 +20,18 @@ export async function getAccounts(userId: string) {
   }));
 }
 
+export async function recomputeAccountBalance(accountId: string) {
+  const result = await db.accountTransaction.aggregate({
+    where: { accountId },
+    _sum: { amount: true },
+  });
+
+  await db.account.update({
+    where: { id: accountId },
+    data: { currentBalance: result._sum.amount ?? 0 },
+  });
+}
+
 export async function getAccount(id: string) {
   const account = await db.account.findUnique({
     where: {

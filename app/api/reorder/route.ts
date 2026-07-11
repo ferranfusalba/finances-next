@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
 
   const { type, items } = await request.json();
 
-  if (type !== "accounts" && type !== "budgets") {
+  if (type !== "accounts") {
     return NextResponse.json(
-      { error: "Invalid type. Must be 'accounts' or 'budgets'" },
+      { error: "Invalid type. Must be 'accounts'" },
       { status: 400 }
     );
   }
@@ -28,15 +28,10 @@ export async function POST(request: NextRequest) {
   try {
     // Scope updates to only resources owned by the current user
     const updates = items.map((item: { id: string; order: number }) =>
-      type === "accounts"
-        ? db.account.update({
-            where: { id: item.id, userId: user.id },
-            data: { order: item.order },
-          })
-        : db.budget.update({
-            where: { id: item.id, userId: user.id },
-            data: { order: item.order },
-          })
+      db.account.update({
+        where: { id: item.id, userId: user.id },
+        data: { order: item.order },
+      })
     );
 
     await db.$transaction(updates);
