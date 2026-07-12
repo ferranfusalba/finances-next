@@ -284,6 +284,8 @@ describe("CreateAccountSchema", () => {
     defaultCurrency: "USD",
     country: "US",
     userId: "user-1",
+    openingBalance: 0,
+    openingDate: "2024-01-01T12:00:00.000Z",
   };
 
   it("accepts a valid account", () => {
@@ -291,11 +293,35 @@ describe("CreateAccountSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("defaults currentBalance to 0 when omitted", () => {
-    const result = CreateAccountSchema.safeParse(validAccount);
+  it("requires an opening balance and date", () => {
+    // The starting balance is not recoverable once the create form is gone: an
+    // account made without one silently starts from zero.
+    for (const key of ["openingBalance", "openingDate"]) {
+      const { [key]: _omitted, ...withoutIt } = validAccount as Record<
+        string,
+        unknown
+      >;
+      expect(CreateAccountSchema.safeParse(withoutIt).success).toBe(false);
+    }
+  });
+
+  it("accepts a negative opening balance", () => {
+    // An account may legitimately open in the red.
+    const result = CreateAccountSchema.safeParse({
+      ...validAccount,
+      openingBalance: -250.5,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("strips currentBalance — it is derived from transactions, not supplied", () => {
+    const result = CreateAccountSchema.safeParse({
+      ...validAccount,
+      currentBalance: 999999,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.currentBalance).toBe(0);
+      expect(result.data).not.toHaveProperty("currentBalance");
     }
   });
 

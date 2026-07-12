@@ -49,7 +49,7 @@ describe("EditAccount", () => {
 
   it("renders the edit trigger button", () => {
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     expect(
@@ -60,7 +60,7 @@ describe("EditAccount", () => {
   it("shows edit dialog when trigger is clicked", async () => {
     const user = userEvent.setup();
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     await user.click(screen.getByRole("button", { name: "Edit account" }));
@@ -72,7 +72,7 @@ describe("EditAccount", () => {
   it("pre-fills form with account data", async () => {
     const user = userEvent.setup();
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     await user.click(screen.getByRole("button", { name: "Edit account" }));
@@ -87,7 +87,7 @@ describe("EditAccount", () => {
   it("calls PUT endpoint on save", async () => {
     const user = userEvent.setup();
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     await user.click(screen.getByRole("button", { name: "Edit account" }));
@@ -109,7 +109,7 @@ describe("EditAccount", () => {
   it("shows success toast and refreshes on successful update", async () => {
     const user = userEvent.setup();
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     await user.click(screen.getByRole("button", { name: "Edit account" }));
@@ -130,7 +130,7 @@ describe("EditAccount", () => {
 
     const user = userEvent.setup();
     render(
-      <EditAccount account={account} />,
+      <EditAccount account={account} bankNames={["Existing Bank", "Other Bank"]} />,
     );
 
     await user.click(screen.getByRole("button", { name: "Edit account" }));

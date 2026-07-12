@@ -5,46 +5,46 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { TransactionUserProvider } from "@/contexts/TransactionUserContext";
 
+import type { AccountTypeValue } from "@/lib/utils/account";
+import type { Account } from "@/types/Account";
+
 import TransactionFormBasicFields from "./TransactionFormBasicFields";
+
+function makeAccount(
+  id: string,
+  name: string,
+  type: AccountTypeValue,
+  defaultCurrency = "EUR",
+): Account {
+  return {
+    id,
+    name,
+    bankName: "Bank",
+    defaultCurrency,
+    order: 0,
+    code: id,
+    active: true,
+    currentBalance: 0,
+    number: null,
+    country: "",
+    type,
+    description: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+const accounts: Account[] = [
+  makeAccount("a1", "Main", "CHECKING"),
+  makeAccount("a2", "Savings", "SAVINGS", "USD"),
+  makeAccount("a3", "Fondos", "INVESTMENT"),
+];
 
 const defaultContextValue = {
   userId: "u1",
   userLocale: "en",
   userTimezone: "",
-  userAccounts: [
-    {
-      id: "a1",
-      name: "Main",
-      bankName: "Bank",
-      defaultCurrency: "EUR",
-      order: 0,
-      code: "a1",
-      active: true,
-      currentBalance: 0,
-      number: null,
-      country: "",
-      type: "",
-      description: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "a2",
-      name: "Savings",
-      bankName: "Bank",
-      defaultCurrency: "USD",
-      order: 1,
-      code: "a2",
-      active: true,
-      currentBalance: 0,
-      number: null,
-      country: "",
-      type: "",
-      description: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ],
+  userAccounts: accounts,
   userTransactionPayees: [],
   userTransactionCategories: [],
   userDefaultTaxRate: 0,
@@ -54,12 +54,12 @@ const defaultContextValue = {
 };
 
 function Wrapper({
-  hasOpeningTransaction = false,
+  accountType = "CHECKING",
   isTransferDestination = false,
   transferOriginAccountId,
   defaultType = "",
 }: {
-  hasOpeningTransaction?: boolean;
+  accountType?: AccountTypeValue;
   isTransferDestination?: boolean;
   transferOriginAccountId?: string;
   defaultType?: string;
@@ -79,8 +79,7 @@ function Wrapper({
       <FormProvider {...form}>
         <form>
           <TransactionFormBasicFields
-            account={defaultContextValue.userAccounts[0]}
-            hasOpeningTransaction={hasOpeningTransaction}
+            account={makeAccount("a1", "Main", accountType)}
             isTransferDestination={isTransferDestination}
             transferOriginAccountId={transferOriginAccountId}
           />
@@ -90,41 +89,97 @@ function Wrapper({
   );
 }
 
+async function openTypeOptions(accountType?: AccountTypeValue) {
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  render(<Wrapper accountType={accountType} />);
+  await user.click(screen.getByText("Select a type"));
+  return screen.getAllByRole("option").map((o) => o.textContent);
+}
+
 describe("TransactionFormBasicFields", () => {
-  it("shows OPENING option when account has no opening transaction", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<Wrapper hasOpeningTransaction={false} />);
+  describe("type options follow the account type", () => {
+    it.each(["CHECKING", "SAVINGS", "CASH", "PREPAID"] as const)(
+      "offers only Income, Expense and Transfer on %s",
+      async (accountType) => {
+        const options = await openTypeOptions(accountType);
 
-    await user.click(screen.getByText("Select a type"));
+        expect(options).toEqual(["Income", "Expense", "Transfer"]);
+      },
+    );
 
-    const options = screen.getAllByRole("option");
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).toContain("OPENING");
+    it("offers only market movement and transfers on INVESTMENT", async () => {
+      // The sparse investment form is a consequence of the allowed-types table,
+      // not a special case in the form: the field-heavy types are simply
+      // unreachable here.
+      const options = await openTypeOptions("INVESTMENT");
+
+      expect(options).toEqual(["Return", "Rounding", "Transfer"]);
+    });
+
+    it("offers the cash-leg types on INVESTMENT_CASH", async () => {
+      const options = await openTypeOptions("INVESTMENT_CASH");
+
+      expect(options).toEqual([
+        "Transfer",
+        "Contribution",
+        "Withdrawal",
+        "Fee",
+        "Withholding",
+      ]);
+    });
+
+    it("keeps INVESTMENT_LEGACY exactly as it was", async () => {
+      const options = await openTypeOptions("INVESTMENT_LEGACY");
+
+      expect(options).toEqual([
+        "Income",
+        "Expense",
+        "Transfer",
+        "Return",
+        "Withholding",
+        "Rounding",
+      ]);
+    });
   });
 
-  it("hides OPENING option when account already has opening transaction", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<Wrapper hasOpeningTransaction={true} />);
+  describe("Opening is never a choice", () => {
+    it.each(["CHECKING", "SAVINGS", "CASH", "PREPAID", "INVESTMENT"] as const)(
+      "never offers Opening on %s",
+      async (accountType) => {
+        // It is written at account creation, or via the missing-opening banner —
+        // never picked from the dropdown.
+        const options = await openTypeOptions(accountType);
 
-    await user.click(screen.getByText("Select a type"));
+        expect(options).not.toContain("Opening");
+      },
+    );
 
-    const options = screen.getAllByRole("option");
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).not.toContain("OPENING");
-  });
+    it("shows Opening, locked, when the row already is one", async () => {
+      // The banner opens this same form with the type pre-set; editing an
+      // existing opening lands here too. Either way it is the only option and
+      // the select is disabled — an opening cannot become an expense.
+      render(<Wrapper defaultType="OPENING" />);
 
-  it("shows all account type options", async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<Wrapper />);
+      const typeSelect = screen.getByRole("combobox", { name: "Type" });
+      expect(typeSelect).toBeDisabled();
+      expect(typeSelect).toHaveTextContent("Opening");
+    });
 
-    await user.click(screen.getByText("Select a type"));
+    it("lets an opening go negative", () => {
+      const { container } = render(<Wrapper defaultType="OPENING" />);
 
-    const options = screen.getAllByRole("option");
-    const optionTexts = options.map((o) => o.textContent);
-    expect(optionTexts).toContain("INCOME");
-    expect(optionTexts).toContain("EXPENSE");
-    expect(optionTexts).toContain("TRANSFER");
-    expect(optionTexts).toContain("OPENING");
+      // An account may legitimately open in the red — no min=0 floor.
+      expect(container.querySelector("#amountForm")).not.toHaveAttribute(
+        "min",
+        "0",
+      );
+    });
+
+    it("keeps the min=0 floor on an ordinary expense", () => {
+      const { container } = render(<Wrapper defaultType="EXPENSE" />);
+
+      expect(container.querySelector("#amountForm")).toHaveAttribute("min", "0");
+    });
   });
 
   it("disables type select when editing transfer from destination side", () => {

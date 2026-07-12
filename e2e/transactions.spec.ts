@@ -58,9 +58,9 @@ test.describe("Account Transactions", () => {
       .getByPlaceholder(/1x Basler/)
       .fill("E2E Income Test");
 
-    // Select type: INCOME
+    // Select type: Income
     await dialog.getByRole("combobox", { name: "Type" }).click();
-    await page.getByRole("option", { name: "INCOME", exact: true }).click();
+    await page.getByRole("option", { name: "Income", exact: true }).click();
 
     // Fill amount
     await dialog.getByPlaceholder("Amount").fill("100.50");
@@ -106,9 +106,9 @@ test.describe("Account Transactions", () => {
       .getByPlaceholder(/1x Basler/)
       .fill("E2E Expense Test");
 
-    // Select type: EXPENSE
+    // Select type: Expense
     await dialog.getByRole("combobox", { name: "Type" }).click();
-    await page.getByRole("option", { name: "EXPENSE", exact: true }).click();
+    await page.getByRole("option", { name: "Expense", exact: true }).click();
 
     // Fill amount
     await dialog.getByPlaceholder("Amount").fill("50.25");
@@ -161,9 +161,9 @@ test.describe("Account Transactions", () => {
       .getByPlaceholder(/1x Basler/)
       .fill("E2E Transfer Test");
 
-    // Select type: TRANSFER
+    // Select type: Transfer
     await dialog.getByRole("combobox", { name: "Type" }).click();
-    await page.getByRole("option", { name: "TRANSFER" }).click();
+    await page.getByRole("option", { name: "Transfer", exact: true }).click();
 
     // Select destination account
     await dialog
@@ -286,7 +286,7 @@ test.describe("Transfer Sync", () => {
     await addDialog.getByPlaceholder(/1x Basler/).fill("Sync Test Original");
 
     await addDialog.getByRole("combobox", { name: "Type" }).click();
-    await page.getByRole("option", { name: "TRANSFER" }).click();
+    await page.getByRole("option", { name: "Transfer", exact: true }).click();
 
     await addDialog
       .getByRole("combobox", { name: /Transfer to Destination/ })

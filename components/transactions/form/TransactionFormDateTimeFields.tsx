@@ -97,7 +97,7 @@ export default function TransactionFormDateTimeFields() {
           <FormItem>
             <FormLabel>Time</FormLabel>
             <FormControl>
-              <Input type="time" {...field} />
+              <Input id="time" type="time" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

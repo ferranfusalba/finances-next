@@ -92,7 +92,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -143,7 +143,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 1 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -167,7 +167,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -189,7 +189,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -211,7 +211,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
     vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
       accountId: "acc-1",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockRejectedValue(
       new Error("DB error"),
     );
@@ -233,7 +233,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
       typeTransferDestination: "acc-2",
       dateTime: new Date("2024-01-15T12:00:00Z"),
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -302,7 +302,7 @@ describe("PUT /api/accounts/transactions/[id]", () => {
       typeTransferDestination: "acc-2",
       dateTime: new Date("2024-01-15T12:00:00Z"),
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
     vi.mocked(db.accountTransaction.update).mockResolvedValue({
       id: "txn-1",
@@ -336,11 +336,114 @@ describe("PUT /api/accounts/transactions/[id]", () => {
       },
     });
   });
+
+  describe("the opening-date invariant", () => {
+    function mockEdit(existing: Record<string, unknown>, opening: Date | null) {
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+        accountId: "acc-1",
+        amount: 100,
+        transferId: null,
+        typeTransferDestination: null,
+        typeTransferOrigin: null,
+        dateTime: new Date("2024-06-01T00:00:00Z"),
+        ...existing,
+      } as never);
+      vi.mocked(db.account.findUnique).mockResolvedValue({
+        userId: "user-1",
+        type: "CHECKING",
+      } as never);
+      vi.mocked(db.accountTransaction.findFirst).mockResolvedValue(
+        opening ? ({ dateTime: opening } as never) : (null as never)
+      );
+      vi.mocked(db.taxLine.deleteMany).mockResolvedValue({ count: 0 } as never);
+      vi.mocked(db.accountTransaction.update).mockResolvedValue({} as never);
+      vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+        _sum: { amount: 0 },
+      } as never);
+      vi.mocked(db.account.update).mockResolvedValue({} as never);
+    }
+
+    it("rejects moving a transaction back before the opening", async () => {
+      mockEdit({ type: "EXPENSE" }, new Date("2024-01-01T00:00:00Z"));
+
+      const response = await PUT(
+        makePutRequest({ dateTime: "2023-06-01T00:00:00.000Z" }),
+        makeParams("txn-1")
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.update).not.toHaveBeenCalled();
+    });
+
+    it("rejects moving the opening forward past an existing transaction", async () => {
+      // findFirst here returns the earliest *other* transaction, not an opening.
+      mockEdit({ type: "OPENING" }, new Date("2024-03-01T00:00:00Z"));
+
+      const response = await PUT(
+        makePutRequest({ dateTime: "2024-09-01T00:00:00.000Z" }),
+        makeParams("txn-1")
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.update).not.toHaveBeenCalled();
+    });
+
+    it("allows moving the opening earlier", async () => {
+      mockEdit({ type: "OPENING" }, new Date("2024-03-01T00:00:00Z"));
+
+      const response = await PUT(
+        makePutRequest({ dateTime: "2023-01-01T00:00:00.000Z" }),
+        makeParams("txn-1")
+      );
+
+      expect(response.status).toBe(200);
+      expect(db.accountTransaction.update).toHaveBeenCalled();
+    });
+
+    it("checks the date the edit does not touch", async () => {
+      // A PUT that changes only the amount still has to satisfy the invariant on
+      // the row's existing date — effectiveType/effectiveDateTime fall back to it.
+      mockEdit(
+        { type: "EXPENSE", dateTime: new Date("2023-06-01T00:00:00Z") },
+        new Date("2024-01-01T00:00:00Z")
+      );
+
+      const response = await PUT(
+        makePutRequest({ amount: 42 }), makeParams("txn-1"));
+
+      expect(response.status).toBe(400);
+    });
+  });
 });
 
 describe("DELETE /api/accounts/transactions/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("refuses to delete the opening balance", async () => {
+    // Deleting it would silently restate every running balance on the account
+    // and leave no way to recover the starting figure.
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.accountTransaction.findUnique).mockResolvedValue({
+      accountId: "acc-1",
+      type: "OPENING",
+      transferId: null,
+    } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({
+      userId: "user-1",
+    } as never);
+
+    const response = await DELETE(
+      new Request("http://localhost") as never,
+      makeParams("txn-1")
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(json.error).toMatch(/cannot be deleted/);
+    expect(db.accountTransaction.delete).not.toHaveBeenCalled();
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -383,7 +486,7 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       accountId: "acc-1",
       amount: 100,
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
     vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
       _sum: { amount: 250 },
@@ -409,7 +512,7 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       accountId: "acc-1",
       amount: 100,
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
     vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
       _sum: { amount: null },
@@ -434,7 +537,7 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       typeTransferOrigin: "acc-1",
       typeTransferDestination: "acc-2",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
     vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
       _sum: { amount: 0 },
@@ -473,7 +576,7 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       amount: 100,
       type: "EXPENSE",
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.delete).mockResolvedValue({} as never);
     vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
       _sum: { amount: 250 },
@@ -492,7 +595,7 @@ describe("DELETE /api/accounts/transactions/[id]", () => {
       accountId: "acc-1",
       amount: 100,
     } as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.delete).mockRejectedValue(
       new Error("Delete failed")
     );

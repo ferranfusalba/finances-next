@@ -55,6 +55,11 @@ test.describe("Accounts", () => {
     await combobox("Select a currency").click();
     await page.getByRole("option", { name: /^EUR - / }).click();
 
+    // Starting balance is compulsory: it becomes the account's OPENING
+    // transaction, and it cannot be recovered once the create form is gone.
+    await page.locator("#openingBalance").fill("1500");
+    await page.locator("#openingDate").fill("2024-01-01");
+
     // Submit
     await page.getByRole("button", { name: "Add" }).click();
 
@@ -63,6 +68,78 @@ test.describe("Accounts", () => {
     await expect(
       page.getByText("E2E Test Checking", { exact: true })
     ).toBeVisible();
+
+    // The starting balance became the opening transaction, so the account opens
+    // at 1.500 rather than at zero — and there is no "no opening balance" banner.
+    await expect(
+      page.getByText("This account has no opening balance")
+    ).toBeHidden();
+    await expect(page.getByRole("cell", { name: "Opening", exact: true })).toBeVisible();
+  });
+
+  test("the bank name is picked from the banks you already use", async ({
+    page,
+  }) => {
+    // It was free text, so a second account at the same bank was one typo away
+    // from being filed under a different one — and the bank name is what groups
+    // accounts in the sidebar and the overview.
+    await createTestAccount(userId, {
+      name: "First", code: "E2E.BANK1", bankName: "Indexa Capital",
+    });
+
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
+    await page.goto("/accounts/new");
+
+    const bankPicker = page
+      .getByRole("combobox")
+      .filter({ hasText: "Select a bank" });
+    await bankPicker.click();
+
+    const options = await page.getByRole("option").allTextContents();
+    expect(options).toContain("Indexa Capital");
+    expect(options.join("|")).toContain("Add a new bank");
+
+    // Adding a bank is still one click — you just cannot do it by accident.
+    await page.getByRole("option", { name: /Add a new bank/ }).click();
+    await expect(page.getByLabel("New Bank")).toBeVisible();
+  });
+
+  test("an account with no opening shows the banner, and setting one clears it", async ({
+    page,
+  }) => {
+    // Accounts predating the compulsory opening have none. We deliberately do not
+    // backfill them with a zero — their real starting balance is not something we
+    // can infer — so they are prompted instead.
+    const account = await createTestAccount(userId, {
+      name: "Legacy Account",
+      code: "E2E.LEGACY",
+      bankName: "Legacy Bank",
+    });
+
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
+    await page.goto(`/accounts/${account.id}`);
+
+    await expect(
+      page.getByText("This account has no opening balance")
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Set opening balance" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Set Opening Balance" })
+    ).toBeVisible();
+
+    // The type is pre-set and locked — an opening cannot become an expense.
+    const typeSelect = page.getByRole("combobox", { name: "Type" });
+    await expect(typeSelect).toBeDisabled();
+    await expect(typeSelect).toHaveText("Opening");
+
+    await page.locator("#amountForm").fill("2500");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      page.getByText("This account has no opening balance")
+    ).toBeHidden({ timeout: 10_000 });
+    await expect(page.getByRole("cell", { name: "Opening", exact: true })).toBeVisible();
   });
 
   test("view an existing account", async ({ page }) => {

@@ -23,10 +23,13 @@ import { Form } from "@/components/ui/form";
 
 import TransactionFormContent from "@/components/transactions/form/TransactionFormContent";
 
+import { currency } from "@/lib/utils";
+import { accountLabel } from "@/lib/utils/account";
 import {
   computeTransactionAmount,
   convertFormTaxLines,
   getNextTimeForDate,
+  type TransactionType,
 } from "@/lib/utils/transaction";
 import { detectTimezone, getTimezoneOffset } from "@/lib/utils/timezone";
 
@@ -49,7 +52,42 @@ interface Props {
   copyTransaction?: AccountTransaction;
   editOpen?: boolean;
   onEditOpenChange?: (open: boolean) => void;
-  hasOpeningTransaction?: boolean;
+  /**
+   * Pre-selects the type and locks the select. Used by the missing-opening banner
+   * to open this same dialog as "set the opening balance" — OPENING is not in the
+   * dropdown, so it can only be reached this way.
+   */
+  defaultType?: TransactionType;
+  /**
+   * Money that landed in this cash leg and is now being put to work: opens the
+   * dialog pre-filled as a transfer of the same amount into the invested parent.
+   *
+   * It creates a NEW transaction — the source row is untouched. Cash going in and
+   * cash being invested are two movements, days apart, and the provider posts
+   * them as two. This just saves you retyping the second one.
+   */
+  investFrom?: AccountTransaction;
+  /** The invested parent to transfer into. Required alongside investFrom. */
+  investDestinationAccountId?: string;
+  /**
+   * Uninvested cash left in the leg. The prefilled amount is capped at it — you
+   * cannot invest money that is no longer sitting there, and after investing a
+   * contribution the row it came from is still on screen with its button.
+   */
+  investAvailableCash?: number;
+  /** Pre-fills the concept on a new transaction. */
+  prefillConcept?: string;
+  /** Pre-fills the date on a new transaction. */
+  prefillDate?: Date;
+  /** Pre-fills the time, "HH:MM". */
+  prefillTime?: string;
+  /**
+   * Posting the month's market movement, from a row on the invested leg. Opened
+   * by a row action, so the dialog is controlled and has no trigger of its own.
+   */
+  addReturn?: boolean;
+  /** Overrides the dialog's trigger button. */
+  trigger?: React.ReactNode;
 }
 
 const formSchema = buildAccountTransactionSchema();
@@ -57,6 +95,7 @@ const formSchema = buildAccountTransactionSchema();
 export default function AccountTransactionAdd(props: Props) {
   const {
     userAccounts,
+    userLocale,
     userTimezone,
   } = useTransactionUser();
 
@@ -66,7 +105,17 @@ export default function AccountTransactionAdd(props: Props) {
 
   const isEditing = !!props.editTransaction;
   const isCopying = !!props.copyTransaction;
+  const isInvesting = !!props.investFrom;
+  const isAddingReturn = !!props.addReturn;
   const editTx = props.editTransaction ?? props.copyTransaction ?? null;
+
+  // Every mode but "add" is driven from outside — a row action opened it, so the
+  // dialog has no trigger button of its own and its open state is the caller's.
+  const isControlled =
+    isEditing || isCopying || isInvesting || isAddingReturn;
+
+  const isOpening =
+    (editTx?.type ?? props.defaultType) === "OPENING";
 
   // When editing a transfer from the destination account, lock type and destination fields
   const isTransferDestination =
@@ -87,17 +136,44 @@ export default function AccountTransactionAdd(props: Props) {
     : undefined;
   const editTimezoneValue = editTx?.timezoneId || undefined;
 
+  const invest = props.investFrom;
+  // The date defaults to the day the money arrived, but is editable: a provider
+  // holds your cash for a few days before buying, so the two rarely share a date.
+  const investDate = invest ? new Date(invest.dateTime) : undefined;
+  const investDestination = userAccounts.find(
+    (a) => a.id === props.investDestinationAccountId,
+  );
+
+  // Capped at what is actually still sitting in cash. Invest a €1.000 contribution
+  // and its row stays on screen, button and all — without the cap, clicking again
+  // would cheerfully move a second €1.000 that is not there.
+  const investAmount = invest
+    ? props.investAvailableCash != null
+      ? Math.min(Math.abs(invest.amount), props.investAvailableCash)
+      : Math.abs(invest.amount)
+    : undefined;
+
   const form = useForm<AccountTransactionFormValues>({
     mode: "onChange",
     resolver: zodResolver(formSchema),
     defaultValues: {
       payee: editTx?.payee ?? "",
       recurring: editTx?.recurring ?? "",
-      concept: editTx?.concept ?? "",
-      type: editTx?.type ?? "",
-      typeTransferDestinationAccount: editTx?.typeTransferDestination ?? "",
+      concept:
+        editTx?.concept ??
+        props.prefillConcept ??
+        (props.defaultType === "OPENING" ? "Opening balance" : ""),
+      type: editTx?.type ?? (invest ? "TRANSFER" : props.defaultType ?? ""),
+      typeTransferDestinationAccount:
+        editTx?.typeTransferDestination ??
+        props.investDestinationAccountId ??
+        "",
       currency: editTx?.currency ?? (props.account?.defaultCurrency as string),
-      amountForm: editTx ? Math.abs(editTx.amount).toString() : "",
+      amountForm: editTx
+        ? Math.abs(editTx.amount).toString()
+        : investAmount != null
+          ? investAmount.toString()
+          : "",
       foreignCurrency: editTx?.foreignCurrency ?? "",
       foreignCurrencyAmount: editTx?.foreignCurrencyAmount
         ? editTx.foreignCurrencyAmount.toString()
@@ -108,8 +184,12 @@ export default function AccountTransactionAdd(props: Props) {
       category: editTx?.category ?? "",
       subcategory: editTx?.subcategory ?? "",
       tags: editTx?.tags ?? [],
-      date: editDate ?? new Date(),
-      time: editTime ?? "09:00",
+      date: editDate ?? investDate ?? props.prefillDate ?? new Date(),
+      time: editTime ?? props.prefillTime ?? "09:00",
+      // Deliberately NOT inherited from the source row when investing. Investing
+      // is a new transaction, so it takes your timezone like any other — and a
+      // source row carrying a timezone the picker does not list would render this
+      // required field blank.
       timezoneId: editTimezoneValue ?? detectedTimezoneValue,
       location: editTx?.location ?? null,
       notes: editTx?.notes ?? "",
@@ -254,7 +334,7 @@ export default function AccountTransactionAdd(props: Props) {
           });
 
       if (res.ok) {
-        if (isEditing || isCopying) {
+        if (isControlled) {
           props.onEditOpenChange?.(false);
         } else {
           setOpen(false);
@@ -286,7 +366,9 @@ export default function AccountTransactionAdd(props: Props) {
   const isDateInitRef = useRef(true);
 
   useEffect(() => {
-    if (isEditing || isCopying) return;
+    // Investing keeps the source row's date as its starting point; auto-advancing
+    // the time from the destination account's last row would throw that away.
+    if (isControlled) return;
     if (isDateInitRef.current) {
       isDateInitRef.current = false;
       return;
@@ -297,9 +379,9 @@ export default function AccountTransactionAdd(props: Props) {
     }
   }, [watchedDate, isEditing, isCopying, props.accountTransactions, form]);
 
-  const dialogOpen = isEditing || isCopying ? (props.editOpen ?? false) : open;
+  const dialogOpen = isControlled ? (props.editOpen ?? false) : open;
   const handleDialogOpenChange = (isOpen: boolean) => {
-    if (isEditing || isCopying) {
+    if (isControlled) {
       props.onEditOpenChange?.(isOpen);
     } else {
       setOpen(isOpen);
@@ -318,29 +400,79 @@ export default function AccountTransactionAdd(props: Props) {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-      {!isEditing && !isCopying && (
+      {!isControlled && (
         <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2"><AddAlt /> Add Transaction</Button>
+          {props.trigger ?? (
+            <Button variant="outline" className="gap-2"><AddAlt /> Add Transaction</Button>
+          )}
         </DialogTrigger>
       )}
       <DialogContent className="max-lg:max-h-margins-y-mobile max-lg:h-screen max-lg:overflow-y-scroll sm:max-w-250 overflow-y-auto max-h-[85vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isEditing ? "Edit Transaction" : "New Transaction"}
+            {isAddingReturn
+              ? `${props.prefillConcept} return`
+              : isInvesting
+                ? "Invest this cash"
+                : isOpening
+                  ? "Set Opening Balance"
+                  : isEditing
+                    ? "Edit Transaction"
+                    : "New Transaction"}
             {isCopying && <Badge variant="secondary">Copying</Badge>}
           </DialogTitle>
           <DialogDescription>
-            {isEditing ? "Edit" : "Add a new"} transaction
-            {isEditing ? " in" : " to"} {props.account?.bankName}
-            {" · "}
-            {props.account?.name}:
+            {isAddingReturn ? (
+              <>
+                What the market made — or lost — over {props.prefillConcept}, gross
+                of fees. Enter a negative amount for a month that lost value; the
+                sign is preserved. Fees and retenciones live on the cash leg, so
+                they can never be mistaken for a bad month.
+              </>
+            ) : isInvesting ? (
+              <>
+                Move this cash into {investDestination?.name ?? "the invested leg"}.
+                The cash row it came from stays as it is — money arriving and money
+                being invested are two movements, and your provider posts them
+                days apart. Adjust the date to when it was actually invested, and
+                the amount if only part of it was.
+                {props.investAvailableCash != null && (
+                  <>
+                    {" "}
+                    There is{" "}
+                    <strong>
+                      {currency(
+                        userLocale,
+                        props.account?.defaultCurrency ?? "EUR",
+                      ).format(props.investAvailableCash)}
+                    </strong>{" "}
+                    of uninvested cash left.
+                  </>
+                )}
+              </>
+            ) : isOpening ? (
+              <>
+                What{" "}
+                {props.account
+                  ? accountLabel(props.account, userAccounts)
+                  : "this account"}{" "}
+                held when your records begin. It must be dated before every
+                existing transaction on the account.
+              </>
+            ) : (
+              <>
+                {isEditing ? "Edit" : "Add a new"} transaction
+                {isEditing ? " in" : " to"} {props.account?.bankName}
+                {" · "}
+                {props.account?.name}:
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <TransactionFormContent
               account={props.account}
-              hasOpeningTransaction={props.hasOpeningTransaction}
               isTransferDestination={isTransferDestination}
               transferOriginAccountId={isTransferDestination ? editTx?.typeTransferOrigin ?? undefined : undefined}
             />

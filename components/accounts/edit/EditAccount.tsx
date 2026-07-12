@@ -29,8 +29,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 
-import AccountTypeField from "@/components/accounts/form/AccountTypeField";
+import BankNameField from "@/components/accounts/form/BankNameField";
 
+import { ACCOUNT_TYPE_LABELS } from "@/lib/utils/account";
 import { countries } from "@/lib/utils/country";
 import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 
@@ -48,11 +49,13 @@ const currencyOptions = currencies.map((currency) => ({
   searchLabel: `${currency.code} ${currency.name}`,
 }));
 
+// `type` is absent: an account's type is immutable once created, because it
+// decides which transaction types the account may hold. It is shown read-only
+// below and the API strips it from the update payload regardless.
 const formSchema = z.object({
   bankName: z.string().min(1, { message: "Bank Name is required." }),
   name: z.string().min(1, { message: "Account Name is required." }),
   code: z.string().min(1, { message: "Account Code is required." }),
-  type: z.string().min(1, { message: "Account Type is required." }),
   number: z.string(),
   country: z.string(),
   defaultCurrency: z.string().min(1, { message: "Currency is required." }),
@@ -63,9 +66,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   account: Account;
+  /** Banks the user already has accounts with. */
+  bankNames: string[];
 }
 
-export default function EditAccount({ account }: Props) {
+export default function EditAccount({ account, bankNames }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -76,7 +81,6 @@ export default function EditAccount({ account }: Props) {
       bankName: account.bankName,
       name: account.name,
       code: account.code,
-      type: account.type,
       number: account.number ?? "",
       country: account.country,
       defaultCurrency: account.defaultCurrency,
@@ -122,19 +126,7 @@ export default function EditAccount({ account }: Props) {
             className="space-y-4"
             aria-busy={isPending}
           >
-            <FormField
-              control={form.control}
-              name="bankName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bank Name*</FormLabel>
-                  <FormControl>
-                    <Input type="text" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <BankNameField bankNames={bankNames} />
             <FormField
               control={form.control}
               name="name"
@@ -161,7 +153,22 @@ export default function EditAccount({ account }: Props) {
                 </FormItem>
               )}
             />
-            <AccountTypeField />
+            <FormItem>
+              <FormLabel>Account Type</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  disabled
+                  aria-label="Account Type"
+                  value={ACCOUNT_TYPE_LABELS[account.type]}
+                  readOnly
+                />
+              </FormControl>
+              <p className="text-muted-foreground mt-1 text-xs select-none">
+                An account&apos;s type is fixed once created. To change it, open
+                a new account.
+              </p>
+            </FormItem>
             <FormField
               control={form.control}
               name="number"

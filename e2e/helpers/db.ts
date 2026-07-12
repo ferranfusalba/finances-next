@@ -92,6 +92,8 @@ export async function createTestAccount(
     type: AccountType;
     defaultCurrency: string;
     country: string;
+    /** Set on an INVESTMENT_CASH leg, pointing at its INVESTMENT parent. */
+    parentAccountId: string;
   }> = {}
 ) {
   return prisma.account.create({
@@ -103,6 +105,7 @@ export async function createTestAccount(
       type: overrides.type ?? "CHECKING",
       defaultCurrency: overrides.defaultCurrency ?? "EUR",
       country: overrides.country ?? "ES",
+      parentAccountId: overrides.parentAccountId ?? null,
       userId,
     },
   });

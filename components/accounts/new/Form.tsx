@@ -3,7 +3,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -21,7 +21,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
 
 import AccountTypeField from "@/components/accounts/form/AccountTypeField";
+import BankNameField from "@/components/accounts/form/BankNameField";
 
+import { SELECTABLE_ACCOUNT_TYPES } from "@/lib/utils/account";
 import { countries } from "@/lib/utils/country";
 import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
 
@@ -39,6 +41,8 @@ const currencyOptions = currencies.map((currency) => ({
 
 interface Props {
   defaultCurrency: string;
+  /** Banks the user already has accounts with. */
+  bankNames: string[];
 }
 
 export default function NewAccountForm(props: Props) {
@@ -56,8 +60,13 @@ export default function NewAccountForm(props: Props) {
     code: z.string().min(1, {
       message: "Account Code is required.",
     }),
-    type: z.string().min(1, {
-      message: "Account Type is required.",
+    // The enum, not z.string(): the client was looser than the API, so a typo'd
+    // type only failed server-side. It also decides which transaction types the
+    // account may hold, and it is immutable once set.
+    // The investment cash leg is absent by design: it is added from its parent
+    // investment account, not opened from scratch.
+    type: z.enum(SELECTABLE_ACCOUNT_TYPES, {
+      errorMap: () => ({ message: "Account Type is required." }),
     }),
     number: z.string(),
     country: z.string(),
@@ -65,6 +74,26 @@ export default function NewAccountForm(props: Props) {
       message: "Currency is required.",
     }),
     description: z.string(),
+    // The starting balance is the account's OPENING transaction, not a column.
+    // It is compulsory here because it cannot be recovered later: an account
+    // created without one silently starts from zero.
+    openingBalance: z
+      .string()
+      .min(1, { message: "Starting balance is required." })
+      .refine((v) => !Number.isNaN(parseFloat(v)), {
+        message: "Starting balance must be a number.",
+      }),
+    // Settable, not stamped `now()`: you will create an account today and then
+    // enter transactions from last month, and every transaction must fall after
+    // the opening.
+    openingDate: z.string().min(1, { message: "Starting date is required." }),
+    // Optional, and only meaningful on an INVESTMENT account. Leaving it blank
+    // creates no cash leg at all — you can still add one later.
+    cashOpeningBalance: z
+      .string()
+      .refine((v) => v === "" || !Number.isNaN(parseFloat(v)), {
+        message: "Cash starting balance must be a number.",
+      }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,13 +102,22 @@ export default function NewAccountForm(props: Props) {
       bankName: "",
       name: "",
       code: "",
-      type: "",
+      type: undefined,
       number: "",
       country: "",
       defaultCurrency: userCurrency,
       description: "",
+      openingBalance: "",
+      openingDate: new Date().toISOString().slice(0, 10),
+      cashOpeningBalance: "",
     },
   });
+
+  // An investment provider holds two balances — the invested position and the
+  // cash it has not invested yet — so it is asked for both at once. Anything
+  // else is asked for one.
+  const selectedType = useWatch({ control: form.control, name: "type" });
+  const isInvestment = selectedType === "INVESTMENT";
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const bankName = values.bankName;
@@ -88,10 +126,14 @@ export default function NewAccountForm(props: Props) {
     const active = true;
     const type = values.type;
     const description = values.description;
-    const currentBalance = 0;
     const defaultCurrency = values.defaultCurrency;
     const number = values.number;
     const country = values.country;
+
+    // Blank means no cash leg at all, which is different from a cash leg holding
+    // zero — one you can still add later, the other already exists.
+    const wantsCashLeg =
+      type === "INVESTMENT" && values.cashOpeningBalance.trim() !== "";
 
     startTransition(async () => {
       const res = await fetch("/api/accounts/", {
@@ -103,10 +145,16 @@ export default function NewAccountForm(props: Props) {
           active,
           type,
           description,
-          currentBalance,
           defaultCurrency,
           number,
           country,
+          openingBalance: parseFloat(values.openingBalance),
+          // Midday, so a timezone shift either way cannot move it onto the
+          // previous or next day and trip the opening-before-everything rule.
+          openingDate: new Date(`${values.openingDate}T12:00:00`).toISOString(),
+          cashOpeningBalance: wantsCashLeg
+            ? parseFloat(values.cashOpeningBalance)
+            : null,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -136,19 +184,7 @@ export default function NewAccountForm(props: Props) {
           aria-busy={isPending}
         >
           {/* Bank Name */}
-          <FormField
-            control={form.control}
-            name="bankName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bank Name*</FormLabel>
-                <FormControl>
-                  <Input type="text" placeholder="N26" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <BankNameField bankNames={props.bankNames} />
           {/* Account Name */}
           <FormField
             control={form.control}
@@ -202,6 +238,82 @@ export default function NewAccountForm(props: Props) {
                   searchPlaceholder="Search currencies..."
                   emptyText="No currency found."
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Opening balance — written as the account's OPENING transaction */}
+          <FormField
+            control={form.control}
+            name="openingBalance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {isInvestment ? "Invested Starting Balance*" : "Starting Balance*"}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    id="openingBalance"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  {isInvestment
+                    ? "What was already invested when your records begin — not counting any uninvested cash your provider is holding. May be negative."
+                    : "What the account held when your records begin. May be negative. Recorded as the account's opening transaction."}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* The cash leg's opening, asked for at the same moment as the invested
+              one. A provider that holds cash for you has two balances from the
+              moment it exists; asking for them separately means entering the total
+              as the invested figure and then going back to subtract it. */}
+          {isInvestment && (
+            <FormField
+              control={form.control}
+              name="cashOpeningBalance"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cash Starting Balance</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="cashOpeningBalance"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      placeholder="Leave blank for no cash account"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Uninvested cash your provider is holding. Fill this in and a
+                    cash account is created alongside, shown as a second table on
+                    this account&apos;s page. Leave it blank if you would rather
+                    not track it — you can add one later.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <FormField
+            control={form.control}
+            name="openingDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Starting Date*</FormLabel>
+                <FormControl>
+                  <Input id="openingDate" type="date" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Every transaction on this account must fall after this date.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

@@ -4,11 +4,14 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { recomputeAccountBalance } from "@/lib/accounts";
+import {
+  checkOpeningDateInvariant,
+  recomputeAccountBalance,
+} from "@/lib/accounts";
 import { toNumber } from "@/lib/utils";
 import {
   computeTransactionAmount,
-  INVESTMENT_TRANSACTION_TYPES,
+  isTransactionTypeAllowed,
 } from "@/lib/utils/transaction";
 import { UpdateAccountTransactionSchema } from "@/schemas";
 
@@ -58,15 +61,50 @@ export async function PUT(
 
     const effectiveType = data.type ?? existing.type;
 
-    // RETURN / WITHHOLDING / ROUNDING only make sense on an investment account.
-    if (
-      INVESTMENT_TRANSACTION_TYPES.includes(effectiveType as never) &&
-      account.type !== "INVESTMENT"
-    ) {
+    if (!isTransactionTypeAllowed(account.type, effectiveType)) {
       return NextResponse.json(
-        { error: `${effectiveType} is only valid on an INVESTMENT account` },
+        { error: `${effectiveType} is not valid on a ${account.type} account` },
         { status: 400 }
       );
+    }
+
+    // Both directions of the opening-date rule: moving the opening forward past
+    // an existing transaction, and moving a transaction back before the opening.
+    const effectiveDateTime = data.dateTime ?? existing.dateTime;
+    const openingError = await checkOpeningDateInvariant({
+      accountId: existing.accountId,
+      type: effectiveType,
+      dateTime: effectiveDateTime,
+      excludeTransactionId: id,
+    });
+
+    if (openingError) {
+      return NextResponse.json({ error: openingError }, { status: 400 });
+    }
+
+    // Editing a transfer re-dates its mirror row on the other account, which has
+    // an opening of its own. The mirror is a TRANSFER, never an OPENING, so it
+    // can never be the row we compare against — no self-exclusion needed.
+    if (existing.type === "TRANSFER") {
+      const mirrorAccountId =
+        existing.typeTransferDestination === existing.accountId
+          ? existing.typeTransferOrigin
+          : existing.typeTransferDestination;
+
+      if (mirrorAccountId) {
+        const mirrorError = await checkOpeningDateInvariant({
+          accountId: mirrorAccountId,
+          type: "TRANSFER",
+          dateTime: effectiveDateTime,
+        });
+
+        if (mirrorError) {
+          return NextResponse.json(
+            { error: `Destination account: ${mirrorError}` },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Re-derive the sign server-side from the effective type. Also covers a type
@@ -216,6 +254,19 @@ export async function DELETE(
 
     if (!account || account.userId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // The opening is not deletable. Removing it would silently restate every
+    // running balance on the account and leave no way to recover the starting
+    // figure. Edit its amount instead.
+    if (transaction.type === "OPENING") {
+      return NextResponse.json(
+        {
+          error:
+            "The opening balance cannot be deleted. Edit its amount or date instead.",
+        },
+        { status: 400 }
+      );
     }
 
     await db.accountTransaction.delete({

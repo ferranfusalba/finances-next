@@ -1,16 +1,13 @@
 import * as z from "zod";
 
+import { ACCOUNT_TYPES } from "@/lib/utils/account";
 import { TRANSACTION_TYPES } from "@/lib/utils/transaction";
 
-export const ACCOUNT_TYPES = [
-  "CHECKING",
-  "SAVINGS",
-  "CASH",
-  "PREPAID",
-  "INVESTMENT",
-] as const;
-
-export type AccountTypeValue = (typeof ACCOUNT_TYPES)[number];
+// Re-exported so existing importers keep working. The constants live in
+// lib/utils/account so lib/utils/transaction can key its allowed-types table on
+// them without importing this module back — schemas already imports from there.
+export { ACCOUNT_TYPES };
+export type { AccountTypeValue } from "@/lib/utils/account";
 
 export const AccountTypeSchema = z.enum(ACCOUNT_TYPES);
 
@@ -115,6 +112,11 @@ const TransactionLocationSchema = z.object({
 
 // --- API Route Schemas ---
 
+// `currentBalance` is deliberately absent: it is derived, not supplied. It is a
+// denormalized SUM(amount) over the account's transactions (recomputeAccountBalance),
+// so letting a client set it would let the two disagree. The starting balance
+// arrives as openingBalance and is written as the account's OPENING transaction —
+// the first row of the ledger — which keeps SUM(amount) correct by construction.
 export const CreateAccountSchema = z.object({
   name: z.string().min(1),
   code: z.string().min(1),
@@ -123,17 +125,32 @@ export const CreateAccountSchema = z.object({
   type: AccountTypeSchema,
   description: z.string().nullable().optional(),
   defaultCurrency: z.string().default(""),
-  currentBalance: z.number().default(0),
   number: z.string().nullable().optional(),
   country: z.string().default(""),
+  openingBalance: z.number(),
+  openingDate: z.string().or(z.date()),
+  // The INVESTMENT_CASH leg hangs off its INVESTMENT parent. The route verifies
+  // the parent exists, belongs to the caller, and is of the right type.
+  parentAccountId: z.string().nullable().optional(),
+  // Creates the cash leg alongside an INVESTMENT account, in the same write.
+  //
+  // An investment provider holds two balances, so asking for one and making you
+  // add the other afterwards means entering the total as the invested figure,
+  // discovering the header sums both legs, and going back to subtract. Ask for
+  // both up front, or for neither.
+  cashOpeningBalance: z.number().nullable().optional(),
 });
 
+// `type` is deliberately absent: an account's type is immutable. It decides
+// which transaction types the account may hold, so changing it would orphan
+// rows that are already there (flipping INVESTMENT -> CHECKING would strand its
+// RETURN rows). Zod strips the key, so a client that still sends one is ignored
+// rather than rejected. A wrong type means opening a new account.
 export const UpdateAccountSchema = z.object({
   name: z.string().min(1).optional(),
   code: z.string().min(1).optional(),
   bankName: z.string().optional(),
   active: z.boolean().optional(),
-  type: AccountTypeSchema.optional(),
   description: z.string().nullable().optional(),
   defaultCurrency: z.string().optional(),
   currentBalance: z.number().optional(),

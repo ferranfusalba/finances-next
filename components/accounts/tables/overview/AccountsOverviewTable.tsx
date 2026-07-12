@@ -31,6 +31,7 @@ import { DragVertical } from "@carbon/icons-react";
 import CurrencyTag from "@/components/chips/CurrencyTag";
 
 import { currency } from "@/lib/utils";
+import { ACCOUNT_TYPE_LABELS } from "@/lib/utils/account";
 import { getCountryFlag } from "@/lib/utils/country";
 
 import { Account } from "@/types/Account";
@@ -133,6 +134,7 @@ export default function AccountsOverviewTable({
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("type", {
+      cell: (info) => ACCOUNT_TYPE_LABELS[info.getValue()],
       header: () => <span>Type</span>,
       footer: (info) => info.column.id,
     }),

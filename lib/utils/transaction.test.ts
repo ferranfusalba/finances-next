@@ -1,13 +1,144 @@
 import { describe, expect, it } from "vitest";
 
+import { ACCOUNT_TYPES } from "./account";
 import {
+  allowedTransactionTypes,
   computeTransactionAmount,
   computeTaxAmount,
   computeTotalTax,
   convertFormTaxLines,
+  decomposeInvestment,
   getNextTimeForDate,
+  hasCounterpartyFields,
+  isTransactionTypeAllowed,
+  isMonthComplete,
+  monthKey,
   nextTimeIncrement,
+  pendingReturnPeriods,
+  returnPeriodForMonth,
+  selectableTransactionTypes,
+  transactionBucket,
 } from "./transaction";
+
+describe("allowedTransactionTypes", () => {
+  it.each(["CHECKING", "SAVINGS", "CASH", "PREPAID"] as const)(
+    "allows only Income, Expense, Transfer and Opening on %s",
+    (accountType) => {
+      expect(allowedTransactionTypes(accountType).sort()).toEqual(
+        ["EXPENSE", "INCOME", "OPENING", "TRANSFER"].sort(),
+      );
+    },
+  );
+
+  it("allows only market movement and transfers on INVESTMENT", () => {
+    // The invested leg holds the position and nothing else. Fees, retenciones,
+    // contributions and withdrawals all belong on the cash leg, which is where
+    // the provider actually posts them.
+    expect(allowedTransactionTypes("INVESTMENT").sort()).toEqual(
+      ["OPENING", "RETURN", "ROUNDING", "TRANSFER"].sort(),
+    );
+  });
+
+  it("allows the cash-leg types on INVESTMENT_CASH", () => {
+    expect(allowedTransactionTypes("INVESTMENT_CASH").sort()).toEqual(
+      [
+        "OPENING",
+        "TRANSFER",
+        "CONTRIBUTION",
+        "WITHDRAWAL",
+        "FEE",
+        "WITHHOLDING",
+      ].sort(),
+    );
+  });
+
+  it("keeps INVESTMENT_LEGACY exactly as it was before the split", () => {
+    // The four existing accounts hold INCOME rows. Narrowing this would make the
+    // API's type guard reject them on edit, locking real history behind a
+    // validation error.
+    expect(allowedTransactionTypes("INVESTMENT_LEGACY").sort()).toEqual(
+      [
+        "INCOME",
+        "EXPENSE",
+        "TRANSFER",
+        "OPENING",
+        "RETURN",
+        "WITHHOLDING",
+        "ROUNDING",
+      ].sort(),
+    );
+  });
+
+  it("does not let RETURN or ROUNDING onto an ordinary account", () => {
+    for (const accountType of ["CHECKING", "SAVINGS", "CASH", "PREPAID"] as const) {
+      for (const type of ["RETURN", "ROUNDING", "WITHHOLDING", "FEE"]) {
+        expect(isTransactionTypeAllowed(accountType, type)).toBe(false);
+      }
+    }
+  });
+
+  it("does not let INCOME or EXPENSE onto either new investment leg", () => {
+    // This is the narrowing the split buys: the sparse investment form is a
+    // consequence of the type table, not a special case in the form.
+    for (const accountType of ["INVESTMENT", "INVESTMENT_CASH"] as const) {
+      expect(isTransactionTypeAllowed(accountType, "INCOME")).toBe(false);
+      expect(isTransactionTypeAllowed(accountType, "EXPENSE")).toBe(false);
+    }
+  });
+
+  it("keeps FEE, CONTRIBUTION and WITHDRAWAL off every non-cash account", () => {
+    for (const accountType of ACCOUNT_TYPES) {
+      if (accountType === "INVESTMENT_CASH") continue;
+      for (const type of ["FEE", "CONTRIBUTION", "WITHDRAWAL"]) {
+        expect(isTransactionTypeAllowed(accountType, type)).toBe(false);
+      }
+    }
+  });
+
+  it("lets every account type hold a TRANSFER", () => {
+    // Both legs of the split are real accounts, so money moves between them —
+    // and into them from your bank — through the ordinary mirror machinery.
+    for (const accountType of ACCOUNT_TYPES) {
+      expect(isTransactionTypeAllowed(accountType, "TRANSFER")).toBe(true);
+    }
+  });
+
+  it("offers OPENING on every account type", () => {
+    for (const accountType of ACCOUNT_TYPES) {
+      expect(allowedTransactionTypes(accountType)).toContain("OPENING");
+    }
+  });
+
+  it("denies everything for an unrecognised account type rather than throwing", () => {
+    // Guards writes; a guard that throws on unexpected input is worse than one
+    // that permits nothing.
+    const unknown = "BANANA" as never;
+    expect(allowedTransactionTypes(unknown)).toEqual([]);
+    expect(isTransactionTypeAllowed(unknown, "INCOME")).toBe(false);
+  });
+});
+
+describe("selectableTransactionTypes", () => {
+  it("never offers OPENING — it is written at account creation, not picked", () => {
+    for (const accountType of ACCOUNT_TYPES) {
+      expect(selectableTransactionTypes(accountType)).not.toContain("OPENING");
+    }
+  });
+
+  it("offers the ordinary types on CHECKING", () => {
+    expect(selectableTransactionTypes("CHECKING")).toEqual([
+      "INCOME",
+      "EXPENSE",
+      "TRANSFER",
+    ]);
+  });
+
+  it("still allows OPENING server-side even though it is unselectable", () => {
+    // The dropdown never shows it, but the row exists and must stay editable —
+    // and the create-account route and the banner both write one.
+    expect(isTransactionTypeAllowed("CHECKING", "OPENING")).toBe(true);
+  });
+});
 
 describe("computeTransactionAmount", () => {
   it("negates amount for EXPENSE", () => {
@@ -45,6 +176,281 @@ describe("computeTransactionAmount", () => {
   it("handles zero amount for any type", () => {
     expect(computeTransactionAmount("EXPENSE", 0)).toBe(-0);
     expect(computeTransactionAmount("INCOME", 0)).toBe(0);
+  });
+
+  it("forces a CONTRIBUTION positive — it is money going in", () => {
+    expect(computeTransactionAmount("CONTRIBUTION", 500)).toBe(500);
+    expect(computeTransactionAmount("CONTRIBUTION", -500)).toBe(500);
+  });
+
+  it("forces a WITHDRAWAL negative — it is money coming out", () => {
+    expect(computeTransactionAmount("WITHDRAWAL", 500)).toBe(-500);
+    expect(computeTransactionAmount("WITHDRAWAL", -500)).toBe(-500);
+  });
+
+  it("forces a FEE negative", () => {
+    expect(computeTransactionAmount("FEE", 4.2)).toBe(-4.2);
+    expect(computeTransactionAmount("FEE", -4.2)).toBe(-4.2);
+  });
+});
+
+describe("transactionBucket", () => {
+  it("gives FEE its own bucket rather than letting it fall into CONTRIBUTION", () => {
+    // A fee is negative. Bucketed as a contribution it would read as money you
+    // withdrew, understating what you have actually paid in.
+    expect(transactionBucket("FEE")).toBe("FEE");
+  });
+
+  it("keeps market movement, tax and drift in separate buckets", () => {
+    expect(transactionBucket("RETURN")).toBe("RETURN");
+    expect(transactionBucket("WITHHOLDING")).toBe("WITHHOLDING");
+    expect(transactionBucket("ROUNDING")).toBe("ROUNDING");
+  });
+
+  it("gives OPENING its own bucket rather than counting it as a contribution", () => {
+    // An opening is an accumulated position that already contains years of past
+    // returns. Counting it as a contribution would claim you paid in money the
+    // market actually made.
+    expect(transactionBucket("OPENING")).toBe("OPENING");
+  });
+
+  it("counts money-in and money-out as contributions", () => {
+    // netContributions = CONTRIBUTION + WITHDRAWAL + TRANSFER, signed.
+    expect(transactionBucket("CONTRIBUTION")).toBe("CONTRIBUTION");
+    expect(transactionBucket("WITHDRAWAL")).toBe("CONTRIBUTION");
+    expect(transactionBucket("TRANSFER")).toBe("CONTRIBUTION");
+  });
+});
+
+describe("returnPeriodForMonth", () => {
+  it("lands on the last day of the row's month", () => {
+    // Every row implies the month it needs a return for, and the return is posted
+    // at the end of that month.
+    const period = returnPeriodForMonth(new Date(2026, 0, 5));
+
+    expect(period.label).toBe("January 2026");
+    expect(period.date.getMonth()).toBe(0);
+    expect(period.date.getDate()).toBe(31);
+  });
+
+  it("gets February right, including in a leap year", () => {
+    expect(returnPeriodForMonth(new Date(2026, 1, 2)).date.getDate()).toBe(28);
+    expect(returnPeriodForMonth(new Date(2028, 1, 2)).date.getDate()).toBe(29);
+  });
+
+  it("accepts an ISO string, which is what the API returns", () => {
+    expect(returnPeriodForMonth("2026-03-02T10:00:00.000Z").label).toBe(
+      "March 2026",
+    );
+  });
+});
+
+describe("monthKey", () => {
+  it("identifies the month a row falls in", () => {
+    expect(monthKey(new Date(2026, 0, 5))).toBe("2026-01");
+    expect(monthKey(new Date(2026, 11, 31))).toBe("2026-12");
+  });
+
+  it("puts two rows in the same month under the same key", () => {
+    // This is what stops a month being offered a second return: the button shows
+    // once across all the rows of a month, not once per row.
+    expect(monthKey(new Date(2026, 0, 2))).toBe(monthKey(new Date(2026, 0, 28)));
+  });
+});
+
+describe("pendingReturnPeriods", () => {
+  const NOW = new Date(2026, 6, 12); // 12 Jul 2026
+  const opening = { type: "OPENING", dateTime: new Date(2025, 11, 31) };
+
+  it("lists every complete month after the opening when none are posted", () => {
+    // The opening IS the position on 31 Dec, so December already contains its own
+    // return — the first month to post is January. July is still running.
+    const pending = pendingReturnPeriods([opening], NOW).map((p) => p.label);
+
+    expect(pending).toEqual([
+      "January 2026",
+      "February 2026",
+      "March 2026",
+      "April 2026",
+      "May 2026",
+      "June 2026",
+    ]);
+  });
+
+  it("drops months that already have a return", () => {
+    const pending = pendingReturnPeriods(
+      [
+        opening,
+        { type: "RETURN", dateTime: new Date(2026, 0, 31) },
+        { type: "RETURN", dateTime: new Date(2026, 2, 31) },
+      ],
+      NOW,
+    ).map((p) => p.label);
+
+    expect(pending).toEqual([
+      "February 2026",
+      "April 2026",
+      "May 2026",
+      "June 2026",
+    ]);
+  });
+
+  it("lists a month you made no contribution in — it still had a market", () => {
+    // The case this exists for. February has no rows at all, but the fund moved,
+    // and without a synthetic row there is nothing to hang the action on.
+    const pending = pendingReturnPeriods(
+      [
+        opening,
+        { type: "TRANSFER", dateTime: new Date(2026, 0, 5) },
+        { type: "RETURN", dateTime: new Date(2026, 0, 31) },
+      ],
+      NOW,
+    ).map((p) => p.label);
+
+    expect(pending).toContain("February 2026");
+  });
+
+  it("is empty once every complete month is posted", () => {
+    const posted = [0, 1, 2, 3, 4, 5].map((m) => ({
+      type: "RETURN",
+      dateTime: new Date(2026, m, 28),
+    }));
+
+    expect(pendingReturnPeriods([opening, ...posted], NOW)).toEqual([]);
+  });
+
+  it("never offers the month still running", () => {
+    const pending = pendingReturnPeriods([opening], NOW).map((p) => p.label);
+
+    expect(pending).not.toContain("July 2026");
+  });
+
+  it("is empty for an account with no opening — there is no month to start from", () => {
+    expect(pendingReturnPeriods([], NOW)).toEqual([]);
+  });
+});
+
+describe("isMonthComplete", () => {
+  const NOW = new Date(2026, 6, 12); // 12 Jul 2026
+
+  it("is false for the month still running — it has no return to post", () => {
+    expect(isMonthComplete(new Date(2026, 6, 1), NOW)).toBe(false);
+  });
+
+  it("is true for the last finished month", () => {
+    expect(isMonthComplete(new Date(2026, 5, 30), NOW)).toBe(true);
+  });
+
+  it("is true for months further back, and across a year boundary", () => {
+    expect(isMonthComplete(new Date(2026, 0, 5), NOW)).toBe(true);
+    expect(isMonthComplete(new Date(2025, 11, 31), NOW)).toBe(true);
+  });
+});
+
+describe("decomposeInvestment", () => {
+  it("sums to the balance, by construction", () => {
+    const rows = [
+      { type: "OPENING", amount: 15_858.77 },
+      { type: "TRANSFER", amount: 3_000 },
+      { type: "RETURN", amount: -369.92 },
+      { type: "FEE", amount: -11.16 },
+      { type: "WITHHOLDING", amount: -0.12 },
+      { type: "ROUNDING", amount: -0.01 },
+    ];
+
+    const d = decomposeInvestment(rows);
+
+    expect(d.opening).toBe(15_858.77);
+    expect(d.netContributions).toBe(3_000);
+    expect(d.totalReturn).toBe(-369.92);
+    expect(d.totalFees).toBe(-11.16);
+    expect(d.totalWithholding).toBe(-0.12);
+    expect(d.roundingAdj).toBe(-0.01);
+
+    const summed =
+      d.opening +
+      d.netContributions +
+      d.totalReturn +
+      d.totalFees +
+      d.totalWithholding +
+      d.roundingAdj;
+    expect(d.balance).toBeCloseTo(summed, 10);
+  });
+
+  it("cancels the internal cash → invested hop across a pair", () => {
+    // This is why cash → invested stays a TRANSFER rather than being retyped
+    // CONTRIBUTION. Fed both legs, the internal move appears twice with opposite
+    // signs and nets to nothing: you contributed 1.000, once — not twice.
+    const cashLeg = [
+      { type: "OPENING", amount: 0 },
+      { type: "TRANSFER", amount: 1_000 }, // in from the bank
+      { type: "TRANSFER", amount: -1_000 }, // out to the fund
+    ];
+    const investedLeg = [
+      { type: "OPENING", amount: 0 },
+      { type: "TRANSFER", amount: 1_000 }, // in from cash
+      { type: "RETURN", amount: 50 },
+    ];
+
+    expect(decomposeInvestment(cashLeg).netContributions).toBe(0);
+    expect(decomposeInvestment(investedLeg).netContributions).toBe(1_000);
+
+    const pair = decomposeInvestment([...cashLeg, ...investedLeg]);
+    expect(pair.netContributions).toBe(1_000);
+    expect(pair.totalReturn).toBe(50);
+    expect(pair.balance).toBe(1_050);
+  });
+
+  it("does not let a fee flatter the market return", () => {
+    // The whole point of the split: fees leave the cash leg, returns happen on the
+    // invested leg, so a bad month and a management charge cannot be confused.
+    const d = decomposeInvestment([
+      { type: "RETURN", amount: 100 },
+      { type: "FEE", amount: -100 },
+    ]);
+
+    expect(d.totalReturn).toBe(100);
+    expect(d.totalFees).toBe(-100);
+    expect(d.balance).toBe(0);
+  });
+
+  it("nets a withdrawal off the contributions", () => {
+    const d = decomposeInvestment([
+      { type: "CONTRIBUTION", amount: 1_000 },
+      { type: "WITHDRAWAL", amount: -250 },
+    ]);
+
+    expect(d.netContributions).toBe(750);
+  });
+
+  it("returns all zeroes for an account with no transactions", () => {
+    const d = decomposeInvestment([]);
+
+    expect(d.balance).toBe(0);
+    expect(d.netContributions).toBe(0);
+  });
+});
+
+describe("hasCounterpartyFields", () => {
+  it("is true only for types that describe a dealing with someone else", () => {
+    for (const type of ["INCOME", "EXPENSE", "TRANSFER", "OPENING"]) {
+      expect(hasCounterpartyFields(type)).toBe(true);
+    }
+  });
+
+  it("is false for types that describe the account's own mechanics", () => {
+    // A market movement has no shop and no VAT; a contribution's counterparty is
+    // the account itself.
+    for (const type of [
+      "RETURN",
+      "ROUNDING",
+      "FEE",
+      "WITHHOLDING",
+      "CONTRIBUTION",
+      "WITHDRAWAL",
+    ]) {
+      expect(hasCounterpartyFields(type)).toBe(false);
+    }
   });
 });
 

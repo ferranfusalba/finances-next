@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 import { getAccounts } from "@/lib/accounts";
+import { accountLabel } from "@/lib/utils/account";
 import { getSalesTaxTransactions } from "@/lib/data";
 import { parseYearParam } from "@/lib/utils/yearFilter";
 import SalesTaxTable from "@/components/data/SalesTaxTable";
@@ -27,7 +28,7 @@ export default async function DataSalesTaxPage({
   const userLocale = session?.user?.userLocale ?? "en-US";
 
   const accountMap: Record<string, string> = Object.fromEntries(
-    accounts.map((a) => [a.id, `${a.bankName} · ${a.name}`]),
+    accounts.map((a) => [a.id, accountLabel(a, accounts)]),
   );
 
   return (

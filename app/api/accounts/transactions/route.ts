@@ -4,10 +4,13 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { recomputeAccountBalance } from "@/lib/accounts";
+import {
+  checkOpeningDateInvariant,
+  recomputeAccountBalance,
+} from "@/lib/accounts";
 import {
   computeTransactionAmount,
-  INVESTMENT_TRANSACTION_TYPES,
+  isTransactionTypeAllowed,
 } from "@/lib/utils/transaction";
 import { CreateAccountTransactionSchema } from "@/schemas";
 
@@ -39,13 +42,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // RETURN / WITHHOLDING / ROUNDING only make sense on an investment account.
-  if (
-    INVESTMENT_TRANSACTION_TYPES.includes(data.type as never) &&
-    account.type !== "INVESTMENT"
-  ) {
+  if (!isTransactionTypeAllowed(account.type, data.type)) {
     return NextResponse.json(
-      { error: `${data.type} is only valid on an INVESTMENT account` },
+      { error: `${data.type} is not valid on a ${account.type} account` },
       { status: 400 }
     );
   }
@@ -55,16 +54,70 @@ export async function POST(request: NextRequest) {
   // inflate the balance — and a negative RETURN would be flipped positive.
   const signedAmount = computeTransactionAmount(data.type, data.amount);
 
-  // For transfers, verify user also owns the destination account
+  // For transfers, verify the user owns the destination account *and* that it
+  // accepts a TRANSFER. The mirror row below is written straight to the
+  // destination without ever passing through a form, so this is the only place
+  // it can be checked.
   if (data.type === "TRANSFER" && data.typeTransferDestination) {
     const destAccount = await db.account.findUnique({
       where: { id: data.typeTransferDestination },
-      select: { userId: true },
+      select: { userId: true, type: true },
     });
 
     if (!destAccount || destAccount.userId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
+    if (!isTransactionTypeAllowed(destAccount.type, "TRANSFER")) {
+      return NextResponse.json(
+        {
+          error: `TRANSFER is not valid on a ${destAccount.type} account`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // The mirror row lands on the destination, which has an opening of its own.
+    // Nothing else checks it — there is no form for the mirror.
+    const mirrorError = await checkOpeningDateInvariant({
+      accountId: data.typeTransferDestination,
+      type: "TRANSFER",
+      dateTime: data.dateTime,
+    });
+
+    if (mirrorError) {
+      return NextResponse.json(
+        { error: `Destination account: ${mirrorError}` },
+        { status: 400 }
+      );
+    }
+  }
+
+  // At most one opening per account. The UI hides the type and disables copy on
+  // an opening row, but a second one posted directly would double-count the
+  // starting balance.
+  if (data.type === "OPENING") {
+    const existingOpening = await db.accountTransaction.findFirst({
+      where: { accountId: data.accountId, type: "OPENING" },
+      select: { id: true },
+    });
+
+    if (existingOpening) {
+      return NextResponse.json(
+        { error: "This account already has an opening balance." },
+        { status: 400 }
+      );
+    }
+  }
+
+  const openingError = await checkOpeningDateInvariant({
+    accountId: data.accountId,
+    type: data.type,
+    dateTime: data.dateTime,
+  });
+
+  if (openingError) {
+    return NextResponse.json({ error: openingError }, { status: 400 });
   }
 
   try {

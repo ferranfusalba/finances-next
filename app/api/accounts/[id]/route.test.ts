@@ -125,6 +125,28 @@ describe("PUT /api/accounts/[id]", () => {
     });
   });
 
+  it("strips `type` from the update — an account's type is immutable", async () => {
+    vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.update).mockResolvedValue({} as never);
+
+    // The type decides which transaction types the account may hold. Flipping an
+    // INVESTMENT account to CHECKING would strand its RETURN rows, so the key is
+    // dropped rather than honoured.
+    const request = new Request("http://localhost", {
+      method: "PUT",
+      body: JSON.stringify({ name: "Updated Name", type: "CHECKING" }),
+    });
+
+    const response = await PUT(request as never, makeParams("acc-1"));
+
+    expect(response.status).toBe(200);
+    expect(db.account.update).toHaveBeenCalledWith({
+      where: { id: "acc-1" },
+      data: { name: "Updated Name" },
+    });
+  });
+
   it("returns 400 when body fails validation", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
 

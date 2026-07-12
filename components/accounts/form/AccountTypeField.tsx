@@ -9,30 +9,22 @@ import {
 } from "@/components/ui/form";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 
-import { ACCOUNT_TYPES } from "@/schemas";
+import {
+  SELECTABLE_ACCOUNT_TYPES,
+  ACCOUNT_TYPE_LABELS as LABELS,
+} from "@/lib/utils/account";
 
 /**
- * Account type is a fixed enum, not free text. Only INVESTMENT changes
- * behaviour (it accepts RETURN / WITHHOLDING / ROUNDING rows, so its balance
- * tracks market value); the rest behave identically to one another.
+ * Account type is a fixed enum, not free text, and it decides which transaction
+ * types the account may hold (see allowedTransactionTypes). It is set once at
+ * creation and is immutable thereafter — hence this field only appears on the
+ * new-account form.
+ *
+ * INVESTMENT_LEGACY is absent from the options: it exists only to keep the
+ * pre-split accounts working, and offering it would let you create new accounts
+ * in the model we are retiring.
  */
-const LABELS: Record<(typeof ACCOUNT_TYPES)[number], string> = {
-  CHECKING: "Checking",
-  SAVINGS: "Savings",
-  CASH: "Cash",
-  PREPAID: "Prepaid",
-  INVESTMENT: "Investment",
-};
-
-const DESCRIPTIONS: Record<(typeof ACCOUNT_TYPES)[number], string> = {
-  CHECKING: "Day-to-day current account",
-  SAVINGS: "Interest-bearing deposit",
-  CASH: "Physical cash",
-  PREPAID: "Restricted, employer-funded balance",
-  INVESTMENT: "Brokerage, fund or wallet — records returns and retenciones",
-};
-
-const options: ComboboxOption[] = ACCOUNT_TYPES.map((type) => ({
+const options: ComboboxOption[] = SELECTABLE_ACCOUNT_TYPES.map((type) => ({
   value: type,
   label: LABELS[type],
 }));
@@ -58,11 +50,6 @@ export default function AccountTypeField() {
               searchPlaceholder="Search account types..."
               emptyText="No account types found."
             />
-            {value in DESCRIPTIONS && (
-              <p className="text-muted-foreground mt-1 text-xs select-none">
-                {DESCRIPTIONS[value as keyof typeof DESCRIPTIONS]}
-              </p>
-            )}
             <FormMessage aria-live="polite" />
           </FormItem>
         );

@@ -21,27 +21,51 @@ import {
 } from "@/components/ui/select";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
+import { accountLabel } from "@/lib/utils/account";
+import {
+  isTransactionTypeAllowed,
+  selectableTransactionTypes,
+  TRANSACTION_TYPE_LABELS,
+  type TransactionType,
+} from "@/lib/utils/transaction";
 
 import { Account } from "@/types/Account";
 
 interface Props {
   account?: Account | null;
-  hasOpeningTransaction?: boolean;
   isTransferDestination?: boolean;
   transferOriginAccountId?: string;
 }
 
-export default function TransactionFormBasicFields({ account, hasOpeningTransaction, isTransferDestination, transferOriginAccountId }: Props) {
+export default function TransactionFormBasicFields({ account, isTransferDestination, transferOriginAccountId }: Props) {
   const form = useFormContext();
   const { userAccounts } = useTransactionUser();
 
   const selectedType = useWatch({ control: form.control, name: "type" });
 
+  // Only accounts that can actually hold a TRANSFER may be a destination — the
+  // server writes the mirror row there without it ever passing through a form.
+  //
+  // Excluded by id, not name: names are not unique. Two investment accounts at
+  // the same provider each have a cash leg called "Cash", and matching on the
+  // name would hide one from the other.
   const userAccounts4Transactions = userAccounts?.filter(
-    (a) => a.name !== account?.name,
+    (a) => a.id !== account?.id && isTransactionTypeAllowed(a.type, "TRANSFER"),
   );
 
-  const isInvestment = account?.type === "INVESTMENT";
+  // OPENING is never offered. The form only ever shows it when it is already the
+  // row's type — either the banner opened this form to set a missing opening, or
+  // an existing opening is being edited. Either way it is the only option and the
+  // select is locked: you cannot turn an opening into an expense, or vice versa.
+  const isOpeningRow = selectedType === "OPENING";
+
+  const typeOptions: TransactionType[] = isOpeningRow
+    ? ["OPENING"]
+    : account
+      ? selectableTransactionTypes(account.type)
+      : [];
+
+  const typeLocked = isTransferDestination || isOpeningRow;
 
   // RETURN and ROUNDING may be negative — March 2026 on Indexa Fondos was
   // -1.099,94 — so they join OPENING in escaping the min=0 constraint.
@@ -62,6 +86,12 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
         return "Amount withheld (retenciones)";
       case "ROUNDING":
         return "Cent adjustment (positive or negative)";
+      case "CONTRIBUTION":
+        return "Amount paid in";
+      case "WITHDRAWAL":
+        return "Amount taken out";
+      case "FEE":
+        return "Fee charged by the provider";
       default:
         return "Amount";
     }
@@ -98,7 +128,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
-              disabled={isTransferDestination}
+              disabled={typeLocked}
             >
               <FormControl>
                 <SelectTrigger aria-label="Type">
@@ -106,19 +136,11 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="INCOME">INCOME</SelectItem>
-                <SelectItem value="EXPENSE">EXPENSE</SelectItem>
-                <SelectItem value="TRANSFER">TRANSFER</SelectItem>
-                {!hasOpeningTransaction && (
-                  <SelectItem value="OPENING">OPENING</SelectItem>
-                )}
-                {isInvestment && (
-                  <>
-                    <SelectItem value="RETURN">RETURN</SelectItem>
-                    <SelectItem value="WITHHOLDING">WITHHOLDING</SelectItem>
-                    <SelectItem value="ROUNDING">ROUNDING</SelectItem>
-                  </>
-                )}
+                {typeOptions.map((type) => (
+                  <SelectItem value={type} key={type}>
+                    {TRANSACTION_TYPE_LABELS[type]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -135,7 +157,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                 disabled
                 value={(() => {
                   const origin = userAccounts.find((a) => a.id === transferOriginAccountId);
-                  return origin ? `${origin.bankName} - ${origin.name}` : "";
+                  return origin ? accountLabel(origin, userAccounts, "-") : "";
                 })()}
               />
             </FormControl>
@@ -164,7 +186,7 @@ export default function TransactionFormBasicFields({ account, hasOpeningTransact
                             value={acct.id}
                             key={acct.id}
                           >
-                            {acct.bankName} - {acct.name}{" "}
+                            {accountLabel(acct, userAccounts, "-")}{" "}
                             {account?.defaultCurrency !==
                             acct.defaultCurrency ? (
                               <CurrencyTag code={acct.defaultCurrency as string} />

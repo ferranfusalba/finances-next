@@ -26,6 +26,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Close,
+  ChartLine,
+  ChartLineData,
   Copy,
   Download,
   Edit as EditIcon,
@@ -59,6 +61,15 @@ import {
 
 import { cn, currency } from "@/lib/utils";
 import { downloadTransactionsCsv } from "@/lib/utils/csv";
+import { accountLabel } from "@/lib/utils/account";
+import {
+  isTransactionType,
+  isTransactionTypeAllowed,
+  monthKey,
+  pendingReturnPeriods,
+  type ReturnPeriod,
+  TRANSACTION_TYPE_LABELS,
+} from "@/lib/utils/transaction";
 
 import { useCollapseMonths } from "@/contexts/CollapseMonthsContext";
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
@@ -113,6 +124,11 @@ export default function AccountTransactionTable(props: Props) {
   const [editTransactionId, setEditTransactionId] = useState<string | null>(
     null,
   );
+  const [investTransactionId, setInvestTransactionId] = useState<string | null>(
+    null,
+  );
+  // The month whose return dialog is open, keyed by "2026-02".
+  const [returnMonth, setReturnMonth] = useState<string | null>(null);
   const [copyTransactionId, setCopyTransactionId] = useState<string | null>(
     null,
   );
@@ -150,6 +166,52 @@ export default function AccountTransactionTable(props: Props) {
   const copyTransaction = copyTransactionId
     ? (accountTransactions.find((t) => t.id === copyTransactionId) ?? null)
     : null;
+
+  const investTransaction = investTransactionId
+    ? (accountTransactions.find((t) => t.id === investTransactionId) ?? null)
+    : null;
+
+  // Money that lands in a cash leg is not invested yet — the provider holds it,
+  // then buys. That second movement is entirely mechanical (same amount, into the
+  // parent, a few days later), so it gets a one-click action rather than being
+  // retyped for every contribution.
+  const investDestinationId =
+    props.account?.type === "INVESTMENT_CASH"
+      ? (props.account.parentAccountId ?? null)
+      : null;
+
+  // The cash leg is a pool, not a set of earmarked envelopes: its balance IS the
+  // uninvested cash. Once you have invested a contribution, its row is still on
+  // screen — so without this the button would keep offering to move money that is
+  // no longer there, and you would post the same €1.000 twice.
+  const availableCash = props.account?.currentBalance ?? 0;
+
+  const canInvest = (transaction: AccountTransaction) =>
+    !!investDestinationId &&
+    availableCash > 0 &&
+    transaction.amount > 0 &&
+    (transaction.type === "TRANSFER" || transaction.type === "CONTRIBUTION");
+
+  // Months that still need a return, derived from the CALENDAR rather than from
+  // the rows: a month in which you made no contribution still had a market, and
+  // its return would otherwise be unreachable — there would be no row to hang the
+  // action on. So each pending month gets a row of its own in the ledger, holding
+  // no value, only the action. A month whose return is already posted has none.
+  const canHoldReturns = props.account
+    ? isTransactionTypeAllowed(props.account.type, "RETURN")
+    : false;
+
+  const pendingReturns = useMemo(
+    () =>
+      canHoldReturns
+        ? pendingReturnPeriods(accountTransactions, new Date())
+        : [],
+    [canHoldReturns, accountTransactions],
+  );
+
+  const openReturnPeriod =
+    pendingReturns.find((p: ReturnPeriod) => monthKey(p.date) === returnMonth) ??
+    null;
 
   const handleDeleteTransaction = async (transactionId: string) => {
     startTransition(async () => {
@@ -302,7 +364,8 @@ export default function AccountTransactionTable(props: Props) {
     }),
     columnHelper.accessor("type", {
       cell: (info) => {
-        return info.getValue();
+        const value = info.getValue();
+        return isTransactionType(value) ? TRANSACTION_TYPE_LABELS[value] : value;
       },
       header: "Type",
       footer: (info) => info.column.id,
@@ -327,11 +390,11 @@ export default function AccountTransactionTable(props: Props) {
         const accountId = info.getValue();
         const account = userAccounts.find((a) => a.id === accountId);
         if (!account) return <>{accountId}</>;
-        const label = `${account.bankName} · ${account.name}`;
+        const label = accountLabel(account, userAccounts);
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
         const currentLabel = props.account
-          ? `${props.account.bankName} · ${props.account.name}`
+          ? accountLabel(props.account, userAccounts)
           : "";
         const href = tid
           ? `/accounts/${accountId}?highlightId=${tid}&fromLabel=${encodeURIComponent(currentLabel)}`
@@ -351,11 +414,11 @@ export default function AccountTransactionTable(props: Props) {
         if (!accountId) return <></>;
         const account = userAccounts.find((a) => a.id === accountId);
         if (!account) return <>{accountId}</>;
-        const label = `${account.bankName} · ${account.name}`;
+        const label = accountLabel(account, userAccounts);
         if (accountId === props.account?.id) return <>{label}</>;
         const tid = info.row.original.transferId;
         const currentLabel = props.account
-          ? `${props.account.bankName} · ${props.account.name}`
+          ? accountLabel(props.account, userAccounts)
           : "";
         const href = tid
           ? `/accounts/${accountId}?highlightId=${tid}&fromLabel=${encodeURIComponent(currentLabel)}`
@@ -502,21 +565,40 @@ export default function AccountTransactionTable(props: Props) {
           !!row.typeTransferOrigin &&
           row.typeTransferOrigin !== props.account?.id;
 
+        // An account has at most one opening, and it is not deletable. Copying
+        // one would mint a second; deleting it would silently restate every
+        // running balance below it. Edit is the only thing you may do to it.
+        const isOpening = row?.type === "OPENING";
+
         return (
           <div className="flex gap-1 items-center">
             {transactionId}
+            {row && canInvest(row) && (
+              <span title="Invest this cash into the fund">
+                <Button
+                  variant="ghost"
+                  aria-label="Invest this cash"
+                  onClick={() => setInvestTransactionId(transactionId)}
+                  disabled={hasSelection}
+                >
+                  <ChartLine />
+                </Button>
+              </span>
+            )}
             <span
               title={
                 isTransferDestination
                   ? "Manage this transfer from the origin account"
-                  : undefined
+                  : isOpening
+                    ? "An account can only have one opening balance"
+                    : undefined
               }
             >
               <Button
                 variant="ghost"
                 aria-label="Copy transaction"
                 onClick={() => setCopyTransactionId(transactionId)}
-                disabled={hasSelection || isTransferDestination}
+                disabled={hasSelection || isTransferDestination || isOpening}
               >
                 <Copy />
               </Button>
@@ -544,9 +626,21 @@ export default function AccountTransactionTable(props: Props) {
               }
             >
               <DialogTrigger asChild>
-                <Button variant="ghost" aria-label="Delete transaction">
-                  <TrashCan />
-                </Button>
+                <span
+                  title={
+                    isOpening
+                      ? "The opening balance cannot be deleted — edit its amount instead"
+                      : undefined
+                  }
+                >
+                  <Button
+                    variant="ghost"
+                    aria-label="Delete transaction"
+                    disabled={isOpening}
+                  >
+                    <TrashCan />
+                  </Button>
+                </span>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -847,38 +941,114 @@ export default function AccountTransactionTable(props: Props) {
                 let lastMonthKey = "";
                 const colCount = table.getAllColumns().length;
 
+                // A pending month is a month that still needs a return. It gets a
+                // row of its own — no value, only the action — because a month in
+                // which you made no contribution has no other row to hang it on,
+                // and its return would otherwise be unreachable.
+                //
+                // Suppressed while searching or filtering: a synthetic row is not
+                // a transaction, so it has nothing to match, and showing it inside
+                // a filtered view would claim a result that is not there.
+                const showPending =
+                  !searchQuery && columnFilters.length === 0 && !hasSelection;
+                const queue = showPending ? [...pendingReturns] : [];
+
+                const monthHeader = (key: string, label: string) => {
+                  const isCollapsed = collapsedMonths.has(key);
+                  return (
+                    <tr
+                      key={`month-${key}`}
+                      className="bg-slate-700 cursor-pointer select-none"
+                      onClick={() => toggleMonth(key)}
+                    >
+                      <td colSpan={colCount} className="px-2 py-1 font-semibold">
+                        <span className="inline-flex items-center gap-1">
+                          {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+                          {label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                };
+
+                const pendingRow = (period: ReturnPeriod) => (
+                  <tr
+                    key={`pending-${period.label}`}
+                    className="border-b border-b-slate-400 bg-slate-900/60"
+                  >
+                    <td
+                      colSpan={colCount}
+                      className="text-muted-foreground px-2 py-1"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={`Add ${period.label} return`}
+                          onClick={() => setReturnMonth(monthKey(period.date))}
+                          className="gap-2"
+                        >
+                          <ChartLineData />
+                          Add {period.label} return
+                        </Button>
+                        <span className="text-xs select-none">
+                          no return posted for this month yet
+                        </span>
+                      </span>
+                    </td>
+                  </tr>
+                );
+
+                /** Pending months that sit entirely before `key` — they have no rows. */
+                const flushPendingBefore = (key: string | null) => {
+                  while (
+                    queue.length &&
+                    (key === null || monthKey(queue[0].date) < key)
+                  ) {
+                    const period = queue.shift() as ReturnPeriod;
+                    const pkey = monthKey(period.date);
+                    elements.push(monthHeader(pkey, period.label));
+                    if (!collapsedMonths.has(pkey)) {
+                      elements.push(pendingRow(period));
+                    }
+                  }
+                };
+
+                /** The pending row for `key`, appended to that month's own rows. */
+                const flushPendingFor = (key: string) => {
+                  const index = queue.findIndex(
+                    (p) => monthKey(p.date) === key,
+                  );
+                  if (index === -1) return;
+                  const [period] = queue.splice(index, 1);
+                  if (!collapsedMonths.has(key)) {
+                    elements.push(pendingRow(period));
+                  }
+                };
+
                 for (const row of rows) {
                   const dt = row.original.dateTime;
-                  const monthKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+                  const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
 
-                  if (monthKey !== lastMonthKey) {
-                    lastMonthKey = monthKey;
-                    const isCollapsed = collapsedMonths.has(monthKey);
-                    const label = dt.toLocaleString(userLocale, {
-                      year: "numeric",
-                      month: "long",
-                    });
+                  if (key !== lastMonthKey) {
+                    // Close out the month we are leaving, then emit any pending
+                    // months that fall between it and this one.
+                    if (lastMonthKey) flushPendingFor(lastMonthKey);
+                    flushPendingBefore(key);
 
+                    lastMonthKey = key;
                     elements.push(
-                      <tr
-                        key={`month-${monthKey}`}
-                        className="bg-slate-700 cursor-pointer select-none"
-                        onClick={() => toggleMonth(monthKey)}
-                      >
-                        <td
-                          colSpan={colCount}
-                          className="px-2 py-1 font-semibold"
-                        >
-                          <span className="inline-flex items-center gap-1">
-                            {isCollapsed ? <ChevronRight /> : <ChevronDown />}
-                            {label}
-                          </span>
-                        </td>
-                      </tr>,
+                      monthHeader(
+                        key,
+                        dt.toLocaleString(userLocale, {
+                          year: "numeric",
+                          month: "long",
+                        }),
+                      ),
                     );
                   }
 
-                  if (!collapsedMonths.has(monthKey)) {
+                  if (!collapsedMonths.has(key)) {
                     const isHighlighted = row.original.id === highlightedTxId;
                     elements.push(
                       <tr
@@ -901,6 +1071,10 @@ export default function AccountTransactionTable(props: Props) {
                     );
                   }
                 }
+
+                // The last month on screen, then every pending month after it.
+                if (lastMonthKey) flushPendingFor(lastMonthKey);
+                flushPendingBefore(null);
 
                 return elements;
               })()}
@@ -964,13 +1138,6 @@ export default function AccountTransactionTable(props: Props) {
             onEditOpenChange={(open) => {
               if (!open) setEditTransactionId(null);
             }}
-            hasOpeningTransaction={
-              editTransaction.type === "OPENING"
-                ? accountTransactions.some(
-                    (t) => t.type === "OPENING" && t.id !== editTransaction.id,
-                  )
-                : hasOpeningTransaction
-            }
           />
         )}
         {copyTransaction && (
@@ -983,7 +1150,38 @@ export default function AccountTransactionTable(props: Props) {
             onEditOpenChange={(open) => {
               if (!open) setCopyTransactionId(null);
             }}
-            hasOpeningTransaction={hasOpeningTransaction}
+          />
+        )}
+        {investTransaction && investDestinationId && (
+          <AccountTransactionAdd
+            key={`invest-${investTransaction.id}`}
+            account={props.account}
+            accountTransactions={accountTransactions}
+            investFrom={investTransaction}
+            investDestinationAccountId={investDestinationId}
+            investAvailableCash={availableCash}
+            editOpen={!!investTransactionId}
+            onEditOpenChange={(open) => {
+              if (!open) setInvestTransactionId(null);
+            }}
+          />
+        )}
+        {openReturnPeriod && (
+          <AccountTransactionAdd
+            key={`return-${openReturnPeriod.label}`}
+            account={props.account}
+            accountTransactions={accountTransactions}
+            addReturn
+            defaultType="RETURN"
+            prefillDate={openReturnPeriod.date}
+            prefillConcept={openReturnPeriod.label}
+            // 23:59, so the month's return sorts after every contribution made
+            // during it — it is the month's closing movement.
+            prefillTime="23:59"
+            editOpen={!!returnMonth}
+            onEditOpenChange={(open) => {
+              if (!open) setReturnMonth(null);
+            }}
           />
         )}
       </div>

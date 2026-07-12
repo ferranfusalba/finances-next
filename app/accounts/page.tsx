@@ -1,13 +1,13 @@
 import { auth } from "@/auth";
 
-import { getAccounts } from "@/lib/accounts";
+import { getAccountsForList } from "@/lib/accounts";
 
 import AccountsOverviewTable from "@/components/accounts/tables/overview/AccountsOverviewTable";
 
 export default async function AccountsPage() {
   const serverSession = await auth();
   const userLocale = serverSession?.user?.userLocale ?? "en-US";
-  const userAccounts = await getAccounts(serverSession?.user.id as string);
+  const userAccounts = await getAccountsForList(serverSession?.user.id as string);
 
   if (!userAccounts.length) {
     return (

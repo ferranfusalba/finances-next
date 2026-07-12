@@ -29,7 +29,7 @@ const defaultContextValue = {
       currentBalance: 1000,
       number: null,
       country: "",
-      type: "",
+      type: "CHECKING" as const,
       description: null,
       createdAt: new Date(),
       updatedAt: new Date(),

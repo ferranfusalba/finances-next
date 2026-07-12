@@ -9,6 +9,9 @@ vi.mock("@/lib/db", () => ({
     accountTransaction: {
       create: vi.fn(),
       aggregate: vi.fn(),
+      // Backs the opening-date invariant and the one-opening-per-account check.
+      // Defaults to null: no opening, no earlier transaction, nothing to violate.
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -45,6 +48,9 @@ const baseTransaction = {
 describe("POST /api/accounts/transactions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // No opening and no earlier transaction unless a test says otherwise, so the
+    // opening-date invariant is satisfied by default.
+    vi.mocked(db.accountTransaction.findFirst).mockResolvedValue(null as never);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -79,7 +85,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("creates a transaction and recomputes balance", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -108,7 +114,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("sets currentBalance to 0 when aggregate sum is null", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -132,8 +138,8 @@ describe("POST /api/accounts/transactions", () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     // Both accounts belong to user
     vi.mocked(db.account.findUnique)
-      .mockResolvedValueOnce({ userId: "user-1" } as never)
-      .mockResolvedValueOnce({ userId: "user-1" } as never);
+      .mockResolvedValueOnce({ userId: "user-1", type: "CHECKING" } as never)
+      .mockResolvedValueOnce({ userId: "user-1", type: "CHECKING" } as never);
 
     const transferData = {
       ...baseTransaction,
@@ -177,8 +183,8 @@ describe("POST /api/accounts/transactions", () => {
   it("returns 403 when transfer destination belongs to another user", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
     vi.mocked(db.account.findUnique)
-      .mockResolvedValueOnce({ userId: "user-1" } as never)
-      .mockResolvedValueOnce({ userId: "other-user" } as never);
+      .mockResolvedValueOnce({ userId: "user-1", type: "CHECKING" } as never)
+      .mockResolvedValueOnce({ userId: "other-user", type: "CHECKING" } as never);
 
     const transferData = {
       ...baseTransaction,
@@ -195,7 +201,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("does not create mirror transaction for non-transfer types", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -218,7 +224,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("passes taxLines as nested create to the database", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     const taxLines = [
       { rate: 21, amount: 50, inclusive: true, taxAmount: 8.68 },
       { rate: 10, amount: 30, inclusive: false, taxAmount: 3 },
@@ -250,7 +256,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("does not include taxLines when none provided", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -270,7 +276,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("passes recurring frequency to the database", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -291,7 +297,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("omits recurring when not provided", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockResolvedValue({
       id: "txn-1",
       ...baseTransaction,
@@ -311,7 +317,7 @@ describe("POST /api/accounts/transactions", () => {
 
   it("returns 500 when create fails", async () => {
     vi.mocked(currentUser).mockResolvedValue(mockUser as never);
-    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1" } as never);
+    vi.mocked(db.account.findUnique).mockResolvedValue({ userId: "user-1", type: "CHECKING" } as never);
     vi.mocked(db.accountTransaction.create).mockRejectedValue(
       new Error("DB write failed")
     );
@@ -369,7 +375,9 @@ describe("POST /api/accounts/transactions", () => {
     });
 
     it("forces a WITHHOLDING negative", async () => {
-      mockOk("INVESTMENT");
+      // Retenciones are posted to the cash leg, which is where the provider
+      // actually takes them from.
+      mockOk("INVESTMENT_CASH");
 
       await POST(makeRequest({ ...baseTransaction, type: "WITHHOLDING", amount: 0.03 }));
 
@@ -394,6 +402,159 @@ describe("POST /api/accounts/transactions", () => {
       // `type: "BANANA"` used to persist and fall through to Math.abs().
       const response = await POST(
         makeRequest({ ...baseTransaction, type: "BANANA", amount: 100 })
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("account type gates transaction type", () => {
+    function mockAccount(accountType: string) {
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.account.findUnique).mockResolvedValue({
+        userId: "user-1",
+        type: accountType,
+      } as never);
+      vi.mocked(db.accountTransaction.create).mockResolvedValue({} as never);
+      vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+        _sum: { amount: 0 },
+      } as never);
+      vi.mocked(db.account.update).mockResolvedValue({} as never);
+    }
+
+    it.each([
+      ["CHECKING", "RETURN"],
+      ["SAVINGS", "RETURN"],
+      ["CASH", "WITHHOLDING"],
+      ["PREPAID", "ROUNDING"],
+    ])("rejects %s on a %s account", async (accountType, type) => {
+      mockAccount(accountType);
+
+      const response = await POST(
+        makeRequest({ ...baseTransaction, type, amount: 100, category: "" })
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it.each(["INCOME", "EXPENSE", "TRANSFER"])(
+      "accepts %s on a CHECKING account",
+      async (type) => {
+        mockAccount("CHECKING");
+
+        // TRANSFER without a destination stays a single row — no mirror to mock.
+        const response = await POST(
+          makeRequest({ ...baseTransaction, type, amount: 100 })
+        );
+
+        expect(response.status).toBe(200);
+        expect(db.accountTransaction.create).toHaveBeenCalled();
+      }
+    );
+  });
+
+  describe("the opening-date invariant", () => {
+    function mockAccountWithOpening(openingAt: Date) {
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.account.findUnique).mockResolvedValue({
+        userId: "user-1",
+        type: "CHECKING",
+      } as never);
+      vi.mocked(db.accountTransaction.findFirst).mockResolvedValue({
+        dateTime: openingAt,
+      } as never);
+      vi.mocked(db.accountTransaction.create).mockResolvedValue({} as never);
+      vi.mocked(db.accountTransaction.aggregate).mockResolvedValue({
+        _sum: { amount: 0 },
+      } as never);
+      vi.mocked(db.account.update).mockResolvedValue({} as never);
+    }
+
+    it("rejects a transaction dated before the account's opening", async () => {
+      mockAccountWithOpening(new Date("2024-01-01T00:00:00Z"));
+
+      const response = await POST(
+        makeRequest({
+          ...baseTransaction,
+          type: "EXPENSE",
+          amount: 50,
+          dateTime: "2023-06-01T00:00:00.000Z",
+        })
+      );
+
+      expect(response.status).toBe(400);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects a second opening on an account that already has one", async () => {
+      // The dropdown never offers OPENING and copy is disabled on the row, but a
+      // direct POST would double-count the starting balance.
+      mockAccountWithOpening(new Date("2024-01-01T00:00:00Z"));
+
+      const response = await POST(
+        makeRequest({
+          ...baseTransaction,
+          type: "OPENING",
+          amount: 500,
+          category: "",
+          dateTime: "2020-01-01T00:00:00.000Z",
+        })
+      );
+
+      expect(response.status).toBe(400);
+      const json = await response.json();
+      expect(json.error).toMatch(/already has an opening balance/);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects a transfer whose mirror would land before the destination's opening", async () => {
+      // The mirror row is written straight into the destination. Nothing else
+      // checks it — there is no form for it.
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.account.findUnique)
+        .mockResolvedValueOnce({ userId: "user-1", type: "CHECKING" } as never)
+        .mockResolvedValueOnce({ userId: "user-1", type: "SAVINGS" } as never);
+      // The destination's opening postdates the transfer.
+      vi.mocked(db.accountTransaction.findFirst).mockResolvedValue({
+        dateTime: new Date("2025-01-01T00:00:00Z"),
+      } as never);
+
+      const response = await POST(
+        makeRequest({
+          ...baseTransaction,
+          type: "TRANSFER",
+          amount: 100,
+          typeTransferDestination: "acc-2",
+          dateTime: "2024-06-01T00:00:00.000Z",
+        })
+      );
+
+      expect(response.status).toBe(400);
+      const json = await response.json();
+      expect(json.error).toMatch(/Destination account/);
+      expect(db.accountTransaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("the transfer mirror row is validated against the destination", () => {
+    it("rejects a transfer into an account that cannot hold one", async () => {
+      // The mirror row is written straight into the destination without ever
+      // passing through a form, so this guard is the only thing standing between
+      // a hostile payload and an illegal row on another account.
+      vi.mocked(currentUser).mockResolvedValue(mockUser as never);
+      vi.mocked(db.account.findUnique)
+        .mockResolvedValueOnce({ userId: "user-1", type: "CHECKING" } as never)
+        .mockResolvedValueOnce({ userId: "user-1", type: "BANANA" } as never);
+
+      const response = await POST(
+        makeRequest({
+          ...baseTransaction,
+          type: "TRANSFER",
+          amount: 100,
+          typeTransferDestination: "acc-2",
+        })
       );
 
       expect(response.status).toBe(400);

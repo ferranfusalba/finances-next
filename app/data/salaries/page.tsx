@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 import { getAccounts } from "@/lib/accounts";
+import { accountLabel } from "@/lib/utils/account";
 import {
   getSalaries,
   getSalaryTransactions,
@@ -39,7 +40,7 @@ export default async function DataSalariesPage({
   const defaultCurrency = session?.user?.userCurrency ?? "EUR";
 
   const accountMap: Record<string, string> = Object.fromEntries(
-    accounts.map((a) => [a.id, `${a.bankName} · ${a.name}`]),
+    accounts.map((a) => [a.id, accountLabel(a, accounts)]),
   );
 
   return (

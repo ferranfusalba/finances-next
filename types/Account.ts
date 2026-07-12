@@ -1,3 +1,5 @@
+import type { AccountTypeValue } from "@/lib/utils/account";
+
 import { AccountTransaction } from "./Transaction";
 
 export interface Account {
@@ -7,7 +9,7 @@ export interface Account {
   code: string;
   bankName: string;
   active: boolean;
-  type: string;
+  type: AccountTypeValue;
   description: string | null;
   defaultCurrency: string;
   currentBalance: number;
@@ -16,4 +18,6 @@ export interface Account {
   createdAt: Date;
   updatedAt: Date;
   transactions?: Array<AccountTransaction>;
+  /** Set on an INVESTMENT_CASH leg, pointing at its INVESTMENT parent. */
+  parentAccountId?: string | null;
 }
