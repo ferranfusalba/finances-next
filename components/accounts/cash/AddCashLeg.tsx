@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import DateField from "@/components/forms/DateField";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { atMiddayInZone } from "@/lib/utils/date";
+import { atStartOfDayInZone } from "@/lib/utils/date";
 
 import { Account } from "@/types/Account";
 
@@ -101,12 +101,15 @@ export default function AddCashLeg({ account }: Props) {
           description: "",
           active: true,
           openingBalance: parseFloat(values.openingBalance),
-          // Midday, so a timezone shift either way cannot move it onto the
-          // previous or next day and trip the opening-before-everything rule.
-          // The account's timezone, not the browser's: an opening dated
-          // 31 December is 31 December in Madrid whether you set it from Madrid
-          // or from a hotel in Toronto.
-          openingDate: atMiddayInZone(values.openingDate, timeZone).toISOString(),
+          // The first instant of the chosen day, in the ACCOUNT's timezone — so
+          // everything on that day and after falls cleanly after the opening, and
+          // 31 December is 31 December whether you set it from Madrid or from a
+          // hotel in Toronto.
+          openingDate: atStartOfDayInZone(
+            values.openingDate,
+            timeZone,
+          ).toISOString(),
+          openingTimezoneId: timeZone,
         }),
         headers: { "Content-Type": "application/json" },
       });

@@ -25,7 +25,7 @@ import BankNameField from "@/components/accounts/form/BankNameField";
 import DateField from "@/components/forms/DateField";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { atMiddayInZone } from "@/lib/utils/date";
+import { atStartOfDayInZone } from "@/lib/utils/date";
 import { SELECTABLE_ACCOUNT_TYPES } from "@/lib/utils/account";
 import { countries } from "@/lib/utils/country";
 import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
@@ -158,12 +158,15 @@ export default function NewAccountForm(props: Props) {
           number,
           country,
           openingBalance: parseFloat(values.openingBalance),
-          // Midday, so a timezone shift either way cannot move it onto the
-          // previous or next day and trip the opening-before-everything rule.
-          // The account's timezone, not the browser's: an opening dated
-          // 31 December is 31 December in Madrid whether you set it from Madrid
-          // or from a hotel in Toronto.
-          openingDate: atMiddayInZone(values.openingDate, timeZone).toISOString(),
+          // The first instant of the chosen day, in the ACCOUNT's timezone — so
+          // everything on that day and after falls cleanly after the opening, and
+          // 31 December is 31 December whether you set it from Madrid or from a
+          // hotel in Toronto.
+          openingDate: atStartOfDayInZone(
+            values.openingDate,
+            timeZone,
+          ).toISOString(),
+          openingTimezoneId: timeZone,
           cashOpeningBalance: wantsCashLeg
             ? parseFloat(values.cashOpeningBalance)
             : null,

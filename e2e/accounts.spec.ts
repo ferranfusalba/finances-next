@@ -94,6 +94,52 @@ test.describe("Accounts", () => {
     await expect(page.getByRole("cell", { name: "Opening", exact: true })).toBeVisible();
   });
 
+  test("an account opened today accepts a transaction dated today", async ({
+    page,
+  }) => {
+    // The opening sits at the FIRST instant of its date. It used to sit at midday,
+    // which rejected a same-day transaction entered before noon — and 09:00 is the
+    // transaction form's own default time, so this was the very next thing you did
+    // after creating an account.
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
+
+    await page.goto("/accounts/new");
+    await page.getByRole("combobox").filter({ hasText: "Select a bank" }).click();
+    await page.getByRole("option", { name: /Add a new bank/ }).click();
+    await page.getByLabel("New Bank").fill("Same Day Bank");
+    await page.getByPlaceholder("Primary Space").fill("Same Day Account");
+    await page.getByPlaceholder("N26.PS").fill("E2E.SAMEDAY");
+
+    const combobox = (placeholder: string) =>
+      page.getByRole("combobox").filter({ hasText: placeholder });
+    await combobox("Select an account type").click();
+    await page.getByRole("option", { name: "Checking", exact: true }).click();
+    await combobox("Select a currency").click();
+    await page.getByRole("option", { name: /^EUR - / }).click();
+
+    // Starting Date defaults to today — the case that used to break.
+    await page.locator("#openingBalance").fill("1000");
+    await page.getByRole("button", { name: "Add" }).click();
+    await expect(page).toHaveURL(/\/accounts\//, { timeout: 10_000 });
+
+    // A transaction with the form's own defaults: today, at 09:00.
+    await page.getByRole("button", { name: "Add Transaction" }).first().click();
+    await expect(page.locator("#time")).toHaveValue("09:00");
+    await page.getByRole("combobox", { name: "Type" }).click();
+    await page.getByRole("option", { name: "Expense", exact: true }).click();
+    await page.locator("#concept").fill("Same-day coffee");
+    await page.locator("#amountForm").fill("5");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    // Accepted, and the balance moved. A midday opening returned 400 here.
+    await expect(
+      page.getByRole("cell", { name: "Same-day coffee" })
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText("cannot be dated before the account's opening balance")
+    ).toBeHidden();
+  });
+
   test("the bank name is picked from the banks you already use", async ({
     page,
   }) => {

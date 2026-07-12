@@ -54,6 +54,9 @@ export default function AccountOpeningBanner({
         account={account}
         accountTransactions={accountTransactions}
         defaultType="OPENING"
+        // The start of the day, exactly as the create form writes it — so every
+        // opening sits at the first instant of its date, whichever path made it.
+        prefillTime="00:00"
         trigger={
           <Button variant="outline" className="shrink-0 select-none">
             Set opening balance

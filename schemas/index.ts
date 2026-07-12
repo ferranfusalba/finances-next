@@ -129,6 +129,10 @@ export const CreateAccountSchema = z.object({
   country: z.string().default(""),
   openingBalance: z.number(),
   openingDate: z.string().or(z.date()),
+  // The zone the opening's wall clock was written in. Stored on the row so the
+  // ledger can render it back in the account's own time rather than the
+  // browser's — an opening dated 31 December must read 31 December from anywhere.
+  openingTimezoneId: z.string().optional(),
   // The INVESTMENT_CASH leg hangs off its INVESTMENT parent. The route verifies
   // the parent exists, belongs to the caller, and is of the right type.
   parentAccountId: z.string().nullable().optional(),

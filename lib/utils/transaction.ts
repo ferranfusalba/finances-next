@@ -472,13 +472,17 @@ export function nextTimeIncrement(currentMinutes: number): {
  */
 export function getNextTimeForDate(
   date: Date,
-  transactions: Array<{ dateTime: Date | string }>
+  transactions: Array<{ dateTime: Date | string; type?: string }>
 ): string {
   const targetYear = date.getFullYear();
   const targetMonth = date.getMonth();
   const targetDay = date.getDate();
 
   const sameDayTxs = transactions.filter((t) => {
+    // The opening is not part of the day's flow — it is the account's starting
+    // point, and it sits at 00:00. Counting it here would make the first real
+    // transaction of the opening day default to 00:01 rather than to 09:00.
+    if (t.type === "OPENING") return false;
     const d = t.dateTime instanceof Date ? t.dateTime : new Date(t.dateTime);
     return (
       d.getFullYear() === targetYear &&

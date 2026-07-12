@@ -639,6 +639,29 @@ describe("nextTimeIncrement", () => {
 });
 
 describe("getNextTimeForDate", () => {
+  it("ignores the opening — it is the account's starting point, not part of the day", () => {
+    // The opening sits at 00:00. Counting it would make the first real transaction
+    // of the opening day default to 00:01 rather than to 09:00.
+    const date = new Date(2026, 2, 12);
+
+    expect(
+      getNextTimeForDate(date, [
+        { type: "OPENING", dateTime: new Date(2026, 2, 12, 0, 0) },
+      ]),
+    ).toBe("09:00");
+  });
+
+  it("still advances past a real transaction on the same day", () => {
+    const date = new Date(2026, 2, 12);
+
+    expect(
+      getNextTimeForDate(date, [
+        { type: "OPENING", dateTime: new Date(2026, 2, 12, 0, 0) },
+        { type: "EXPENSE", dateTime: new Date(2026, 2, 12, 14, 30) },
+      ]),
+    ).toBe("14:31");
+  });
+
   it("returns 09:00 when no transactions exist on the date", () => {
     const date = new Date(2026, 2, 8); // March 8, 2026
     expect(getNextTimeForDate(date, [])).toBe("09:00");

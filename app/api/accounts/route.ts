@@ -6,6 +6,7 @@ import { toNumber } from "@/lib/utils";
 
 import { currentUser } from "@/lib/auth";
 import { requiredParentAccountType } from "@/lib/utils/account";
+import { getTimezoneOffset } from "@/lib/utils/timezone";
 import { computeTransactionAmount } from "@/lib/utils/transaction";
 import { CreateAccountSchema } from "@/schemas";
 
@@ -97,6 +98,15 @@ export async function POST(request: NextRequest) {
   // OPENING preserves its sign — an account may legitimately open in the red.
   const openingAmount = computeTransactionAmount("OPENING", data.openingBalance);
 
+  // The opening carries its timezone like every other row. Without it the ledger
+  // renders it in the browser's zone, so an opening set at midnight in Madrid
+  // would read 23:00 on the PREVIOUS day to anyone west of it.
+  const openingZone = data.openingTimezoneId || null;
+  const openingAt =
+    data.openingDate instanceof Date
+      ? data.openingDate
+      : new Date(data.openingDate);
+
   const openingRow = (accountId: string, amount: number) => ({
     accountId,
     type: "OPENING",
@@ -104,6 +114,10 @@ export async function POST(request: NextRequest) {
     amount,
     currency: data.defaultCurrency,
     dateTime: data.openingDate,
+    timezoneId: openingZone,
+    timezoneOffset: openingZone
+      ? getTimezoneOffset(openingZone, openingAt)
+      : null,
     payee: "",
     category: "",
     notes: "",
