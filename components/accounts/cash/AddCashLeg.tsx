@@ -30,7 +30,8 @@ import { Input } from "@/components/ui/input";
 
 import DateField from "@/components/forms/DateField";
 
-import { atMidday } from "@/lib/utils/date";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { atMiddayInZone } from "@/lib/utils/date";
 
 import { Account } from "@/types/Account";
 
@@ -66,8 +67,13 @@ interface Props {
  */
 export default function AddCashLeg({ account }: Props) {
   const router = useRouter();
+  const user = useCurrentUser();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // The account's timezone, not the browser's. See atMiddayInZone.
+  const timeZone =
+    user?.userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -97,7 +103,10 @@ export default function AddCashLeg({ account }: Props) {
           openingBalance: parseFloat(values.openingBalance),
           // Midday, so a timezone shift either way cannot move it onto the
           // previous or next day and trip the opening-before-everything rule.
-          openingDate: atMidday(values.openingDate).toISOString(),
+          // The account's timezone, not the browser's: an opening dated
+          // 31 December is 31 December in Madrid whether you set it from Madrid
+          // or from a hotel in Toronto.
+          openingDate: atMiddayInZone(values.openingDate, timeZone).toISOString(),
         }),
         headers: { "Content-Type": "application/json" },
       });

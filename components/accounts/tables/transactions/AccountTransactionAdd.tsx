@@ -31,7 +31,12 @@ import {
   getNextTimeForDate,
   type TransactionType,
 } from "@/lib/utils/transaction";
-import { detectTimezone, getTimezoneOffset } from "@/lib/utils/timezone";
+import {
+  detectTimezone,
+  getTimezoneOffset,
+  zonedParts,
+  zonedTimeToUtc,
+} from "@/lib/utils/timezone";
 
 import { useTransactionUser } from "@/contexts/TransactionUserContext";
 import { transactionTypeToCategoryType } from "@/lib/utils/categoryType";
@@ -127,14 +132,27 @@ export default function AccountTransactionAdd(props: Props) {
   const detectedTimezone = detectTimezone(userTimezone || undefined);
   const detectedTimezoneValue = detectedTimezone?.id;
 
-  const editDate = editTx?.dateTime ? new Date(editTx.dateTime) : undefined;
-  const editTime = editTx?.dateTime
-    ? (() => {
-        const d = new Date(editTx.dateTime);
-        return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-      })()
-    : undefined;
   const editTimezoneValue = editTx?.timezoneId || undefined;
+
+  // Read the row's wall clock IN the row's own timezone. `.getHours()` reads in
+  // the BROWSER's zone, so a Madrid transaction opened from Toronto would show
+  // 03:00 in the form — and saving it back would store 03:00 Madrid, moving a row
+  // you only meant to look at.
+  const editParts = editTx?.dateTime
+    ? zonedParts(
+        new Date(editTx.dateTime),
+        editTimezoneValue ??
+          detectedTimezoneValue ??
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+      )
+    : undefined;
+
+  const editDate = editParts
+    ? new Date(editParts.year, editParts.month, editParts.day)
+    : undefined;
+  const editTime = editParts
+    ? `${String(editParts.hours).padStart(2, "0")}:${String(editParts.minutes).padStart(2, "0")}`
+    : undefined;
 
   const invest = props.investFrom;
   // The date defaults to the day the money arrived, but is editable: a provider
@@ -241,12 +259,21 @@ export default function AccountTransactionAdd(props: Props) {
 
   const onSubmit = async (values: AccountTransactionFormValues) => {
     const selectedDate = values.date;
-    const dateBuilt = new Date(
+    // Composed IN the selected timezone, not in the browser's.
+    //
+    // `new Date(y, m, d, hh, mm)` builds the instant where the browser happens to
+    // be — so 09:00 entered on holiday in Toronto and 09:00 entered at home in
+    // Madrid produced two instants six hours apart, both labelled Madrid. The
+    // account did not move; only you did.
+    const dateBuilt = zonedTimeToUtc(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate(),
       Number(values.time.split(":")[0] ?? 9),
       Number(values.time.split(":")[1] ?? 0),
+      values.timezoneId ||
+        detectedTimezoneValue ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
 
     const payee = values.payee;

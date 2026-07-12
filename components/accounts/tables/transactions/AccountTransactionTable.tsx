@@ -382,9 +382,15 @@ export default function AccountTransactionTable(props: Props) {
       id: "dateTime",
       cell: (info) => {
         const tz = info.row.original.timezoneOffset;
+        // Rendered in the row's OWN timezone, not the browser's. A Madrid
+        // transaction must still read 09:00 when you open the app from Toronto —
+        // the account did not move, only you did.
+        const zone = info.row.original.timezoneId || undefined;
         return (
           <div>
-            <i>{info.getValue().toLocaleString("ca")}</i>
+            <i>
+              {info.getValue().toLocaleString("ca", { timeZone: zone })}
+            </i>
             {tz && <div className="text-xs text-muted-foreground">{tz}</div>}
           </div>
         );
