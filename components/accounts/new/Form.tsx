@@ -22,7 +22,9 @@ import { Combobox } from "@/components/ui/combobox";
 
 import AccountTypeField from "@/components/accounts/form/AccountTypeField";
 import BankNameField from "@/components/accounts/form/BankNameField";
+import DateField from "@/components/forms/DateField";
 
+import { atMidday } from "@/lib/utils/date";
 import { SELECTABLE_ACCOUNT_TYPES } from "@/lib/utils/account";
 import { countries } from "@/lib/utils/country";
 import { currencies, getCurrencySymbol } from "@/lib/utils/currency";
@@ -86,7 +88,7 @@ export default function NewAccountForm(props: Props) {
     // Settable, not stamped `now()`: you will create an account today and then
     // enter transactions from last month, and every transaction must fall after
     // the opening.
-    openingDate: z.string().min(1, { message: "Starting date is required." }),
+    openingDate: z.date({ message: "Starting date is required." }),
     // Optional, and only meaningful on an INVESTMENT account. Leaving it blank
     // creates no cash leg at all — you can still add one later.
     cashOpeningBalance: z
@@ -108,7 +110,7 @@ export default function NewAccountForm(props: Props) {
       defaultCurrency: userCurrency,
       description: "",
       openingBalance: "",
-      openingDate: new Date().toISOString().slice(0, 10),
+      openingDate: new Date(),
       cashOpeningBalance: "",
     },
   });
@@ -151,7 +153,7 @@ export default function NewAccountForm(props: Props) {
           openingBalance: parseFloat(values.openingBalance),
           // Midday, so a timezone shift either way cannot move it onto the
           // previous or next day and trip the opening-before-everything rule.
-          openingDate: new Date(`${values.openingDate}T12:00:00`).toISOString(),
+          openingDate: atMidday(values.openingDate).toISOString(),
           cashOpeningBalance: wantsCashLeg
             ? parseFloat(values.cashOpeningBalance)
             : null,
@@ -302,21 +304,11 @@ export default function NewAccountForm(props: Props) {
               )}
             />
           )}
-          <FormField
-            control={form.control}
+          <DateField
             name="openingDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Starting Date*</FormLabel>
-                <FormControl>
-                  <Input id="openingDate" type="date" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Every transaction on this account must fall after this date.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Starting Date*"
+            id="openingDate"
+            description="Every transaction on this account must fall after this date."
           />
           {/* Number */}
           <FormField

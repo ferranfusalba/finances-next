@@ -58,7 +58,24 @@ test.describe("Accounts", () => {
     // Starting balance is compulsory: it becomes the account's OPENING
     // transaction, and it cannot be recovered once the create form is gone.
     await page.locator("#openingBalance").fill("1500");
-    await page.locator("#openingDate").fill("2024-01-01");
+
+    // Starting Date is the same calendar picker the transaction form uses — not a
+    // native <input type="date">, which rendered differently in every browser and
+    // made the same task look like two different apps.
+    await page.locator("#openingDate").click();
+    const calendar = page.getByRole("dialog");
+    await expect(calendar).toBeVisible();
+
+    // By data-day, not by text: the day buttons take their accessible name from
+    // aria-label ("Wednesday, July 1st, 2026"), so matching on "1" finds nothing.
+    // The 1st of the current month is always in the past, so never disabled.
+    const today = new Date();
+    const firstOfMonth = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-01`;
+    await calendar.locator(`td[data-day="${firstOfMonth}"] button`).click();
+
+    await expect(page.locator("#openingDate")).not.toHaveText("Pick a date");
 
     // Submit
     await page.getByRole("button", { name: "Add" }).click();

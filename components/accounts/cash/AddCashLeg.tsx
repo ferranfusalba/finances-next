@@ -28,6 +28,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import DateField from "@/components/forms/DateField";
+
+import { atMidday } from "@/lib/utils/date";
+
 import { Account } from "@/types/Account";
 
 const formSchema = z.object({
@@ -39,7 +43,7 @@ const formSchema = z.object({
     .refine((v) => !Number.isNaN(parseFloat(v)), {
       message: "Starting balance must be a number.",
     }),
-  openingDate: z.string().min(1, { message: "Starting date is required." }),
+  openingDate: z.date({ message: "Starting date is required." }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,7 +75,7 @@ export default function AddCashLeg({ account }: Props) {
       name: "Cash",
       code: `${account.code}.CASH`,
       openingBalance: "",
-      openingDate: new Date().toISOString().slice(0, 10),
+      openingDate: new Date(),
     },
   });
 
@@ -93,7 +97,7 @@ export default function AddCashLeg({ account }: Props) {
           openingBalance: parseFloat(values.openingBalance),
           // Midday, so a timezone shift either way cannot move it onto the
           // previous or next day and trip the opening-before-everything rule.
-          openingDate: new Date(`${values.openingDate}T12:00:00`).toISOString(),
+          openingDate: atMidday(values.openingDate).toISOString(),
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -184,18 +188,10 @@ export default function AddCashLeg({ account }: Props) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
+            <DateField
               name="openingDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Starting Date*</FormLabel>
-                  <FormControl>
-                    <Input id="cashOpeningDate" type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Starting Date*"
+              id="cashOpeningDate"
             />
             <FormDescription>
               Currency, bank and country are inherited from{" "}

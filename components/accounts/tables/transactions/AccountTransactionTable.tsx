@@ -294,6 +294,22 @@ export default function AccountTransactionTable(props: Props) {
     return map;
   }, [accountTransactions, props.carryForwardBalance]);
 
+  /**
+   * What an account's transfer column shows for a given row.
+   *
+   * The column *stores* an account id and only *renders* the name, so the
+   * default filter matched "Pensiones" against a uuid and found nothing. Every
+   * filter below matches what the cell actually shows.
+   */
+  const transferAccountText = useCallback(
+    (accountId: string | null | undefined) => {
+      if (!accountId) return "";
+      const account = userAccounts.find((a) => a.id === accountId);
+      return account ? accountLabel(account, userAccounts) : accountId;
+    },
+    [userAccounts],
+  );
+
   const globalFilterFn = useCallback(
     (
       row: { original: AccountTransaction },
@@ -302,6 +318,10 @@ export default function AccountTransactionTable(props: Props) {
     ) => {
       const q = filterValue.toLowerCase();
       const t = row.original;
+      const typeLabel = isTransactionType(t.type)
+        ? TRANSACTION_TYPE_LABELS[t.type]
+        : t.type;
+
       return (
         (t.payee?.toLowerCase().includes(q) ?? false) ||
         (t.concept?.toLowerCase().includes(q) ?? false) ||
@@ -310,12 +330,30 @@ export default function AccountTransactionTable(props: Props) {
         (t.notes?.toLowerCase().includes(q) ?? false) ||
         (t.tags?.some((tag) => tag.toLowerCase().includes(q)) ?? false) ||
         (t.location?.name?.toLowerCase().includes(q) ?? false) ||
-        (t.type?.toLowerCase().includes(q) ?? false) ||
+        typeLabel.toLowerCase().includes(q) ||
+        // The accounts a transfer moves between, by name rather than by uuid.
+        transferAccountText(t.typeTransferOrigin).toLowerCase().includes(q) ||
+        transferAccountText(t.typeTransferDestination)
+          .toLowerCase()
+          .includes(q) ||
         t.id.toLowerCase().includes(q) ||
         t.amount.toString().includes(q)
       );
     },
-    [],
+    [transferAccountText],
+  );
+
+  /** Matches a transfer column against the account name it renders. */
+  const accountFilterFn = useCallback(
+    (
+      row: { getValue: (id: string) => unknown },
+      columnId: string,
+      filterValue: string,
+    ) =>
+      transferAccountText(row.getValue(columnId) as string | null)
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase()),
+    [transferAccountText],
   );
 
   const columns = [
@@ -368,6 +406,11 @@ export default function AccountTransactionTable(props: Props) {
         return isTransactionType(value) ? TRANSACTION_TYPE_LABELS[value] : value;
       },
       header: "Type",
+      filterFn: (row, columnId, value) => {
+        const raw = row.getValue(columnId) as string;
+        const label = isTransactionType(raw) ? TRANSACTION_TYPE_LABELS[raw] : raw;
+        return label.toLowerCase().includes(String(value).toLowerCase());
+      },
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("recurring", {
@@ -406,6 +449,7 @@ export default function AccountTransactionTable(props: Props) {
         );
       },
       header: "Transfer Origin Account",
+      filterFn: accountFilterFn,
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("typeTransferDestination", {
@@ -430,6 +474,7 @@ export default function AccountTransactionTable(props: Props) {
         );
       },
       header: "Transfer Destination Account",
+      filterFn: accountFilterFn,
       footer: (info) => info.column.id,
     }),
     columnHelper.accessor("currency", {
@@ -501,6 +546,10 @@ export default function AccountTransactionTable(props: Props) {
     }),
     columnHelper.accessor("tags", {
       header: "Tags",
+      filterFn: (row, columnId, value) =>
+        ((row.getValue(columnId) as string[] | null) ?? []).some((tag) =>
+          tag.toLowerCase().includes(String(value).toLowerCase()),
+        ),
       footer: (info) => info.column.id,
       cell: (info) => {
         const tags = info.getValue();
@@ -518,6 +567,18 @@ export default function AccountTransactionTable(props: Props) {
     }),
     columnHelper.accessor("location", {
       header: "Location",
+      filterFn: (row, columnId, value) => {
+        const loc = row.getValue(columnId) as {
+          name?: string;
+          address?: string;
+        } | null;
+        if (!loc) return false;
+        const q = String(value).toLowerCase();
+        return (
+          (loc.name?.toLowerCase().includes(q) ?? false) ||
+          (loc.address?.toLowerCase().includes(q) ?? false)
+        );
+      },
       cell: (info) => {
         const loc = info.getValue();
         if (!loc) return "";

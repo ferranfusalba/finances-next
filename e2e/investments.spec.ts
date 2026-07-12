@@ -85,7 +85,8 @@ test.describe("Investment split", () => {
 
     await page.locator("#openingBalance").fill("9000");
     await cashField.fill("1000");
-    await page.locator("#openingDate").fill("2026-01-01");
+    // Starting Date is the shared calendar picker now, and defaults to today —
+    // which is valid here: the account has no transactions to precede.
     await page.getByRole("button", { name: "Add" }).click();
 
     await expect(page).toHaveURL(/\/accounts\//, { timeout: 10_000 });
@@ -136,7 +137,6 @@ test.describe("Investment split", () => {
     await page.getByRole("option", { name: /^EUR - / }).click();
 
     await page.locator("#openingBalance").fill("500");
-    await page.locator("#openingDate").fill("2026-01-01");
     await page.getByRole("button", { name: "Add" }).click();
 
     await expect(page).toHaveURL(/\/accounts\//, { timeout: 10_000 });
@@ -187,7 +187,6 @@ test.describe("Investment split", () => {
     ).toBeVisible();
 
     await page.locator("#cashOpeningBalance").fill("0");
-    await page.locator("#cashOpeningDate").fill("2026-01-01");
     await page.getByRole("button", { name: "Add", exact: true }).click();
 
     // It lands as the second table on the same page — no redirect away.
@@ -737,6 +736,41 @@ test.describe("Investment split", () => {
 
     await expect(
       page.getByText("Where this balance came from")
+    ).toBeHidden();
+  });
+
+  test("the transfer columns filter by account name, not by uuid", async ({
+    page,
+  }) => {
+    // The column stores an account id and only *renders* the name, so the default
+    // filter matched "Fondos" against a uuid and returned nothing at all.
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
+
+    const base = {
+      payee: "", concept: "", currency: "EUR", category: "", notes: "",
+      timezoneId: "Etc/UTC",
+    };
+    const r = await page.request.post("/api/accounts/transactions/", {
+      data: { ...base, concept: "Filterable transfer", type: "TRANSFER",
+              amount: 40, accountId: checkingId,
+              typeTransferDestination: cashId,
+              dateTime: "2026-04-01T10:00:00.000Z" },
+    });
+    expect(r.status()).toBe(200);
+
+    await page.goto(`/accounts/${checkingId}`);
+    await page.getByRole("button", { name: /Filters/ }).click();
+
+    // The destination is "Indexa Capital - Fondos (Efectivo)" — typing any part of
+    // the name it shows must find the row.
+    const destFilter = page.getByPlaceholder("Transfer Destination");
+    await destFilter.fill("Efectivo");
+    await expect(page.getByRole("cell", { name: "Filterable transfer" })).toBeVisible();
+
+    // And a name that is not there finds nothing, rather than everything.
+    await destFilter.fill("Pensiones");
+    await expect(
+      page.getByRole("cell", { name: "Filterable transfer" })
     ).toBeHidden();
   });
 
